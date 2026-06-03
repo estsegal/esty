@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עשור של מחדל: איום הרחפנים וכשל המדינה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Assistant", Arial, sans-serif;
+  background: #ffffff;
+  color: #1a1a18;
+  direction: rtl;
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+
+/* legend / filter */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.leg-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-family: "Assistant", Arial, sans-serif;
+  color: #5f5e5a;
+  background: #f5f5f3;
+  border: 1.5px solid rgba(0,0,0,0.15);
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: background .15s, border-color .15s;
+}
+.leg-btn:hover { background: #ffffff; border-color: rgba(0,0,0,0.28); }
+
+.leg-btn.active.t-warning { border: 2px solid #E0A040; background: #FAEEDA; color: #412402; }
+.leg-btn.active.t-report  { border: 2px solid #3A76B0; background: #E6F1FB; color: #042C53; }
+.leg-btn.active.t-failure { border: 2px solid #C04040; background: #FCEBEB; color: #501313; }
+.leg-btn.active.t-alt     { border: 2px solid #1D7A56; background: #E1F5EE; color: #04342C; }
+
+.leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.filter-hint {
+  font-size: 12px;
+  color: #888780;
+  margin-bottom: 22px;
+  text-align: center;
+}
+
+/* timeline */
+.tl { position: relative; padding-right: 24px; }
+.tl-line {
+  position: absolute; right: 9px; top: 0; bottom: 0;
+  width: 2px; background: rgba(0,0,0,0.14);
+}
+
+.tl-item { display: flex; align-items: flex-start; margin-bottom: 14px; position: relative; }
+.tl-item.hidden { display: none; }
+
+.tl-left { width: 68px; min-width: 68px; padding-left: 10px; padding-top: 13px; text-align: left; }
+.tl-date { font-size: 12px; font-weight: 500; color: #5f5e5a; line-height: 1.3; }
+
+.tl-dot-col {
+  width: 22px; min-width: 22px;
+  display: flex; justify-content: center;
+  padding-top: 14px; position: relative; z-index: 2;
+}
+.tl-dot { width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid #ffffff; flex-shrink: 0; }
+
+.tl-card {
+  flex: 1;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.10);
+  padding: 13px 14px;
+  background: #ffffff;
+  margin-right: 10px;
+}
+.tl-card.warning { border-color: #E0A040; background: #FAEEDA; }
+.tl-card.failure { border-color: #C04040; background: #FCEBEB; }
+.tl-card.report  { border-color: #3A76B0; background: #E6F1FB; }
+.tl-card.alt     { border-color: #1D7A56; background: #E1F5EE; }
+
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.card-title { font-size: 15px; font-weight: 500; color: #1a1a18; line-height: 1.4; }
+
+.badge {
+  font-size: 11px; font-weight: 500;
+  padding: 2px 8px; border-radius: 20px;
+  white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+}
+.bw { background: #FAC775; color: #412402; }
+.bf { background: #F09595; color: #501313; }
+.br { background: #85B7EB; color: #042C53; }
+.ba { background: #5DCAA5; color: #04342C; }
+
+.card-body { font-size: 14px; color: #5f5e5a; line-height: 1.6; }
+.card-body ul { padding-right: 18px; margin-top: 4px; }
+.card-body li { margin-bottom: 3px; }
+.card-body strong { color: #1a1a18; }
+
+.quote {
+  font-size: 13px; color: #1a1a18;
+  margin-top: 8px; padding: 8px 12px;
+  border-right: 3px solid #E0A040;
+  background: rgba(0,0,0,0.04);
+  border-radius: 0 6px 6px 0;
+  font-style: italic; line-height: 1.65;
+}
+.quote.qr { border-color: #C04040; }
+.quote.qb { border-color: #3A76B0; }
+
+.src-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #185FA5;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(24,95,165,0.25);
+  transition: border-color .15s;
+}
+.src-link:hover { border-color: #185FA5; }
+.src-link::after {
+  content: "";
+  font-size: 11px;
+}
+
+/* gap labels */
+.gap { display: flex; align-items: center; gap: 8px; margin: 2px 0; padding-right: 10px; }
+.gap-line { flex: 1; border-top: 1px dashed rgba(0,0,0,0.18); }
+.gap-txt  { font-size: 12px; color: #888780; white-space: nowrap; }
+
+/* empty */
+.empty-msg { text-align: center; padding: 32px 16px; color: #888780; font-size: 14px; display: none; }
+
+/* footer */
+.footer-box {
+  margin-top: 24px; padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #C04040;
+  background: #FFF5F5;
+  font-size: 13px; color: #791F1F; line-height: 1.75;
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="legend" id="legend">
+    <button class="leg-btn active t-warning" data-type="warning" aria-pressed="true">
+      <div class="leg-dot" style="background:#E0A040"></div>אזהרה / המלצה
+    </button>
+    <button class="leg-btn active t-report" data-type="report" aria-pressed="true">
+      <div class="leg-dot" style="background:#3A76B0"></div>דוח מבקר
+    </button>
+    <button class="leg-btn active t-failure" data-type="failure" aria-pressed="true">
+      <div class="leg-dot" style="background:#C04040"></div>כשל מתועד
+    </button>
+    <button class="leg-btn active t-alt" data-type="alt" aria-pressed="true">
+      <div class="leg-dot" style="background:#1D7A56"></div>פתרון עצמאי
+    </button>
+  </div>
+
+  <p class="filter-hint" id="filter-hint">לחצו על הקטגוריות לסינון</p>
+
+  <div class="tl" id="tl">
+    <div class="tl-line"></div>
+
+    <!-- 1 -->
+    <div class="tl-item" data-type="warning">
+      <div class="tl-left"><span class="tl-date">מרץ 2016</span></div>
+      <div class="tl-dot-col"><div class="tl-dot" style="background:#E0A040"></div></div>
+      <div class="tl-card warning">
+        <div class="card-head"><p class="card-title">אזהרת סגן הרמטכ"ל יאיר גולן</p><span class="badge bw">אזהרה</span></div>
+        <div class="quote">"איום הרחפנים הוא איום מתפתח, המהווה אתגר משמעותי לצה"ל ולכוחות הביטחון"</div>
+        <a class="src-link" href="https://www.mako.co.il/news-military/2026_q2/Article-9f67f8e241b3e91026.htm" target="_blank" rel="noopener">כאן – ארכיון אזהרות 2016</a>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="tl-item" data-type="warning">
+      <div class="tl-left"><span class="tl-date">מאי 2016</span></div>
+      <div class="tl-dot-col"><div class="tl-dot" style="background:#E0A040"></div></div>
+      <div class="tl-card warning">
+        <div class="card-head"><p class="card-title">המלצה פורמלית לבניין כוח</p><span class="badge bw">המלצה</span></div>
+        <div class="quote">"נדרש לבנות לאיום סדרת תרחישים... עם סדרי עדיפויות ברורים"</div>
+        <a class="src-link" href="https://www.mako.co.il/news-military/2026_q2/Article-9f67f8e241b3e91026.htm" target="_blank" rel="noopener">N12 – כבר לפני שנים</a>
+      </div>
+    </div>
+
+    <div class="gap" data-gap="1"><div class="gap-line"></div><span class="gap-txt">18 חודשים — שקט מוסדי</span><div class="gap-line"></div></div>
+
+    <!-- 3 -->
+    <div class="tl-item" data-type="report">
+      <div class="tl-left"><span class="tl-date">נוב' 2017</span></div>
+      <div class="tl-dot-col"><div class="tl-dot" style="background:#3A76B0"></div></div>
+      <div class="tl-card report">
+        <div class="card-head"><p class="card-title">דוח מבקר המדינה הראשון</p><span class="badge br">דוח מבקר</span></div>
+        <p class="card-body">מבקר יוסף שפירא. ממצאים מרכזיים:</p>
+        <div class="card-body"><ul>
+          <li>אין גוף אחראי להגנה מפני רחפנים</li>
+          <li>כ-20,000 רחפנים אזרחיים — ללא רישום או פיקוח</li>
+          <li>חיל האוויר ללא מענה ראוי לאיום</li>
+        </ul></div>
+        <a class="src-link" href="https://library.mevaker.gov.il/sites/DigitalLibrary/Pages/Reports/944-1.aspx" target="_blank" rel="noopener">מבקר המדינה – דוח היערכות לאומית לרחפנים 2017</a>
+      </div>
+    </div>
+
+    <div class="gap" data-gap="2"><div class="gap-line"></div><span class="gap-txt">3 שנים — הכשלים נמשכים</span><div class="gap-line"></div></div>
+
+    <!-- 4 -->
+    <div class="tl-item" data-type="failure">
+      <div class="tl-left"><span class="tl-date">2020</span></div>
+      <div class="tl-dot-col"><div class="tl-dot" style="background:#C04040"></div></div>
+      <div class="tl-card failure">
+        <div class="card-head"><p class="card-title">האיום גדל — המדינה לא מגיבה</p><span class="badge bf">כשל</span></div>
+        <div class="card-body"><ul>
+          <li>כ-30,000 רחפנים בישראל (יוני 2020)</li>
+          <li>מעל 90,000 טיסות רחפנים בגוש דן בשנת 2019 בלבד</li>
+        </ul></div>
+        <a class="src-link" href="https://www.ynet.co.il/digital/technews/article/BJfzr911Ld" target="_blank" rel="noopener">ynet – "אין חוקים: צה"ל והמשטרה לא ערוכים לאיום"</a>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="tl-item" data-type="report">
+      <div class="tl-left"><span class="tl-date">אפריל 2021</span></div>
+      <div class="tl-dot-col"><div class="tl-dot" style="background:#3A76B0"></div></div>
+      <div class="tl-card report">
+        <div class="card-head"><p class="card-title">דוח מעקב מבקר המדינה</p><span class="badge br">דוח מעקב</span></div>
+        <p class="card-body">מבקר מתניהו אנגלמן: רוב הליקויים מ-2017 <strong>לא טופלו</strong> — למרות החלטת קבינט. צה"ל והמשטרה לא ערוכים כנדרש.</p>
+        <div class="quote qb">5 שנות אזהרות — הכשלים עדיין לא תוקנו</div>
+        <a class="src-link" href="https://library.mevaker.gov.il/sites/DigitalLibrary/Documents/2021/71B-Bitachon/2021-71B-401-Drones-Taktzir.pdf" target="_blank" rel="noopener">מבקר המדינה – דוח 71ב, אפריל 2021</a>
+      </div>
+    </div>
+
+    <div class="gap" data-gap="3"><div class="gap-line"></div><span class="gap-txt">3 שנים נוספות — תוך כדי לחימה</span><div class="gap-line"></div></div>
+
+    <!-- 6 -->
+    <div class="tl-item" data-type="failure">
+      <div class="tl-left"><span class="tl-date">יולי 2024</span></div>
+      <div class="tl-dot-col"><div class="tl-dot" style="background:#C04040"></div></div>
+      <div class="tl-card failure">
+        <div class="card-head"><p class="card-title">שב"כ רוכש הגנה לנתניהו — לא לחיילים</p><span class="badge bf">עיוות עדיפויות</span></div>
+        <p class="card-body">תוספת תקציב של <strong>13.5 מיליון ₪</strong> "לשיפור המוכנות למצבי חירום ברחבת הכותל המערבי" — תקציב שלא הופנה להגנת לוחמים בשטח.</p>
+        <a class="src-link" href="https://www.ynet.co.il/news/article/hydlb4w1zx" target="_blank" rel="noopener">ynet – "ישראל הגיעה לא ערוכה לאיום הרחפנים"</a>
+      </div>
+    </div>
+
+    <div class="gap" data-gap="4"><div class="gap-line"></div><span class="gap-txt">אפריל–מאי 2026: הלוחמים מוצאים פתרונות עצמיים</span><div class="gap-line"></div></div>
+
+    <!-- 7 -->
+    <div class="tl-item" data-type="alt">
+      <div class="tl-left"><span class="tl-date">אפריל 2026</span></div>
+      <div class="tl-dot-col"><div class="tl-dot" style="background:#1D7A56"></div></div>
+      <div class="tl-card alt">
+        <div class="card-head"><p class="card-title">לוחמים קונים רשתות דיג בכינרת</p><span class="badge ba">פתרון עצמאי</span></div>
+        <p class="card-body">כוחות צה"ל בדרום לבנון פנו לדייגים בכינרת לרכוש רשתות להגנה מרחפני חיזבאללה — יוזמה אישית של לוחמים, ללא רכש מוסדר מהצבא.</p>
+        <a class="src-link" href="https://www.kan.org.il/content/kan-news/defense/1044806/" target="_blank" rel="noopener">כאן חדשות – רשתות דיג מהכינרת</a>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="tl-item" data-type="alt">
+      <div class="tl-left"><span class="tl-date">מאי 2026</span></div>
+      <div class="tl-dot-col"><div class="tl-dot" style="background:#1D7A56"></div></div>
+      <div class="tl-card alt">
+        <div class="card-head"><p class="card-title">הורים ולוחמים רוכשים רשתות בכוחות עצמם</p><span class="badge ba">פתרון עצמאי</span></div>
+        <p class="card-body">לוחמי מילואים ממחטיבת הצנחנים פנו לדייגים ולחוות דגים. הורים רכשו בעצמם רשתות דיג להגנה על לוחמיהם — מאולתר, ממומן מתרומות.</p>
+        <a class="src-link" href="https://www.ynet.co.il/news/article/ryeaerhrzx" target="_blank" rel="noopener">ynet – "מתמגנים עם רשתות דיג, בעזרת תרומות"</a>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="tl-item" data-type="failure">
+      <div class="tl-left"><span class="tl-date">מאי 2026</span></div>
+      <div class="tl-dot-col"><div class="tl-dot" style="background:#C04040"></div></div>
+      <div class="tl-card failure">
+        <div class="card-head"><p class="card-title">קול מהשטח: מחדל בלתי מוסבר</p><span class="badge bf">עדות לוחם</span></div>
+        <div class="quote qr">"לא מבינים איך יש מצב שמצליחים ליירט מחוץ לאטמוספירה, ובסוף מול רחפני נפץ מעליאקספרס — הצבא לא נותן מענה"</div>
+        <a class="src-link" href="https://www.ynet.co.il/news/article/rynmtizlze" target="_blank" rel="noopener">ynet – לוחמים מאלתרים עם רשתות</a>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="tl-item" data-type="failure">
+      <div class="tl-left"><span class="tl-date">מאי 2026</span></div>
+      <div class="tl-dot-col"><div class="tl-dot" style="background:#C04040"></div></div>
+      <div class="tl-card failure">
+        <div class="card-head"><p class="card-title">חבר קבינט מודה בפומבי בכישלון</p><span class="badge bf">הודאת מדינה</span></div>
+        <div class="quote qr">"אני מתבייש שאין לנו מענה אמיתי" — חבר קבינט לראשי רשויות</div>
+        <p class="card-body" style="margin-top:8px"><strong>15 רחפני נפץ</strong> התפוצצו ביום אחד בצפון.</p>
+        <a class="src-link" href="https://www.mako.co.il/news-military/2026_q2/Article-5ce6407d6697e91027.htm" target="_blank" rel="noopener">N12 – מרשתות ועד בובות ראווה</a>
+      </div>
+    </div>
+
+    <div class="empty-msg" id="empty-msg">אין פריטים בקטגוריות הנבחרות</div>
+  </div>
+
+  <div class="footer-box">
+    <strong>סיכום המחדל:</strong> מרץ 2016 עד יוני 2026 — עשר שנים שבהן נשמעו אזהרות, הוגשו שלושה דוחות מבקר, ניתנו המלצות ברורות, התקבלו החלטות קבינט — ובפועל: לא נבנתה יכולת הגנה שיטתית. החיילים פנו לדייגים, ההורים רכשו רשתות, ולוחמים נהרגו ממזל"טים מסין.
+  </div>
+
+</div>
+<script>
+  var btns  = document.querySelectorAll('.leg-btn');
+  var items = document.querySelectorAll('.tl-item');
+  var gaps  = document.querySelectorAll('[data-gap]');
+  var empty = document.getElementById('empty-msg');
+  var hint  = document.getElementById('filter-hint');
+  var active = { warning: true, report: true, failure: true, alt: true };
+
+  function countActive() {
+    var n = 0; for (var k in active) { if (active[k]) n++; } return n;
+  }
+
+  function update() {
+    items.forEach(function(el) {
+      el.classList.toggle('hidden', !active[el.dataset.type]);
+    });
+    gaps.forEach(function(gap) {
+      var next = gap.nextElementSibling;
+      var hasVisible = false;
+      while (next && !next.dataset.gap) {
+        if (next.classList.contains('tl-item') && !next.classList.contains('hidden')) { hasVisible = true; break; }
+        next = next.nextElementSibling;
+      }
+      gap.style.display = hasVisible ? '' : 'none';
+    });
+    var any = false;
+    items.forEach(function(el) { if (!el.classList.contains('hidden')) any = true; });
+    empty.style.display = any ? 'none' : 'block';
+    var c = countActive();
+    hint.textContent = c === 4 ? 'לחצו על הקטגוריות לסינון' : 'מציג ' + c + ' מתוך 4 קטגוריות \u2014 לחצו שוב לאיפוס';
+  }
+
+  btns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var t = btn.dataset.type;
+      if (active[t]) {
+        if (countActive() === 1) {
+          active = { warning: true, report: true, failure: true, alt: true };
+          btns.forEach(function(b) { b.classList.add('active'); b.setAttribute('aria-pressed','true'); });
+          update(); return;
+        }
+        active[t] = false; btn.classList.remove('active'); btn.setAttribute('aria-pressed','false');
+      } else {
+        active[t] = true; btn.classList.add('active'); btn.setAttribute('aria-pressed','true');
+      }
+      update();
+    });
+  });
+</script>
+</body>
+</html>
