@@ -1,0 +1,238 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.wrap{font-family:'Assistant',sans-serif;padding:16px 0 36px;direction:rtl;max-width:860px;margin:0 auto}
+.chart-title{font-size:22px;font-weight:600;color:#1a1a1a;margin-bottom:6px}
+.chart-sub{font-size:15px;color:#555;margin-bottom:22px;line-height:1.6;text-align:center}
+
+/* ===== פס הפסדים ===== */
+.loss-panel{border-radius:12px;padding:18px 18px 14px;margin-bottom:22px;border:.5px solid #F7C1C1;background:#FCEBEB}
+.loss-title{font-size:18px;font-weight:600;color:#791F1F;margin-bottom:14px}
+.loss-bar{display:flex;border-radius:8px;overflow:hidden;height:58px;margin-bottom:12px}
+.loss-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;padding:0 6px;text-align:center;line-height:1.3;cursor:pointer;transition:filter .15s,transform .12s;position:relative}
+.loss-seg:hover{filter:brightness(1.18);transform:scaleY(1.06);z-index:2}
+.loss-seg.active{filter:brightness(1.22);transform:scaleY(1.08);z-index:3;outline:2.5px solid #fff}
+.loss-seg-label{font-size:11px;opacity:.9}
+.loss-seg-amount{font-size:13px;font-weight:600}
+.loss-tooltip{background:#fff;border:1.5px solid #F7C1C1;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:14px;color:#791F1F;line-height:1.6;min-height:52px;transition:opacity .2s}
+.loss-tooltip strong{font-size:14px;display:block;margin-bottom:2px}
+.loss-tooltip.empty{color:#888;font-style:italic}
+.loss-legend{display:flex;flex-wrap:wrap;gap:8px}
+.loss-dot-row{display:flex;align-items:center;gap:5px;font-size:12px;color:#555;cursor:pointer;padding:3px 6px;border-radius:6px;transition:background .15s}
+.loss-dot-row:hover{background:rgba(163,45,45,0.08)}
+.loss-dot{width:11px;height:11px;border-radius:2px;flex-shrink:0}
+
+/* ===== טבלת הטבות ===== */
+.benefits-panel{background:#EAF3DE;border:.5px solid #C0DD97;border-radius:12px;padding:18px;margin-bottom:20px}
+.benefits-title{font-size:16px;font-weight:600;color:#27500A;margin-bottom:14px}
+.benefit-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;border-radius:8px;padding:6px 10px;transition:background .15s;cursor:default}
+.benefit-row:hover{background:rgba(59,109,17,0.10)}
+.benefit-row:hover .benefit-tooltip-inline{opacity:1;max-height:60px}
+.benefit-label{font-size:14px;color:#3B6D11;width:170px;flex-shrink:0;line-height:1.35;font-weight:500}
+.benefit-track{flex:1;height:24px;border-radius:5px;background:rgba(59,109,17,0.12);position:relative;overflow:hidden}
+.benefit-fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
+.benefit-amount{font-size:14px;font-weight:600;color:#27500A;width:70px;flex-shrink:0;text-align:left}
+.benefit-tooltip-inline{font-size:12px;color:#3B6D11;opacity:0;max-height:0;overflow:hidden;transition:opacity .2s,max-height .2s;line-height:1.4;padding-right:170px}
+.benefits-total{display:flex;justify-content:space-between;align-items:center;padding:10px 10px 0;border-top:.5px solid #C0DD97;margin-top:6px}
+.benefits-total-label{font-size:15px;font-weight:600;color:#27500A}
+.benefits-total-val{font-size:17px;font-weight:600;color:#27500A}
+
+/* ===== פאנל חיים ===== */
+.lifetime-panel{background:#EAF3DE;border:.5px solid #C0DD97;border-radius:12px;padding:18px;margin-bottom:16px}
+.lifetime-title{font-size:15px;font-weight:600;color:#27500A;margin-bottom:14px}
+.lifetime-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.age-label{font-size:13px;color:#3B6D11;width:110px;flex-shrink:0;font-weight:500}
+.life-track{flex:1;min-width:120px;height:24px;background:rgba(59,109,17,0.12);border-radius:5px;overflow:hidden}
+.life-fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:12px;font-weight:600;color:#fff}
+.life-diff{font-size:13px;font-weight:600;color:#A32D2D;width:100px;flex-shrink:0;text-align:left}
+.lifetime-note{font-size:13px;color:#3B6D11;margin-top:8px;line-height:1.6}
+
+/* ===== ציטוט ===== */
+.quote-box{background:#f8f8f8;border-right:3px solid #E24B4A;border-radius:0 10px 10px 0;padding:12px 16px;font-size:14px;color:#444;line-height:1.7;margin-top:4px}
+.quote-box em{font-style:normal;font-weight:600;color:#222}
+.source{font-size:12px;color:#888;margin-top:14px;line-height:1.6}
+
+@media(max-width:520px){
+  .chart-title{font-size:18px}
+  .chart-sub{font-size:14px}
+  .loss-title{font-size:16px}
+  .loss-seg{font-size:10px}
+  .loss-seg-amount{font-size:11px}
+  .benefit-label{width:130px;font-size:13px}
+  .benefit-amount{width:60px;font-size:13px}
+  .age-label{width:90px;font-size:12px}
+  .life-diff{width:80px;font-size:12px}
+  .lifetime-note{font-size:12px}
+}
+</style>
+
+<div class="wrap">
+<h2 class="sr-only">מלכודת התמריצים: מה גבר חרדי מאבד ביציאה לעבוד, על פי מסמך גרדוס, משרד האוצר 2024</h2>
+
+<div class="chart-title">מלכודת התמריצים</div>
+<div class="chart-sub">מה גבר חרדי מאבד ביציאה לעבודה — לחצו על כל רכיב לפרטים</div>
+
+
+<!-- פס הפסדים -->
+<div class="loss-panel">
+  <div class="loss-title">אובדן של 5,441 ₪ לחודש — עם יציאה לעבודה</div>
+
+  <div class="loss-bar" id="lossBar">
+    <div class="loss-seg" style="width:23.4%;background:#A32D2D" data-key="avrech">
+      <span class="loss-seg-label">קצבת אברך</span>
+      <span class="loss-seg-amount">1,271 ₪</span>
+    </div>
+    <div class="loss-seg" style="width:18.6%;background:#C04040" data-key="bituach">
+      <span class="loss-seg-label">ביטוח לאומי</span>
+      <span class="loss-seg-amount">1,012 ₪</span>
+    </div>
+    <div class="loss-seg" style="width:16.4%;background:#D05050" data-key="maon">
+      <span class="loss-seg-label">מעונות יום</span>
+      <span class="loss-seg-amount">890 ₪</span>
+    </div>
+    <div class="loss-seg" style="width:15.6%;background:#E06060" data-key="yeshiva">
+      <span class="loss-seg-label">תוספת ישיבה</span>
+      <span class="loss-seg-amount">850 ₪</span>
+    </div>
+    <div class="loss-seg" style="width:12.4%;background:#E87070" data-key="arnona">
+      <span class="loss-seg-label">ארנונה</span>
+      <span class="loss-seg-amount">673 ₪</span>
+    </div>
+    <div class="loss-seg" style="width:13.6%;background:#F08080" data-key="other">
+      <span class="loss-seg-label">שאר</span>
+      <span class="loss-seg-amount">745 ₪</span>
+    </div>
+  </div>
+
+
+
+
+</div>
+
+<!-- טבלת הטבות -->
+<div class="benefits-panel">
+  <div class="benefits-title">ההטבות שמקבל אברך בישיבה — ויאבד ביציאה לעבודה</div>
+  <div style="font-size:12px;color:#639922;margin-bottom:12px">העבירו את העכבר על כל שורה להסבר</div>
+
+  <div class="benefit-row" data-tip="מלגה חודשית ממשלתית לגברים נשואים הלומדים בכולל (ישיבה לנשואים). מותנית בנוכחות מלאה. מבוטלת לחלוטין ביציאה לעבוד.">
+    <div class="benefit-label">קצבת אברך</div>
+    <div class="benefit-track"><div class="benefit-fill" style="width:23%;background:#3B6D11">1,271 ₪</div></div>
+    <div class="benefit-amount">1,271 ₪</div>
+  </div>
+  <div class="benefit-tooltip-inline" id="tip-0"></div>
+
+  <div class="benefit-row" data-tip="פטור/הנחה משמעותית מתשלומי ביטוח לאומי וביטוח בריאות. ביציאה לעבוד — חוזרים לתשלום מלא כשכיר.">
+    <div class="benefit-label">ביטוח לאומי + בריאות</div>
+    <div class="benefit-track"><div class="benefit-fill" style="width:18%;background:#3B6D11">1,012 ₪</div></div>
+    <div class="benefit-amount">1,012 ₪</div>
+  </div>
+  <div class="benefit-tooltip-inline" id="tip-1"></div>
+
+  <div class="benefit-row" data-tip="סבסוד ממשלתי למעונות יום לילדים. מותנה בכך שאחד ההורים לא עובד — אברך נחשב 'מועסק' ומקבל הסבסוד. ביציאה לעבוד, ההכנסה החדשה מפחיתה את הזכאות.">
+    <div class="benefit-label">סבסוד מעונות יום</div>
+    <div class="benefit-track"><div class="benefit-fill" style="width:16%;background:#3B6D11">890 ₪</div></div>
+    <div class="benefit-amount">890 ₪</div>
+  </div>
+  <div class="benefit-tooltip-inline" id="tip-2"></div>
+
+  <div class="benefit-row" data-tip="תשלום נוסף מהמוסד התורני (מעבר לקצבת האברך) עבור שעות לימוד נוספות. מבוטל עם הפסקת הלימוד.">
+    <div class="benefit-label">תוספת ישיבה</div>
+    <div class="benefit-track"><div class="benefit-fill" style="width:15%;background:#3B6D11">850 ₪</div></div>
+    <div class="benefit-amount">850 ₪</div>
+  </div>
+  <div class="benefit-tooltip-inline" id="tip-3"></div>
+
+  <div class="benefit-row" data-tip="הנחה בארנונה (מס רכוש עירוני) המוענקת למשקי בית חרדיים על בסיס הכנסה נמוכה. ביציאה לעבוד, ההכנסה עולה וההנחה מצטמצמת או נשללת.">
+    <div class="benefit-label">הנחת ארנונה</div>
+    <div class="benefit-track"><div class="benefit-fill" style="width:12%;background:#3B6D11">673 ₪</div></div>
+    <div class="benefit-amount">673 ₪</div>
+  </div>
+  <div class="benefit-tooltip-inline" id="tip-4"></div>
+
+  <div class="benefit-row" data-tip="כולל: הכנסות ממשקי בית אחרים, הטבות נוספות (סיוע בשכר דירה, תמיכת משפחה) — כולם נשחקים עם עלייה בהכנסה.">
+    <div class="benefit-label">שאר הטבות</div>
+    <div class="benefit-track"><div class="benefit-fill" style="width:13%;background:#3B6D11">745 ₪</div></div>
+    <div class="benefit-amount">745 ₪</div>
+  </div>
+  <div class="benefit-tooltip-inline" id="tip-5"></div>
+
+  <div class="benefits-total">
+    <div class="benefits-total-label">סה"כ תמיכה חודשית שתאבד</div>
+    <div class="benefits-total-val">5,441 ₪</div>
+  </div>
+</div>
+
+<!-- פאנל חיים -->
+<div class="lifetime-panel">
+  <div class="lifetime-title">פער שכר מצטבר לאורך חיים — כניסה בגיל 21 מול גיל 35</div>
+  <div class="lifetime-row">
+    <div class="age-label">כניסה בגיל 21</div>
+    <div class="life-track"><div class="life-fill" style="width:100%;background:#3B6D11">מדד שכר 173 בגיל 60</div></div>
+    <div class="life-diff" style="color:#3B6D11">בסיס</div>
+  </div>
+  <div class="lifetime-row">
+    <div class="age-label">כניסה בגיל 35</div>
+    <div class="life-track"><div class="life-fill" style="width:57%;background:#E24B4A">מדד שכר 100 בגיל 60</div></div>
+    <div class="life-diff">−75% שכר<br>−1.3M ₪</div>
+  </div>
+  <div class="lifetime-note">
+    כניסה לשוק בגיל 21 מול גיל 35: <strong>75% יותר שכר</strong> לאורך החיים,
+    פער מצטבר של <strong>1.3 מיליון ₪ לאדם</strong> (בריבית היוון 5%) — מסמך גרדוס, עמ׳ 14
+  </div>
+</div>
+
+<!-- ציטוט -->
+<div class="quote-box">
+  <em>"הגדלת תקציב הישיבות מהווה התמריץ הכלכלי השלילי המשמעותי ביותר לאי-כניסתם של הגברים החרדים לשוק העבודה"</em><br>
+  — יואב גרדוס, ממונה על התקציבים, משרד האוצר — בדיווח לשר האוצר בצלאל סמוטריץ', 24 במרץ 2024
+</div>
+
+<div class="source">מקור: יואב גרדוס, עמדת אגף התקציבים — הצעת חוק שירות הביטחון, 24.3.2024, תרשימים 11, 13 · כל הנתונים הכספיים ישירות ממסמך רשמי של משרד האוצר</div>
+</div>
+
+<script>
+const tooltips = {
+  avrech: { title: "קצבת אברך — 1,271 ₪/חודש", body: "מלגה חודשית ממשלתית לגברים נשואים הלומדים בכולל. מותנית בנוכחות מלאה ואי-עבודה. מבוטלת לחלוטין ביציאה לעבוד." },
+  bituach: { title: "ביטוח לאומי + בריאות — 1,012 ₪/חודש", body: "פטור/הנחה מתשלומי ביטוח לאומי. ביציאה לעבוד — חוזרים לתשלום מלא כשכיר. הפרש משמעותי בכיסוי הבריאותי." },
+  maon: { title: "סבסוד מעונות יום — 890 ₪/חודש", body: "סבסוד ממשלתי למעונות ילדים. אברך נחשב 'מועסק' ומקבל את הסבסוד המרבי. ביציאה לעבוד, ההכנסה החדשה מפחיתה או מבטלת את הזכאות." },
+  yeshiva: { title: "תוספת ישיבה — 850 ₪/חודש", body: "תשלום נוסף מהמוסד התורני מעבר לקצבת האברך, עבור שעות לימוד ונוכחות. מבוטל עם הפסקת הלימוד." },
+  arnona: { title: "הנחת ארנונה — 673 ₪/חודש", body: "הנחה בארנונה (מס רכוש עירוני) על בסיס הכנסה נמוכה. ביציאה לעבוד ועלייה בהכנסה — ההנחה נשחקת או נשללת." },
+  other: { title: "שאר הטבות — 745 ₪/חודש", body: "כולל: סיוע בשכר דירה, הכנסות ממשקי בית אחרים, הטבות נוספות — כולם נשחקים עם עלייה בהכנסה." }
+};
+
+function showTooltip(key) {
+  document.querySelectorAll('.loss-seg').forEach(s => s.classList.toggle('active', s.dataset.key === key));
+}
+function clearTooltip() {
+  document.querySelectorAll('.loss-seg').forEach(s => s.classList.remove('active'));
+}
+
+document.querySelectorAll('.loss-seg').forEach(seg => {
+  seg.addEventListener('mouseenter', () => showTooltip(seg.dataset.key));
+  seg.addEventListener('mouseleave', clearTooltip);
+  seg.addEventListener('click', () => showTooltip(seg.dataset.key));
+});
+document.querySelectorAll('.loss-dot-row').forEach(row => {
+  row.addEventListener('mouseenter', () => showTooltip(row.dataset.key));
+  row.addEventListener('mouseleave', clearTooltip);
+  row.addEventListener('click', () => showTooltip(row.dataset.key));
+});
+
+// benefit rows hover
+const benefitRows = document.querySelectorAll('.benefit-row');
+const tipEls = document.querySelectorAll('.benefit-tooltip-inline');
+benefitRows.forEach((row, i) => {
+  row.addEventListener('mouseenter', () => {
+    tipEls[i].textContent = row.dataset.tip;
+    tipEls[i].style.opacity = '1';
+    tipEls[i].style.maxHeight = '60px';
+    tipEls[i].style.padding = '3px 10px 8px';
+  });
+  row.addEventListener('mouseleave', () => {
+    tipEls[i].style.opacity = '0';
+    tipEls[i].style.maxHeight = '0';
+    tipEls[i].style.padding = '0 10px';
+  });
+});
+</script>
