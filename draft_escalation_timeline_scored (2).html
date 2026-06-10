@@ -1,0 +1,446 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+body{direction:rtl}
+.wrap{font-family:'Assistant',sans-serif;padding:16px 0 40px;direction:rtl;max-width:860px;margin:0 auto}
+
+/* ===== כפתורי פילטר ===== */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.filter-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Assistant',sans-serif;font-size:14px;font-weight:500;padding:8px 16px;border-radius:20px;border:1.5px solid #ddd;background:#fff;color:#666;cursor:pointer;transition:all .18s;user-select:none}
+.filter-btn:hover{border-color:#aaa;color:#333}
+.filter-btn.active{color:#fff;border-color:transparent}
+.filter-btn .fdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.fb-all.active{background:#333;color:#fff}
+.fb-prot .fdot{background:#378ADD}
+.fb-prot.active{background:#185FA5;border-color:#185FA5}
+.fb-remove .fdot{background:#E24B4A}
+.fb-remove.active{background:#A32D2D;border-color:#A32D2D}
+.fb-add .fdot{background:#639922}
+.fb-add.active{background:#3B6D11;border-color:#3B6D11}
+.fb-bypass .fdot{background:#7F77DD}
+.fb-bypass.active{background:#534AB7;border-color:#534AB7}
+.fb-const .fdot{background:#BA7517}
+.fb-const.active{background:#854F0B;border-color:#854F0B}
+.filter-count{font-size:11px;opacity:.75;font-weight:400}
+
+/* ===== ציר ===== */
+.spine{position:relative;padding-right:44px}
+.spine::before{content:'';position:absolute;right:17px;top:0;bottom:0;width:2px;background:#e0e0e0;border-radius:2px}
+
+/* ===== ממשלה ===== */
+.gov-section{margin-bottom:32px;transition:opacity .2s}
+.gov-section.hidden{display:none}
+.gov-label{display:flex;align-items:center;gap:10px;margin-bottom:14px;position:relative;flex-wrap:wrap}
+.gov-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;position:absolute;right:-51px;border:2.5px solid #fff;z-index:1;box-shadow:0 0 0 1.5px #ddd}
+.gov-name{font-size:14px;font-weight:600;color:#333;letter-spacing:.02em}
+.gov-years{font-size:12px;color:#888;margin-right:6px}
+.score-pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;margin-right:auto;white-space:nowrap}
+
+/* ===== אירוע ===== */
+.event{display:flex;flex-direction:column;gap:4px;padding:13px 15px;border-radius:10px;margin-bottom:8px;border:.5px solid transparent;transition:opacity .2s,transform .15s}
+.event.filtered-out{opacity:.18;pointer-events:none}
+.event-row{display:flex;align-items:flex-start;gap:10px}
+.event-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.event-body{flex:1}
+.event-title{font-size:15px;font-weight:600;line-height:1.4;margin-bottom:4px}
+.event-desc{font-size:14px;line-height:1.6;opacity:.82}
+.event-year{font-size:12px;font-weight:500;letter-spacing:.04em;margin-bottom:5px;opacity:.7}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:4px;margin-top:6px;font-family:'Assistant',sans-serif}
+.score-tag{font-size:11px;opacity:.8;font-weight:400}
+
+/* ===== צבעי סוג ===== */
+.ev-prot{background:#E6F1FB;border-color:#B5D4F4;color:#0C447C}
+.ev-prot .event-title{color:#0C447C}
+.ev-prot .event-icon{color:#378ADD}
+.ev-remove{background:#FCEBEB;border-color:#F7C1C1;color:#791F1F}
+.ev-remove .event-title{color:#791F1F}
+.ev-remove .event-icon{color:#E24B4A}
+.ev-add{background:#EAF3DE;border-color:#C0DD97;color:#173404}
+.ev-add .event-title{color:#27500A}
+.ev-add .event-icon{color:#639922}
+.ev-bypass{background:#EEEDFE;border-color:#CECBF6;color:#26215C}
+.ev-bypass .event-title{color:#3C3489}
+.ev-bypass .event-icon{color:#7F77DD}
+.ev-const{background:#FAEEDA;border-color:#FAC775;color:#412402}
+.ev-const .event-title{color:#633806}
+.ev-const .event-icon{color:#BA7517}
+.badge-prot{background:#E6F1FB;color:#185FA5}
+.badge-remove{background:#FCEBEB;color:#A32D2D}
+.badge-add{background:#EAF3DE;color:#3B6D11}
+.badge-bypass{background:#EEEDFE;color:#534AB7}
+.badge-const{background:#FAC775;color:#633806}
+
+/* ===== פס חומרה ===== */
+.bar-wrap{margin-top:12px;margin-bottom:2px}
+.bar-track{height:9px;background:#eee;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.bar-label{display:flex;justify-content:space-between;margin-top:5px}
+.bar-label span{font-size:12px;color:#999}
+.bar-label strong{font-size:12px;color:#555;font-weight:600}
+
+/* ===== ממשלה ללא חרדים ===== */
+.no-haredi{background:#f5f5f5;border:.5px solid #ddd;border-radius:10px;padding:13px 15px;font-size:14px;color:#555;border-right:3px solid #639922;line-height:1.6}
+
+/* ===== מקרא ניקוד (למטה) ===== */
+.methodology{background:#f8f8f8;border:.5px solid #e0e0e0;border-radius:10px;padding:14px 16px;margin-top:32px;font-size:13px;color:#555;line-height:1.6}
+.methodology strong{color:#333;font-size:13px}
+.method-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.method-item{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:6px;font-weight:600}
+
+/* ===== ריספונסיביות ===== */
+@media(max-width:520px){
+  .filter-btn{font-size:13px;padding:7px 12px}
+  .gov-name{font-size:13px}
+  .event-title{font-size:14px}
+  .event-desc{font-size:13px}
+  .spine{padding-right:32px}
+  .spine::before{right:12px}
+  .gov-dot{right:-38px;width:13px;height:13px}
+}
+@media(prefers-color-scheme:dark){
+  .filter-btn{background:#1a1a1a;border-color:#333;color:#aaa}
+  .filter-btn:hover{border-color:#555;color:#eee}
+  .fb-all.active{background:#eee;color:#111}
+  .spine::before{background:#333}
+  .gov-dot{border-color:#111;box-shadow:0 0 0 1.5px #333}
+  .gov-name{color:#ddd}
+  .gov-years{color:#777}
+  .bar-track{background:#222}
+  .bar-label span{color:#666}
+  .bar-label strong{color:#aaa}
+  .no-haredi{background:#1a1a1a;border-color:#333;color:#aaa;border-right-color:#639922}
+  .methodology{background:#1a1a1a;border-color:#333;color:#aaa}
+  .methodology strong{color:#ddd}
+  .ev-prot{background:#0c1e30;border-color:#0C447C}
+  .ev-prot .event-title{color:#85B7EB}
+  .ev-remove{background:#2e0f0f;border-color:#791F1F}
+  .ev-remove .event-title{color:#F09595}
+  .ev-add{background:#0d1e07;border-color:#27500A}
+  .ev-add .event-title{color:#97C459}
+  .ev-bypass{background:#14122c;border-color:#3C3489}
+  .ev-bypass .event-title{color:#AFA9EC}
+  .ev-const{background:#1e1100;border-color:#633806}
+  .ev-const .event-title{color:#EF9F27}
+}
+
+/* ===== לינק הסכם ===== */
+.gov-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#185FA5;text-decoration:none;border:.5px solid #B5D4F4;border-radius:5px;padding:2px 8px;margin-top:6px;transition:background .15s;font-family:'Assistant',sans-serif}
+.gov-link:hover{background:#E6F1FB}
+.gov-link::before{content:'↗';font-size:11px}
+</style>
+
+<div class="wrap">
+<h2 class="sr-only">ציר זמן הסלמת נושא הגיוס בהסכמי הקואליציה של ממשלות נתניהו, עם מדד ניקוד שקוף</h2>
+
+<!-- כפתורי פילטר -->
+<div class="filters" role="group" aria-label="סנן לפי סוג סעיף">
+  <button class="filter-btn fb-prot" data-type="prot"><span class="fdot"></span>שמירה <span class="filter-count" id="cnt-prot"></span></button>
+  <button class="filter-btn fb-remove" data-type="remove"><span class="fdot"></span>ביטול מנגנון אכיפה <span class="filter-count" id="cnt-remove"></span></button>
+  <button class="filter-btn fb-add" data-type="add"><span class="fdot"></span>תמריץ כלכלי <span class="filter-count" id="cnt-add"></span></button>
+  <button class="filter-btn fb-bypass" data-type="bypass"><span class="fdot"></span>עוקף בג"ץ / וטו <span class="filter-count" id="cnt-bypass"></span></button>
+  <button class="filter-btn fb-const" data-type="const"><span class="fdot"></span>עיגון חוקתי <span class="filter-count" id="cnt-const"></span></button>
+</div>
+
+<div class="spine">
+
+<!-- ממשלה 32 -->
+<div class="gov-section" data-gov="32">
+  <div class="gov-label">
+    <span class="gov-dot" style="background:#378ADD"></span>
+    <span class="gov-name">ממשלה 32 — נתניהו 2</span>
+    <span class="gov-years">2009–2013</span>
+    <span class="score-pill" style="background:#E6F1FB;color:#185FA5">2 נקודות | 10%</span>
+  </div>
+
+  <div class="event ev-prot" data-type="prot">
+    <div class="event-year">2009</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-shield" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">שמירת "תורתו אומנותו" — פטור גורף ללא תקרה</div>
+        <div class="event-desc">ההסכם מנציח את הפטור לכל לומדי ישיבה ללא הגבלה מספרית. אין כל דרישת גיוס.</div>
+        <span class="badge badge-prot">שמירה</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements32.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 32</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="event ev-prot" data-type="prot">
+    <div class="event-year">2009–2012</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-eye-off" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">התחייבות לאפס אכיפת חוק טל</div>
+        <div class="event-desc">לא יינקטו צעדים לאכיפת חוק טל כנגד תלמידי ישיבות. חוק טל נפסל בבג"ץ פה-אחד בפברואר 2012.</div>
+        <span class="badge badge-prot">שמירה</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements32.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 32</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar-wrap">
+    <div class="bar-track"><div class="bar-fill" style="width:10%;background:#378ADD"></div></div>
+    <div class="bar-label"><span>מדד חומרה: 2 מתוך 20</span><strong>10%</strong></div>
+  </div>
+</div>
+
+<!-- ממשלה 33 -->
+<div class="gov-section" data-gov="33">
+  <div class="gov-label">
+    <span class="gov-dot" style="background:#639922"></span>
+    <span class="gov-name">ממשלה 33 — ללא חרדים</span>
+    <span class="gov-years">2013–2015</span>
+    <span class="score-pill" style="background:#EAF3DE;color:#3B6D11">0 נקודות | —</span>
+  </div>
+  <div class="no-haredi">⚡ ש"ס ויהדות התורה לא נכנסו לממשלה ("ברית בנט-לפיד"). חוק השוויון בנטל (2014) נחקק לראשונה — יעדי גיוס, סנקציות פליליות, לוחות זמנים. נפסל בבג"ץ בספטמבר 2017.</div>
+</div>
+
+<!-- ממשלה 34 -->
+<div class="gov-section" data-gov="34">
+  <div class="gov-label">
+    <span class="gov-dot" style="background:#E24B4A"></span>
+    <span class="gov-name">ממשלה 34 — נתניהו 4</span>
+    <span class="gov-years">2015–2020</span>
+    <span class="score-pill" style="background:#FCEBEB;color:#A32D2D">6 נקודות | 30%</span>
+  </div>
+
+  <div class="event ev-remove" data-type="remove">
+    <div class="event-year">2015</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-lock-open" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">יעדי גיוס — להחלטת ממשלה בלבד, לא לחקיקה</div>
+        <div class="event-desc">ביטול מעשי של מנגנון חוק השוויון בנטל: יעדים ניתן לשנות ללא כנסת, ללא סנקציה פרלמנטרית.</div>
+        <span class="badge badge-remove">ביטול מנגנון אכיפה</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements34.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 34</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="event ev-remove" data-type="remove">
+    <div class="event-year">2015</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-quote" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">"לא ייכנס אדם לכלא בשל לימוד תורה" — עוגן בהסכם</div>
+        <div class="event-desc">ציטוט נתניהו מ-2012 הפך להתחייבות חוזית. ביטול מנגנון ההפללה הפלילית שנקבע בחוק השוויון בנטל.</div>
+        <span class="badge badge-remove">ביטול מנגנון אכיפה</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements34.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 34</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="event ev-prot" data-type="prot">
+    <div class="event-year">2015</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-shield" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">שמירת "תורתו אומנותו" ללא פגיעה — שוב</div>
+        <div class="event-desc">אין אזכור ליעדי גיוס מינימליים אפקטיביים. המצב הקיים מוגן מחדש.</div>
+        <span class="badge badge-prot">שמירה × 2</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements34.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 34</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar-wrap">
+    <div class="bar-track"><div class="bar-fill" style="width:30%;background:#E24B4A"></div></div>
+    <div class="bar-label"><span>מדד חומרה: 6 מתוך 20 | שמירה×2 + ביטול×2</span><strong>30%</strong></div>
+  </div>
+</div>
+
+<!-- ממשלה 35 -->
+<div class="gov-section" data-gov="35">
+  <div class="gov-label">
+    <span class="gov-dot" style="background:#7F77DD"></span>
+    <span class="gov-name">ממשלה 35 — נתניהו-גנץ</span>
+    <span class="gov-years">2020–2021</span>
+    <span class="score-pill" style="background:#EEEDFE;color:#534AB7">7 נקודות | 35%</span>
+  </div>
+
+  <div class="event ev-remove" data-type="remove">
+    <div class="event-year">2020</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-lock-open" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">יעדי גיוס בהחלטת ממשלה — המשך וחיזוק</div>
+        <div class="event-desc">אותו מנגנון מממשלה 34, מעוגן גם בממשלת אחדות עם גנץ. גם שותפות "מרכזית" לא שינתה את הנוסחה.</div>
+        <span class="badge badge-remove">ביטול מנגנון אכיפה</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements35.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 35</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="event ev-add" data-type="add">
+    <div class="event-year">2020</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-building-bank" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">תקציב ישיבות — עיגון בתקציב המדינה הרגיל</div>
+        <div class="event-desc">המימון מובטח גם אם הממשלה מתחלפת. תמריץ כלכלי להישאר בישיבה, לא תלוי בכספים קואליציוניים.</div>
+        <span class="badge badge-add">תמריץ כלכלי</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements35.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 35</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="event ev-bypass" data-type="bypass">
+    <div class="event-year">2020 — חידוש היסטורי</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-gavel" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">מנגנון עוקף בג"ץ — לראשונה בהיסטוריה</div>
+        <div class="event-desc">"אם יהיה שינוי שיפגע בסטטוס קוו — יפעלו ראש הממשלה וגוש הליכוד ביחד לתיקון הפגיעה." נתניהו מתחייב בכתב לחוקק מנגנון שיסכל פסיקת בג"ץ.</div>
+        <span class="badge badge-bypass">עוקף בג"ץ</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements35.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 35</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar-wrap">
+    <div class="bar-track"><div class="bar-fill" style="width:35%;background:#7F77DD"></div></div>
+    <div class="bar-label"><span>מדד חומרה: 7 מתוך 20 | ביטול×1 + תמריץ×1 + עוקף×1 (×4)</span><strong>35%</strong></div>
+  </div>
+</div>
+
+<!-- ממשלה 37 -->
+<div class="gov-section" data-gov="37">
+  <div class="gov-label">
+    <span class="gov-dot" style="background:#BA7517"></span>
+    <span class="gov-name">ממשלה 37 — נתניהו 6</span>
+    <span class="gov-years">2022–2026</span>
+    <span class="score-pill" style="background:#FAC775;color:#633806">16 נקודות | 80%</span>
+  </div>
+
+  <div class="event ev-add" data-type="add">
+    <div class="event-year">2022</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-trending-up" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">הכפלת תקציב ישיבות; אברכים מחו"ל — פי 3</div>
+        <div class="event-desc">52 מתוך 140 סעיפי ההסכם (37%) מוקדשים לתקצוב. הגדלת התמריץ הכלכלי להישאר בישיבה.</div>
+        <span class="badge badge-add">תמריץ כלכלי × 2</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements37.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 37</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="event ev-bypass" data-type="bypass">
+    <div class="event-year">2022</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-ban" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">וטו מוסדי — כל חוק גיוס עתידי חייב הסכמה חרדית</div>
+        <div class="event-desc">שלא כממשלה 35 (התחייבות אישית של נתניהו בלבד), כאן מנגנון מוסדי: לא ניתן לחוקק שום הסדר גיוס ללא הסכמה חרדית מראש.</div>
+        <span class="badge badge-bypass">וטו מוסדי</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements37.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 37</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="event ev-bypass" data-type="bypass">
+    <div class="event-year">2022</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-gavel" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">כפל מנגנון: וטו + עוקף בג"ץ = הגנה כפולה</div>
+        <div class="event-desc">מנגנון עוקף הבג"ץ מממשלה 35 חוזר — אך כעת מגובה בוטו מוסדי. שני מנגנונים פועלים יחד.</div>
+        <span class="badge badge-bypass">עוקף בג"ץ</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements37.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 37</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="event ev-const" data-type="const">
+    <div class="event-year">2022 — שיא ההסלמה</div>
+    <div class="event-row">
+      <span class="event-icon ti ti-star" aria-hidden="true"></span>
+      <div class="event-body">
+        <div class="event-title">חוק יסוד: לימוד תורה — עיגון חוקתי של הפטור</div>
+        <div class="event-desc">לראשונה: התחייבות לחוקק חוק יסוד שיעגן פטור מגיוס ברמה חוקתית — "שווה ערך לגיוס לצה"ל". נועד להפוך את הפטור לבלתי-ניתן לביטול על ידי בג"ץ.</div>
+        <span class="badge badge-const">עיגון חוקתי</span>
+        <a class="gov-link" href="https://main.knesset.gov.il/mk/government/Pages/CoalitionAgreements37.aspx" target="_blank" rel="noopener">הסכם קואליציוני — ממשלה 37</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar-wrap">
+    <div class="bar-track"><div class="bar-fill" style="width:80%;background:#BA7517"></div></div>
+    <div class="bar-label"><span>מדד חומרה: 16 מתוך 20 | תמריץ×2 + עוקף×2 + חוקתי×1 (×4 כל אחד)</span><strong>80%</strong></div>
+  </div>
+</div>
+
+</div><!-- /spine -->
+
+<!-- מקרא ניקוד — למטה -->
+<div class="methodology">
+  <strong>מדד החומרה — כיצד מחושבים האחוזים?</strong><br>
+  כל סעיף גיוס בהסכם מקבל ניקוד לפי סוגו. הציון הכולל של ממשלה = סכום כל הסעיפים. המקסימום התיאורטי = 20 (5 סעיפי עוקף/חוקתי × 4 נקודות).
+  <div class="method-grid">
+    <span class="method-item" style="background:#E6F1FB;color:#185FA5">שמירה = 1 נקודה</span>
+    <span class="method-item" style="background:#FCEBEB;color:#A32D2D">ביטול מנגנון אכיפה = 2 נקודות</span>
+    <span class="method-item" style="background:#EAF3DE;color:#3B6D11">תמריץ כלכלי = 2 נקודות</span>
+    <span class="method-item" style="background:#EEEDFE;color:#534AB7">עוקף בג"ץ / וטו = 4 נקודות</span>
+    <span class="method-item" style="background:#FAC775;color:#633806">עיגון חוקתי = 4 נקודות</span>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+const events = document.querySelectorAll('.event[data-type]');
+const govSections = document.querySelectorAll('.gov-section[data-gov]');
+const btns = document.querySelectorAll('.filter-btn');
+
+// ספירת אירועים לפי סוג
+const types = ['prot','remove','add','bypass','const'];
+function updateCounts(activeType) {
+  const total = [...events].filter(e => e.dataset.type).length;
+
+  types.forEach(t => {
+    const el = document.getElementById('cnt-' + t);
+    if (el) el.textContent = [...events].filter(e => e.dataset.type === t).length;
+  });
+}
+updateCounts();
+
+function applyFilter(type) {
+  // כפתורים
+  if(type !== 'all') btns.forEach(b => b.classList.toggle('active', b.dataset.type === type));
+
+  // אירועים
+  events.forEach(ev => {
+    if (type === 'all' || ev.dataset.type === type) {
+      ev.classList.remove('filtered-out');
+    } else {
+      ev.classList.add('filtered-out');
+    }
+  });
+
+  // ממשלות — הסתר אם אין בהן אירועים מוצגים
+  govSections.forEach(sec => {
+    if (type === 'all') {
+      sec.classList.remove('hidden');
+      return;
+    }
+    const hasVisible = [...sec.querySelectorAll('.event[data-type]')]
+      .some(e => e.dataset.type === type);
+    // ממשלה 33 — תמיד מוצגת
+    const isNoHaredi = sec.dataset.gov === '33';
+    sec.classList.toggle('hidden', !hasVisible && !isNoHaredi);
+  });
+}
+
+btns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(btn.classList.contains('active')) {
+      // לחיצה שנייה על אותו כפתור — איפוס לכולם
+      btns.forEach(b => b.classList.remove('active'));
+      applyFilter('all');
+    } else {
+      applyFilter(btn.dataset.type);
+    }
+  });
+});
+</script>
