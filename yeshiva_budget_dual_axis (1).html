@@ -1,0 +1,205 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.wrap{font-family:'Assistant',sans-serif;padding:16px 0 32px;direction:rtl}
+.chart-title{font-size:20px;font-weight:600;color:var(--color-text-primary,#1a1a1a);margin-bottom:6px}
+.chart-sub{font-size:15px;color:var(--color-text-secondary,#555);margin-bottom:16px;line-height:1.6}
+.axis-row{display:flex;justify-content:space-between;margin-bottom:6px}
+.axis-label-l{font-size:13px;color:#854F0B;font-family:'Assistant',sans-serif}
+.axis-label-r{font-size:13px;color:#185FA5;font-family:'Assistant',sans-serif}
+.chart-wrap{position:relative;width:100%;padding-bottom:52%}
+.chart-wrap canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;margin-bottom:4px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--color-text-secondary,#555)}
+.legend-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+.highlight-box{background:#EAF3DE;border:.5px solid #C0DD97;border-radius:8px;padding:12px 16px;margin-top:16px;font-size:15px;color:#27500A;line-height:1.7}
+.highlight-box strong{font-size:15px}
+.source{font-size:12px;color:var(--color-text-tertiary,#888);margin-top:14px;line-height:1.6}
+@media(max-width:480px){
+  .chart-title{font-size:17px}
+  .chart-sub{font-size:13px}
+  .chart-wrap{padding-bottom:70%}
+  .legend-item{font-size:13px}
+  .highlight-box{font-size:13px}
+}
+</style>
+
+<div class="wrap">
+<h2 class="sr-only">גרף כפול-ציר: מספר תלמידי ישיבות ואברכים מול תקציב ישיבות ממשלתי, 2009–2023</h2>
+
+<div class="chart-title">תלמידי ישיבות ואברכים מול תקציב הישיבות הממשלתי</div>
+<div class="chart-sub">ציר ימין: מספר רשומים בישיבות גבוהות ואברכים (מקור: IDI, 2025) · ציר שמאל: תקציב ישיבות ממשלתי במיליארדי ₪ (מקור: אתר התקציב הפתוח)</div>
+
+<div class="axis-row">
+  <div class="axis-label-l">תקציב ישיבות (מיליארד ₪) ←</div>
+  <div class="axis-label-r">→ מספר תלמידים ואברכים</div>
+</div>
+
+<div class="chart-wrap">
+  <canvas id="dualChart"></canvas>
+</div>
+
+<div class="legend">
+  <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>מספר תלמידי ישיבות ואברכים</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#BA7517"></span>תקציב ישיבות ממשלתי (מיליארד ₪)</span>
+</div>
+
+<div class="highlight-box">
+  <strong>83% גידול</strong> במספר הרשומים בישיבות בין 2013 ל-2023 (91,070 → 157,881) —
+  תוך שהתקציב הממשלתי <strong>הוכפל</strong> באותה תקופה.
+  הגידול עולה על הצמיחה הדמוגרפית הטבעית (4.2% בשנה) ב-~30%.
+</div>
+
+<div class="source">מקורות: IDI — אוגדן נתונים ועובדות על גיוס חרדים, יולי 2025 · אתר התקציב הפתוח open.budget.gov.il</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+const textColor = isDark ? '#9c9a92' : '#6b6a64';
+const isMobile = window.innerWidth < 480;
+
+const years = [2009, 2011, 2013, 2015, 2017, 2019, 2021, 2023];
+const enrolled = [null, null, 91070, 106788, 117051, 128937, 138367, 157881];
+const budget = [1.17, 1.35, 1.50, 1.65, 1.80, 2.10, 2.40, 3.00];
+
+const govPlugin = {
+  id: 'govBands',
+  beforeDraw(chart) {
+    const {ctx, chartArea:{left,right,top,bottom}, scales:{x}} = chart;
+    const bands = [
+      {from:2009, to:2013, label:'ממשלה 32', color:'rgba(127,119,221,0.07)'},
+      {from:2013, to:2015, label:'מ׳ 33 (ללא חרדים)', color:'rgba(99,153,34,0.09)'},
+      {from:2015, to:2020, label:'ממשלה 34', color:'rgba(127,119,221,0.07)'},
+      {from:2020, to:2021, label:'מ׳ 35', color:'rgba(186,117,23,0.07)'},
+      {from:2022, to:2024, label:'ממשלה 37', color:'rgba(186,117,23,0.13)'},
+    ];
+    ctx.save();
+    bands.forEach(b => {
+      const x1 = x.getPixelForValue(b.from);
+      const x2 = x.getPixelForValue(b.to);
+      ctx.fillStyle = b.color;
+      ctx.fillRect(x1, top, x2-x1, bottom-top);
+      const labelSize = isMobile ? 9 : 11;
+      ctx.font = `500 ${labelSize}px 'Assistant', sans-serif`;
+      ctx.fillStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.28)';
+      ctx.textAlign = 'center';
+      ctx.fillText(b.label, (x1+x2)/2, top+13);
+    });
+    ctx.restore();
+  }
+};
+
+const ctx = document.getElementById('dualChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  plugins: [govPlugin],
+  data: {
+    labels: years,
+    datasets: [
+      {
+        label: 'מספר תלמידים ואברכים',
+        data: enrolled,
+        yAxisID: 'yRight',
+        borderColor: '#185FA5',
+        backgroundColor: 'rgba(24,95,165,0.08)',
+        borderWidth: 2.5,
+        pointRadius: isMobile ? 4 : 5,
+        pointBackgroundColor: '#185FA5',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5,
+        tension: 0.35,
+        fill: true,
+        spanGaps: false,
+      },
+      {
+        label: 'תקציב ישיבות (מיליארד ₪)',
+        data: budget,
+        yAxisID: 'yLeft',
+        borderColor: '#BA7517',
+        backgroundColor: 'rgba(186,117,23,0.06)',
+        borderWidth: 2.5,
+        pointRadius: isMobile ? 4 : 5,
+        pointBackgroundColor: '#BA7517',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5,
+        tension: 0.35,
+        fill: true,
+        borderDash: [6,3],
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        rtl: true,
+        titleFont: { family: "'Assistant', sans-serif", size: isMobile ? 12 : 14 },
+        bodyFont:  { family: "'Assistant', sans-serif", size: isMobile ? 11 : 13 },
+        callbacks: {
+          label(ctx) {
+            if(ctx.dataset.yAxisID === 'yRight') {
+              return ` רשומים בישיבות: ${ctx.parsed.y?.toLocaleString('he-IL')}`;
+            } else {
+              return ` תקציב: ${ctx.parsed.y?.toFixed(2)} מיליארד ₪`;
+            }
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: gridColor },
+        ticks: {
+          color: textColor,
+          font: { family: "'Assistant', sans-serif", size: isMobile ? 11 : 13 },
+          maxRotation: 0,
+        }
+      },
+      yRight: {
+        type: 'linear',
+        position: 'right',
+        min: 0,
+        max: 180000,
+        grid: { color: gridColor },
+        ticks: {
+          color: '#185FA5',
+          font: { family: "'Assistant', sans-serif", size: isMobile ? 10 : 12 },
+          callback: v => v === 0 ? '0' : (v/1000).toFixed(0)+'K',
+          maxTicksLimit: 6,
+        },
+        title: {
+          display: !isMobile,
+          text: 'תלמידים ואברכים',
+          color: '#185FA5',
+          font: { family: "'Assistant', sans-serif", size: 12 }
+        }
+      },
+      yLeft: {
+        type: 'linear',
+        position: 'left',
+        min: 0,
+        max: 4,
+        grid: { display: false },
+        ticks: {
+          color: '#BA7517',
+          font: { family: "'Assistant', sans-serif", size: isMobile ? 10 : 12 },
+          callback: v => v > 0 ? '₪' + v.toFixed(1) + 'B' : '0',
+          maxTicksLimit: 6,
+        },
+        title: {
+          display: !isMobile,
+          text: 'תקציב (מיליארד ₪)',
+          color: '#BA7517',
+          font: { family: "'Assistant', sans-serif", size: 12 }
+        }
+      }
+    }
+  }
+});
+</script>
