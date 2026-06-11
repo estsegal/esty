@@ -1,0 +1,298 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.wrap{font-family:'Assistant',sans-serif;padding:16px 0 32px;direction:rtl;max-width:860px;margin:0 auto}
+.chart-title{font-size:22px;font-weight:600;color:#1a1a1a;margin-bottom:6px}
+.chart-sub{font-size:16px;color:#555;margin-bottom:16px;line-height:1.6}
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px;align-items:center}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:16px;color:#555;cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;user-select:none}
+.legend-item:hover{background:rgba(0,0,0,0.05)}
+.legend-item.muted{opacity:.35}
+.chart-wrap{position:relative;width:100%;padding-bottom:50%}
+.chart-wrap canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important}
+.stat-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.stat-card{flex:1;min-width:130px;background:#f5f5f5;border-radius:8px;padding:11px 13px;transition:transform .15s,box-shadow .15s;cursor:default}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.stat-num{font-size:24px;font-weight:600;margin-bottom:3px}
+.stat-label{font-size:14px;color:#666;line-height:1.4}
+.gap-box{background:#FCEBEB;border:.5px solid #F7C1C1;border-radius:8px;padding:12px 16px;margin-top:14px;font-size:16px;color:#791F1F;line-height:1.7}
+.gap-box strong{font-size:16px}
+.source{font-size:14px;color:#999;margin-top:14px;line-height:1.6}
+.year-tooltip{position:absolute;bottom:calc(100% + 8px);background:#1a1a1a;color:#fff;border-radius:7px;padding:8px 12px;font-size:13px;font-family:'Assistant',sans-serif;direction:rtl;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;transform:translateX(50%)}
+.year-tooltip::after{content:'';position:absolute;top:100%;right:50%;transform:translateX(50%);border:5px solid transparent;border-top-color:#1a1a1a}
+@media(max-width:520px){
+  .chart-title{font-size:19px}
+  .chart-sub{font-size:15px}
+  .chart-wrap{padding-bottom:70%}
+  .legend-item{font-size:15px}
+  .stat-num{font-size:20px}
+  .stat-label{font-size:13px}
+  .gap-box{font-size:15px}
+}
+@media(prefers-color-scheme:dark){
+  .chart-title{color:#eee}
+  .chart-sub{color:#aaa}
+  .legend-item{color:#aaa}
+  .legend-item:hover{background:rgba(255,255,255,0.07)}
+  .stat-card{background:#1a1a1a}
+  .stat-label{color:#888}
+  .source{color:#666}
+  .year-tooltip{background:#fff;color:#111}
+  .year-tooltip::after{border-top-color:#fff}
+}
+</style>
+
+<div class="wrap">
+<h2 class="sr-only">גרף שלושה קווים: גידול בפועל מול צמיחה דמוגרפית צפויה מול תקציב ישיבות, 2013–2023</h2>
+
+<div class="chart-title">הגידול בישיבות בהתאם לגידול בתקציב (ועולה על הגידול הדמוגרפי)</div>
+<div class="chart-sub">כמדד להתחלת הגרף קבענו 100 לשנת 2013 · לחצו על מקרא להסתרת/הצגת קו</div>
+
+<div class="legend" id="legend">
+  <span class="legend-item" data-idx="0" title="לחצו להסתיר/להציג">
+    <svg width="26" height="12" style="flex-shrink:0"><line x1="0" y1="6" x2="26" y2="6" stroke="#185FA5" stroke-width="3"/></svg>
+    גידול בפועל
+  </span>
+  <span class="legend-item" data-idx="1" title="לחצו להסתיר/להציג">
+    <svg width="26" height="12" style="flex-shrink:0"><line x1="0" y1="6" x2="26" y2="6" stroke="#185FA5" stroke-width="2.5" stroke-dasharray="5,4"/></svg>
+    צמיחה דמוגרפית צפויה (4.2%/שנה)
+  </span>
+  <span class="legend-item" data-idx="2" title="לחצו להסתיר/להציג">
+    <svg width="26" height="12" style="flex-shrink:0"><line x1="0" y1="6" x2="26" y2="6" stroke="#BA7517" stroke-width="2.5"/></svg>
+    תקציב ישיבות (מנורמל)
+  </span>
+</div>
+
+<div class="chart-wrap" id="chartWrap">
+  <canvas id="triChart"></canvas>
+  <div class="year-tooltip" id="yearTooltip"></div>
+</div>
+
+<div class="stat-row">
+  <div class="stat-card">
+    <div class="stat-num" style="color:#185FA5">+73%</div>
+    <div class="stat-label">גידול בפועל ברשומים בישיבות 2013–2023</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:#185FA5">+51%</div>
+    <div class="stat-label">גידול דמוגרפי צפוי בלבד (4.2%/שנה × 10 שנים)</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:#A32D2D">+22%</div>
+    <div class="stat-label">קצב עודף — לא מוסבר ע"י דמוגרפיה בלבד</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:#BA7517">+100%</div>
+    <div class="stat-label">גידול בתקציב הישיבות באותה תקופה</div>
+  </div>
+</div>
+
+<div class="gap-box">
+  <strong>הפער המרכזי:</strong> אם הגידול היה דמוגרפי בלבד — היינו מצפים ל-~138,000 רשומים ב-2023.
+  בפועל: <strong>157,881</strong>. הפרש של כ-<strong>20,000 איש</strong> — שהתקצוב הממשלתי הגדל עשוי להסביר חלקו.
+</div>
+
+<div class="source">
+  מקורות: IDI — אוגדן נתונים ועובדות על גיוס חרדים, יולי 2025 · אתר התקציב הפתוח open.budget.gov.il<br>
+  הערה: נתוני התקציב מנורמלו למדד 100 ב-2013 לצורך השוואה. תקציב 2013: ~1.5 מיליארד ₪; 2023: ~3.0 מיליארד ₪.
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+const textColor = isDark ? '#9c9a92' : '#6b6a64';
+const isMobile = window.innerWidth < 520;
+
+const actualRaw = [91070, 106788, 117051, 128937, 138367, 157881];
+const base = actualRaw[0];
+const actual = actualRaw.map(v => Math.round(v / base * 100));
+const demog = [0,2,4,6,8,10].map(y => Math.round(Math.pow(1.042, y) * 100));
+const budget = [100, 110, 120, 140, 160, 200];
+const years = ['2013','2015','2017','2019','2021','2023'];
+const rawEnrolled = [91070, 106788, 117051, 128937, 138367, 157881];
+
+// ===== Plugin: gap fill + labels =====
+const gapPlugin = {
+  id: 'gapFill',
+  beforeDatasetsDraw(chart) {
+    const {ctx, chartArea:{top}, scales:{x,y}} = chart;
+    if(chart.getDatasetMeta(0).hidden || chart.getDatasetMeta(1).hidden) return;
+
+    ctx.save();
+    ctx.beginPath();
+    const pts1 = actual.map((v,i) => ({x: x.getPixelForValue(i), y: y.getPixelForValue(v)}));
+    const pts2 = demog.map((v,i)  => ({x: x.getPixelForValue(i), y: y.getPixelForValue(v)}));
+    ctx.moveTo(pts1[0].x, pts1[0].y);
+    for(let i=0;i<pts1.length-1;i++){
+      const cp1x=pts1[i].x+(pts1[i+1].x-pts1[i].x)/3, cp1y=pts1[i].y+(pts1[i+1].y-pts1[i].y)/3;
+      const cp2x=pts1[i].x+2*(pts1[i+1].x-pts1[i].x)/3, cp2y=pts1[i].y+2*(pts1[i+1].y-pts1[i].y)/3;
+      ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,pts1[i+1].x,pts1[i+1].y);
+    }
+    for(let i=pts2.length-1;i>=1;i--){
+      const cp1x=pts2[i].x-(pts2[i].x-pts2[i-1].x)/3, cp1y=pts2[i].y-(pts2[i].y-pts2[i-1].y)/3;
+      const cp2x=pts2[i].x-2*(pts2[i].x-pts2[i-1].x)/3, cp2y=pts2[i].y-2*(pts2[i].y-pts2[i-1].y)/3;
+      ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,pts2[i-1].x,pts2[i-1].y);
+    }
+    ctx.closePath();
+    ctx.fillStyle='rgba(24,95,165,0.10)';
+    ctx.fill();
+    ctx.restore();
+
+    // פער label
+    const la = pts1[pts1.length-1], ld = pts2[pts2.length-1];
+    const midY = (la.y + ld.y) / 2, midX = la.x - 52;
+    ctx.save();
+    ctx.font=`600 ${isMobile?10:11}px 'Assistant',sans-serif`;
+    ctx.fillStyle=isDark?'rgba(144,177,222,0.9)':'rgba(24,95,165,0.72)';
+    ctx.textAlign='center';
+    ctx.fillText('פער',midX,midY-2);
+    ctx.fillText('~20,000',midX,midY+12);
+    ctx.restore();
+
+    // gov labels
+    const govs=[
+      {from:0,to:1,label:'מ׳ 33'},
+      {from:1,to:3,label:'ממשלה 34'},
+      {from:3,to:4,label:'מ׳ 35'},
+      {from:4,to:5,label:'ממשלה 37'},
+    ];
+    ctx.save();
+    govs.forEach(g=>{
+      const x1=x.getPixelForValue(g.from), x2=x.getPixelForValue(g.to);
+      ctx.font=`500 ${isMobile?8:9}px 'Assistant',sans-serif`;
+      ctx.fillStyle=isDark?'rgba(255,255,255,0.22)':'rgba(0,0,0,0.22)';
+      ctx.textAlign='center';
+      ctx.fillText(g.label,(x1+x2)/2,top+12);
+    });
+    ctx.restore();
+  }
+};
+
+const chartEl = document.getElementById('triChart');
+const myChart = new Chart(chartEl, {
+  type: 'line',
+  plugins: [gapPlugin],
+  data: {
+    labels: years,
+    datasets: [
+      {
+        label: 'גידול בפועל',
+        data: actual,
+        borderColor: '#185FA5',
+        backgroundColor: 'transparent',
+        borderWidth: 3,
+        pointRadius: isMobile ? 4 : 6,
+        pointHoverRadius: isMobile ? 6 : 8,
+        pointBackgroundColor: '#185FA5',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        tension: 0.3,
+        yAxisID: 'y',
+        order: 1,
+      },
+      {
+        label: 'צמיחה דמוגרפית צפויה',
+        data: demog,
+        borderColor: '#185FA5',
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderDash: [5,4],
+        pointRadius: isMobile ? 3 : 5,
+        pointHoverRadius: isMobile ? 5 : 7,
+        pointBackgroundColor: '#185FA5',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5,
+        tension: 0.3,
+        yAxisID: 'y',
+        order: 2,
+      },
+      {
+        label: 'תקציב ישיבות (מנורמל)',
+        data: budget,
+        borderColor: '#BA7517',
+        backgroundColor: 'transparent',
+        borderWidth: 2.5,
+        pointRadius: isMobile ? 3 : 5,
+        pointHoverRadius: isMobile ? 5 : 7,
+        pointBackgroundColor: '#BA7517',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5,
+        tension: 0.3,
+        yAxisID: 'y',
+        order: 3,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        rtl: true,
+        titleFont: { family: "'Assistant', sans-serif", size: isMobile ? 13 : 15 },
+        bodyFont:  { family: "'Assistant', sans-serif", size: isMobile ? 12 : 14 },
+        padding: 10,
+        callbacks: {
+          title(items) { return 'שנת ' + items[0].label; },
+          label(item) {
+            if(item.datasetIndex === 0) {
+              const enrolled = rawEnrolled[item.dataIndex];
+              return ` גידול בפועל: ${item.parsed.y} (${enrolled?.toLocaleString('he-IL')} תלמידים)`;
+            }
+            if(item.datasetIndex === 1) {
+              const exp = Math.round(rawEnrolled[0] * item.parsed.y / 100);
+              return ` צמיחה דמוגרפית צפויה: ${item.parsed.y} (~${exp.toLocaleString('he-IL')} תלמידים)`;
+            }
+            return ` תקציב ישיבות (מנורמל): ${item.parsed.y}`;
+          },
+          afterBody(items) {
+            const a = items[0]?.parsed.y, d = items[1]?.parsed.y;
+            if(a && d && a > d) {
+              const gap = Math.round((a - d) / 100 * rawEnrolled[0]);
+              return ['', `פער מעל הצמיחה הדמוגרפית: +${Math.round(a-d)} נקודות (~${gap.toLocaleString('he-IL')} איש)`];
+            }
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: gridColor },
+        ticks: { color: textColor, font: { family: "'Assistant', sans-serif", size: isMobile ? 13 : 15 } }
+      },
+      y: {
+        min: 90, max: 220,
+        grid: { color: gridColor },
+        ticks: {
+          color: textColor,
+          font: { family: "'Assistant', sans-serif", size: isMobile ? 12 : 14 },
+          callback: v => v + '',
+          maxTicksLimit: 7,
+        },
+        title: {
+          display: !isMobile,
+          text: 'מדד (2013 = 100)',
+          color: textColor,
+          font: { family: "'Assistant', sans-serif", size: 14 }
+        }
+      }
+    }
+  }
+});
+
+// ===== לחיצה על מקרא להסתרת/הצגת קו =====
+document.querySelectorAll('.legend-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const idx = parseInt(item.dataset.idx);
+    const meta = myChart.getDatasetMeta(idx);
+    meta.hidden = !meta.hidden;
+    item.classList.toggle('muted', meta.hidden);
+    myChart.update();
+  });
+});
+</script>
