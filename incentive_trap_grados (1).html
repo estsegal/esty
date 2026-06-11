@@ -4,8 +4,7 @@
 h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 .wrap{font-family:'Assistant',sans-serif;padding:16px 0 36px;direction:rtl;max-width:860px;margin:0 auto}
 .chart-title{font-size:22px;font-weight:600;color:#1a1a1a;margin-bottom:6px}
-.chart-sub{font-size:15px;color:#555;margin-bottom:5px;line-height:1.6}
-.source-tag{font-size:12px;color:#888;margin-bottom:22px}
+.chart-sub{font-size:15px;color:#555;margin-bottom:22px;line-height:1.6;text-align:center}
 
 /* ===== פס הפסדים ===== */
 .loss-panel{border-radius:12px;padding:18px 18px 14px;margin-bottom:22px;border:.5px solid #F7C1C1;background:#FCEBEB}
@@ -34,7 +33,7 @@ h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,
 .benefit-track{flex:1;height:24px;border-radius:5px;background:rgba(59,109,17,0.12);position:relative;overflow:hidden}
 .benefit-fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
 .benefit-amount{font-size:14px;font-weight:600;color:#27500A;width:70px;flex-shrink:0;text-align:left}
-.benefit-tooltip-inline{font-size:12px;color:#3B6D11;opacity:0;max-height:0;overflow:hidden;transition:opacity .2s,max-height .2s;line-height:1.4;padding-right:170px}
+.benefit-tooltip-inline{font-size:12px;color:#3B6D11;opacity:0;max-height:0;overflow:hidden;transition:opacity .2s,max-height .2s;line-height:1.4;padding-right:10px}
 .benefits-total{display:flex;justify-content:space-between;align-items:center;padding:10px 10px 0;border-top:.5px solid #C0DD97;margin-top:6px}
 .benefits-total-label{font-size:15px;font-weight:600;color:#27500A}
 .benefits-total-val{font-size:17px;font-weight:600;color:#27500A}
@@ -66,14 +65,26 @@ h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,
   .life-diff{width:80px;font-size:12px}
   .lifetime-note{font-size:12px}
 }
+
+/* מקרא מובייל */
+.mobile-legend{display:none;flex-direction:column;gap:8px;margin-top:14px}
+.mobile-legend-row{display:flex;align-items:center;justify-content:space-between;font-size:14px}
+.mobile-legend-left{display:flex;align-items:center;gap:8px}
+.mobile-legend-dot{width:13px;height:13px;border-radius:3px;flex-shrink:0}
+.mobile-legend-label{color:#555}
+.mobile-legend-amount{font-weight:600;color:#791F1F}
+@media(max-width:480px){
+  .loss-seg-label{display:none !important}
+  .loss-seg-amount{display:none !important}
+  .mobile-legend{display:flex !important}
+}
 </style>
 
 <div class="wrap">
 <h2 class="sr-only">מלכודת התמריצים: מה גבר חרדי מאבד ביציאה לעבוד, על פי מסמך גרדוס, משרד האוצר 2024</h2>
 
-<div class="chart-title">מלכודת התמריצים</div>
 <div class="chart-sub">מה גבר חרדי מאבד ביציאה לעבודה — לחצו על כל רכיב לפרטים</div>
-<div class="source-tag">כל הנתונים: יואב גרדוס, ראש אגף תקציבים, משרד האוצר, 24.3.2024 · תרשים 11 במסמך</div>
+
 
 <!-- פס הפסדים -->
 <div class="loss-panel">
@@ -106,16 +117,9 @@ h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,
     </div>
   </div>
 
-  <div class="loss-tooltip empty" id="lossTooltip">העבירו את העכבר על רכיב לפרטים ←</div>
 
-  <div class="loss-legend">
-    <span class="loss-dot-row" data-key="avrech"><span class="loss-dot" style="background:#A32D2D"></span>קצבת אברך — 1,271 ₪</span>
-    <span class="loss-dot-row" data-key="bituach"><span class="loss-dot" style="background:#C04040"></span>ביטוח לאומי — 1,012 ₪</span>
-    <span class="loss-dot-row" data-key="maon"><span class="loss-dot" style="background:#D05050"></span>סבסוד מעונות — 890 ₪</span>
-    <span class="loss-dot-row" data-key="yeshiva"><span class="loss-dot" style="background:#E06060"></span>תוספת ישיבה — 850 ₪</span>
-    <span class="loss-dot-row" data-key="arnona"><span class="loss-dot" style="background:#E87070"></span>הנחת ארנונה — 673 ₪</span>
-    <span class="loss-dot-row" data-key="other"><span class="loss-dot" style="background:#F08080"></span>שאר הטבות — 745 ₪</span>
-  </div>
+
+
 </div>
 
 <!-- טבלת הטבות -->
@@ -209,18 +213,10 @@ const tooltips = {
   other: { title: "שאר הטבות — 745 ₪/חודש", body: "כולל: סיוע בשכר דירה, הכנסות ממשקי בית אחרים, הטבות נוספות — כולם נשחקים עם עלייה בהכנסה." }
 };
 
-const lossTooltip = document.getElementById('lossTooltip');
-
 function showTooltip(key) {
-  if (!tooltips[key]) return;
-  const t = tooltips[key];
-  lossTooltip.classList.remove('empty');
-  lossTooltip.innerHTML = `<strong>${t.title}</strong>${t.body}`;
   document.querySelectorAll('.loss-seg').forEach(s => s.classList.toggle('active', s.dataset.key === key));
 }
 function clearTooltip() {
-  lossTooltip.classList.add('empty');
-  lossTooltip.innerHTML = 'העבירו את העכבר על רכיב לפרטים ←';
   document.querySelectorAll('.loss-seg').forEach(s => s.classList.remove('active'));
 }
 
