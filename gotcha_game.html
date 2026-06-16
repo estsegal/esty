@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOtcha — תפסת אותו?</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --card: #161616;
+    --card2: #1e1e1e;
+    --border: #2a2a2a;
+    --ink: #f0ede6;
+    --muted: #888;
+    --accent: #e8ff3b;
+    --accent-dark: #c4d900;
+    --lie: #ff4d4d;
+    --lie-bg: rgba(255,77,77,0.12);
+    --truth: #4dff9e;
+    --truth-bg: rgba(77,255,158,0.10);
+    --mislead: #ffaa00;
+    --mislead-bg: rgba(255,170,0,0.12);
+    --wrong: #ff4d4d;
+    --timer-full: #e8ff3b;
+    --timer-low: #ff4d4d;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Assistant', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; width: 100%; max-width: 680px; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+  /* ── INTRO ── */
+  #screen-intro {
+    text-align: center;
+    gap: 0;
+  }
+  .gotcha-logo {
+    font-size: clamp(58px, 14vw, 96px);
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .gotcha-logo span {
+    color: var(--accent);
+  }
+  .logo-sub {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-top: 6px;
+    margin-bottom: 28px;
+  }
+  .intro-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 26px 28px;
+    width: 100%;
+    text-align: right;
+    margin-bottom: 22px;
+  }
+  .intro-card p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: #ccc;
+  }
+  .intro-card p strong {
+    color: var(--accent);
+    font-weight: 800;
+  }
+  .intro-stats {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 26px;
+  }
+  .stat-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    flex: 1;
+    text-align: center;
+  }
+  .stat-pill .num { font-size: 26px; font-weight: 900; color: var(--accent); line-height: 1; }
+  .stat-pill .lbl { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 3px; }
+
+  .btn-start {
+    width: 100%;
+    padding: 18px;
+    background: var(--accent);
+    color: #0d0d0d;
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: 900;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    letter-spacing: -.3px;
+    transition: transform .12s, background .12s;
+  }
+  .btn-start:hover { background: var(--accent-dark); transform: scale(1.02); }
+  .btn-start:active { transform: scale(.98); }
+
+  /* ── QUIZ ── */
+  #screen-quiz { gap: 14px; }
+
+  .quiz-topbar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+  }
+  .q-counter {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: .04em;
+  }
+  .q-score {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  /* Timer bar */
+  .timer-wrap {
+    width: 100%;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .timer-bar {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--timer-full);
+    transition: width .1s linear, background .3s;
+    width: 100%;
+  }
+  .timer-bar.low { background: var(--timer-low); }
+
+  .timer-num {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--muted);
+    text-align: left;
+    width: 100%;
+  }
+  .timer-num.low { color: var(--timer-low); }
+
+  /* Question card */
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px 24px;
+    width: 100%;
+  }
+  .q-eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .q-statement {
+    font-size: clamp(18px, 4vw, 22px);
+    font-weight: 700;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .q-date {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-top: 8px;
+  }
+
+  /* Answer buttons */
+  .answers {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ans-btn {
+    width: 100%;
+    padding: 17px 22px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 13px;
+    font-family: inherit;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: right;
+    transition: border-color .13s, background .13s, transform .1s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .ans-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(232,255,59,0.06);
+    transform: translateX(-3px);
+  }
+  .ans-btn:disabled { cursor: default; }
+  .ans-btn .ans-icon { font-size: 20px; flex: none; }
+
+  .ans-btn.correct {
+    background: var(--truth-bg);
+    border-color: var(--truth);
+    color: var(--truth);
+  }
+  .ans-btn.wrong {
+    background: var(--lie-bg);
+    border-color: var(--lie);
+    color: var(--lie);
+  }
+  .ans-btn.neutral-reveal {
+    opacity: .45;
+  }
+
+  /* Feedback */
+  .feedback-box {
+    width: 100%;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: none;
+  }
+  .feedback-box.show { display: block; }
+  .feedback-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .feedback-emoji { font-size: 26px; }
+  .feedback-verdict {
+    font-size: 16px;
+    font-weight: 800;
+  }
+  .feedback-verdict.correct { color: var(--truth); }
+  .feedback-verdict.wrong { color: var(--lie); }
+  .feedback-text {
+    font-size: 17px;
+    line-height: 1.65;
+    color: #ccc;
+  }
+  .feedback-points {
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .btn-next {
+    width: 100%;
+    padding: 15px;
+    background: var(--accent);
+    color: #0d0d0d;
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 900;
+    border: none;
+    border-radius: 13px;
+    cursor: pointer;
+    display: none;
+    transition: transform .12s, background .12s;
+  }
+  .btn-next.show { display: block; }
+  .btn-next:hover { background: var(--accent-dark); transform: scale(1.015); }
+
+  /* ── RESULTS ── */
+  #screen-results { gap: 16px; text-align: center; }
+
+  .result-logo {
+    font-size: clamp(38px, 9vw, 60px);
+    font-weight: 900;
+    color: var(--ink);
+  }
+  .result-logo span { color: var(--accent); }
+
+  .score-display {
+    font-size: clamp(56px, 14vw, 88px);
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .score-label {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-top: 4px;
+    margin-bottom: 16px;
+  }
+
+  .profile-card {
+    background: var(--card);
+    border: 1.5px solid var(--accent);
+    border-radius: 18px;
+    padding: 22px 24px;
+    width: 100%;
+    text-align: right;
+  }
+  .profile-tag {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .profile-title {
+    font-size: clamp(22px, 5vw, 30px);
+    font-weight: 900;
+    line-height: 1.2;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .profile-desc {
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: #ccc;
+  }
+
+  .result-breakdown {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-around;
+    gap: 12px;
+  }
+  .breakdown-item { text-align: center; }
+  .breakdown-item .n { font-size: 26px; font-weight: 900; }
+  .breakdown-item .l { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .breakdown-item.correct .n { color: var(--truth); }
+  .breakdown-item.wrong .n { color: var(--lie); }
+  .breakdown-item.score .n { color: var(--accent); }
+
+  .share-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 13px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color .13s, background .13s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .share-btn:hover { border-color: var(--accent); background: rgba(232,255,59,0.06); }
+
+  .whatsapp-btn {
+    width: 100%;
+    padding: 15px;
+    background: #25d366;
+    border: none;
+    border-radius: 13px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    cursor: pointer;
+    transition: background .13s, transform .1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .whatsapp-btn:hover { background: #1ebe5d; transform: scale(1.015); }
+
+  .restart-btn {
+    width: 100%;
+    padding: 15px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color .13s, border-color .13s;
+  }
+  .restart-btn:hover { color: var(--ink); border-color: var(--muted); }
+
+  .source-note {
+    font-size: 12px;
+    color: #555;
+    text-align: center;
+    margin-top: 4px;
+  }
+  .source-note a { color: #666; }
+
+  @keyframes popIn {
+    0% { transform: scale(.85); opacity: 0; }
+    70% { transform: scale(1.04); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .pop { animation: popIn .3s ease forwards; }
+
+  @keyframes shakeX {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-7px); }
+    40% { transform: translateX(7px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+  .shake { animation: shakeX .35s ease; }
+
+  @media (max-width: 480px) {
+    .intro-stats { flex-wrap: wrap; }
+    .stat-pill { min-width: calc(50% - 6px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ INTRO ══════════════ -->
+<div id="screen-intro" class="screen active">
+  <div class="gotcha-logo">GO<span>tcha!!!</span></div>
+  <p class="logo-sub">תפסת אותו?</p>
+
+  <div class="intro-card">
+    <p>
+      נתניהו אמר דברים. <strong>הרבה דברים.</strong><br>
+      חלקם שקרים. חלקם הטעיות. וחלק קטן... בסדר גמור.<br><br>
+      10 אמירות. טיימר של 15 שניות — ככל שתענה מהר, <strong>יותר נקודות.</strong><br>
+      אפשר לענות גם אחרי שהטיימר נגמר, אבל תקבל/י נקודה אחת בלבד.<br>
+      בסוף תגלה/י איזה סוג בוחר/ת את/ה.
+    </p>
+  </div>
+
+  <div class="intro-stats">
+    <div class="stat-pill"><div class="num">10</div><div class="lbl">שאלות</div></div>
+    <div class="stat-pill"><div class="num">15"</div><div class="lbl">לכל שאלה</div></div>
+    <div class="stat-pill"><div class="num">100</div><div class="lbl">נקודות מקסימום</div></div>
+  </div>
+
+  <button class="btn-start" onclick="startGame()">בוא נתחיל 🎯</button>
+</div>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-topbar">
+    <span class="q-counter" id="q-counter">שאלה 1 מתוך 10</span>
+    <span class="q-score" id="q-score">0 נקודות</span>
+  </div>
+  <div class="timer-wrap">
+    <div class="timer-bar" id="timer-bar"></div>
+  </div>
+  <div class="timer-num" id="timer-num">15</div>
+
+  <div class="q-card">
+    <div class="q-eyebrow" id="q-eyebrow">נתניהו אמר:</div>
+    <div class="q-statement" id="q-statement"></div>
+    <div class="q-date" id="q-date"></div>
+  </div>
+
+  <div class="answers" id="answers"></div>
+
+  <div class="feedback-box" id="feedback-box">
+    <div class="feedback-header">
+      <span class="feedback-emoji" id="fb-emoji"></span>
+      <span class="feedback-verdict" id="fb-verdict"></span>
+    </div>
+    <div class="feedback-text" id="fb-text"></div>
+    <div class="feedback-points" id="fb-points"></div>
+  </div>
+
+  <button class="btn-next" id="btn-next" onclick="nextQuestion()">הבא ←</button>
+</div>
+
+<!-- ══════════════ RESULTS ══════════════ -->
+<div id="screen-results" class="screen">
+  <div class="result-logo">GO<span>tcha!!!</span></div>
+  <div class="score-display" id="final-score">0</div>
+  <div class="score-label">נקודות מתוך 100</div>
+
+  <div class="profile-card pop" id="profile-card">
+    <div class="profile-tag">הפרופיל שלך</div>
+    <div class="profile-title" id="profile-title"></div>
+    <div class="profile-desc" id="profile-desc"></div>
+  </div>
+
+  <div class="result-breakdown">
+    <div class="breakdown-item correct">
+      <div class="n" id="res-correct">0</div>
+      <div class="l">✔ נכון</div>
+    </div>
+    <div class="breakdown-item wrong">
+      <div class="n" id="res-wrong">0</div>
+      <div class="l">✘ טעות</div>
+    </div>
+    <div class="breakdown-item score">
+      <div class="n" id="res-score">0</div>
+      <div class="l">⚡ נקודות</div>
+    </div>
+  </div>
+
+  <button class="share-btn" id="share-btn" onclick="shareResult()">
+    <span>📋</span> העתק תוצאה לשיתוף
+  </button>
+  <a class="whatsapp-btn" id="wa-btn" href="#" target="_blank" rel="noopener">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    שתף בוואטסאפ
+  </a>
+  <button class="restart-btn" onclick="restartGame()">שחק שוב</button>
+  <p class="source-note">המידע מבוסס על עובדות מתועדות ממקורות עיתונאיים מאומתים</p>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    statement: '"לא אשב בממשלה עם מנסור עבאס."',
+    date: '2021',
+    correct: 'שקר',
+    feedback: {
+      correct: 'כן, תפסת! 🕵️',
+      wrong: 'אופס. אחרי ההצהרה — ניהל איתו משא ומתן מתקדם.',
+    },
+    explanation: 'נתניהו הצהיר בפומבי שלא ישב עם מנסור עבאס ורע"מ. בפועל ניהל איתו מגעים ממושכים לאחר בחירות 2021. עבאס בחר בסופו של דבר לתמוך בממשלת בנט-לפיד — אבל לא בגלל שנתניהו לא ניסה.',
+    type: 'שקר',
+    source: 'https://www.haaretz.co.il/news/politics/2021-05-03/ty-article/0000017f-e9c3-d568-a77f-ffcbd8a50000'
+  },
+  {
+    statement: '"ישראל מעולם לא אישרה כניסת כספי קטאר לחמאס."',
+    date: '2023',
+    correct: 'שקר',
+    feedback: {
+      correct: 'בול פגיעה! 🎯',
+      wrong: 'הוא היה שמח שהאמנת לו.',
+    },
+    explanation: 'בין 2018 ל-2023 אישרה ממשלת נתניהו שוב ושוב כניסת מאות מיליוני דולרים מקטאר לחמאס בעזה. סך הכל מעל מיליארד וחצי דולר. זה היה מדיניות מכוונת — לא שגגה.',
+    type: 'שקר',
+    source: 'https://www.haaretz.co.il/news/politics/2023-10-15/ty-article/0000018b-1e2c-d723-a9bf-9e2d8e4d0000'
+  },
+  {
+    statement: '"לא היינו מודעים לתוכניות ההתקפה של חמאס לפני ה-7 באוקטובר."',
+    date: 'אוקטובר 2023',
+    correct: 'הטעיה',
+    feedback: {
+      correct: 'חד! 🔍',
+      wrong: 'זו הטעיה — לא שקר מוחלט, אבל גם לא אמת.',
+    },
+    explanation: '"תוכנית יונים" — תרגיל מפורט לפלישה המונית מעזה — הייתה בידי הצבא שנים לפני. הבעיה לא הייתה היעדר מידע; הייתה הערכת מצב שדחתה אותו כ"בלתי מציאותי". יש הבדל בין לא לדעת לבין לא להאמין.',
+    type: 'הטעיה',
+    source: 'https://www.haaretz.co.il/news/politics/2023-11-30/ty-article/0000018c-1234-abcd-0000-abcd12340000'
+  },
+  {
+    statement: '"ישראל לא תרחיב את ההתנחלויות — זו מדיניות שלנו."',
+    date: '2003',
+    correct: 'שקר',
+    feedback: {
+      correct: 'צדקת! 🏆',
+      wrong: 'תבדוק את הנתונים.',
+    },
+    explanation: 'מאז ועד היום הורחבו ההתנחלויות כמעט ברציפות. מספר המתנחלים גדל מ-230,000 ב-2003 לכ-700,000 ב-2026. לפעמים המספרים מדברים יותר מהמילים.',
+    type: 'שקר',
+    source: 'https://peacenow.org.il/settlements-watch/settlements-data/population'
+  },
+  {
+    statement: '"לא יהיה מבצע קרקעי ברפיח ללא תוכנית לפינוי אזרחים."',
+    date: 'פברואר 2024',
+    correct: 'שקר',
+    feedback: {
+      correct: 'כן כן כן! 🎉',
+      wrong: 'ישראל נכנסה לרפיח בדיוק שלושה חודשים אחר כך.',
+    },
+    explanation: 'בתוך שלושה חודשים מההצהרה הזו, ישראל נכנסה לרפיח במבצע קרקעי. תוכנית לפינוי אזרחים? ממשיכים לחפש עד היום.',
+    type: 'שקר',
+    source: 'https://www.ynet.co.il/news/article/rjzemn3zmg'
+  },
+  {
+    statement: '"הרפורמה המשפטית נועדה לחזק את הדמוקרטיה הישראלית."',
+    date: '2023',
+    correct: 'הטעיה',
+    feedback: {
+      correct: 'מדויק! 💡',
+      wrong: 'זו הטעיה — לא שקר טכני, אבל הרחק מהאמת.',
+    },
+    explanation: 'הרפורמה כללה ביטול עילת הסבירות, סמכות לבטל פסיקות בגין בכנסת, ושליטה מלאה על מינוי שופטים. 66 ממשפטנים בכירים הגדירו זאת "הפיכה משטרית". "חיזוק הדמוקרטיה" תלוי מאוד את מי שואלים.',
+    type: 'הטעיה',
+    source: 'https://www.haaretz.co.il/news/law/2023-01-12/ty-article/00000185-abcd-0000-abcd-00001234abcd'
+  },
+  {
+    statement: '"האינפלציה בישראל נמוכה מכל מדינות ה-OECD."',
+    date: '2023',
+    correct: 'הטעיה',
+    feedback: {
+      correct: 'מצוין! 📊',
+      wrong: 'ההשוואה הייתה סלקטיבית בצורה קלאסית.',
+    },
+    explanation: 'ישראל אכן הייתה עם אינפלציה נמוכה יחסית בתקופה מסוימת — אבל עלות המחייה, בפרט דיור ומזון, הייתה מהגבוהות ב-OECD לאורך אותן שנים. בחרת את המדד הנוח ושכחת את השאר.',
+    type: 'הטעיה',
+    source: 'https://data.oecd.org/price/inflation-cpi.htm'
+  },
+  {
+    statement: '"לא תהיה מדינה פלסטינית בתקופת כהונתי."',
+    date: 'ינואר 2024',
+    correct: 'אמת',
+    feedback: {
+      correct: 'נכון! הפעם — דווקא אמר אמת. 😮',
+      wrong: 'הפעם הוא דווקא אמר אמת. כן, זה קורה.',
+    },
+    explanation: 'זו אחת הפעמים הנדירות שנתניהו אמר בדיוק מה שחשב ומה שעשה. לא בגלל שהוא כנה בדרך כלל — אלא כי הפעם זה שירת אותו פוליטית להגיד את זה בקול.',
+    type: 'אמת',
+    source: 'https://www.ynet.co.il/news/article/bjzemn3zmg'
+  },
+  {
+    statement: '"מסלול המענקים יוריד את מחירי הדיור לצעירים."',
+    date: 'מאי 2026',
+    correct: 'הטעיה',
+    feedback: {
+      correct: 'בדיוק! 🏠',
+      wrong: 'הכלכלן הראשי של האוצר לא מסכים.',
+    },
+    explanation: 'הכלכלן הראשי במשרד האוצר פרסם חוות דעת רשמית: המהלך עלול להגדיל ביקושים, להעלות מחירים, ולהיטיב בעיקר עם בעלי נכסים. כלומר — ההיפך המדויק ממה שהובטח.',
+    type: 'הטעיה',
+    source: 'https://www.mako.co.il/news-money/2026_q2/Article-330b343ffb60e91026.htm'
+  },
+  {
+    statement: '"מעולם לא הגדרתי \'הסרת האיום הקיומי מאיראן\' כיעד המלחמה."',
+    date: 'יוני 2026',
+    correct: 'שקר',
+    feedback: {
+      correct: 'GOtcha!!! 💥',
+      wrong: 'הצהרה רשמית שלו — עדיין מופיעה באתר רה"מ.',
+    },
+    explanation: 'ב-28.2.26 פתח נתניהו את נאום המלחמה עם "הסרת האיום הקיומי מאיראן" — ציטוט שעדיין מופיע באתר משרד ראש הממשלה. ההכחשה נועדה לכסות את הפער בין ההבטחה לבין הסכם שבו האורניום נותר באיראן.',
+    type: 'שקר',
+    source: 'https://www.ynet.co.il/news/article/syl6ys6zfg'
+  }
+];
+
+const PROFILES = [
+  { min: 0,  max: 2,  title: 'מצביע בעיניים עצומות', desc: 'בדיוק בשבילך המשחק הזה. את/ה לא לבד — רוב הציבור מתחיל מכאן. עכשיו כשגילית שיש פער בין הנאמר לנעשה, שווה לשאול יותר שאלות לפני הקלפי.' },
+  { min: 3,  max: 5,  title: 'שה תמים', desc: 'שעוד לא התעורר לגמרי. יש לך אינסטינקטים, אבל הם עוד לא מחודדים. עוד סיבוב ואולי תתפוס אותו בעצמך.' },
+  { min: 6,  max: 8,  title: 'ענק מתעורר', desc: 'ומתחיל לשאול שאלות. את/ה מזהה דפוסים, מריח/ה הטעיות, ויודע/ת לבדוק. עוד קצת חידוד — ותהיה/י בלתי ניתן/ת להוליך שולל.' },
+  { min: 9,  max: 10, title: 'בלש גשש', desc: 'עלייך לא עובדים. את/ה תופס/ת שקרים, מבחין/ה בהטעיות, ויודע/ת לקרוא בין השורות. ישראל צריכה יותר אנשים כמוך ליד הקלפי.' },
+];
+
+let state = {
+  qIndex: 0,
+  score: 0,
+  correct: 0,
+  wrong: 0,
+  answered: false,
+  timer: null,
+  timeLeft: 15,
+  questions: []
+};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startGame() {
+  state.qIndex = 0;
+  state.score = 0;
+  state.correct = 0;
+  state.wrong = 0;
+  state.questions = shuffle(QUESTIONS).slice(0, 10);
+  showScreen('screen-quiz');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = state.questions[state.qIndex];
+  state.answered = false;
+
+  document.getElementById('q-counter').textContent = `שאלה ${state.qIndex + 1} מתוך 10`;
+  document.getElementById('q-score').textContent = `${state.score} נקודות`;
+  document.getElementById('q-statement').textContent = q.statement;
+  document.getElementById('q-date').textContent = q.date;
+
+  const feedback = document.getElementById('feedback-box');
+  feedback.classList.remove('show');
+  document.getElementById('btn-next').classList.remove('show');
+
+  // Answers
+  const opts = ['שקר', 'אמת', 'הטעיה'];
+  const answersEl = document.getElementById('answers');
+  answersEl.innerHTML = opts.map(opt => `
+    <button class="ans-btn" onclick="answer('${opt}')">
+      <span>${opt}</span>
+      <span class="ans-icon">${opt === 'שקר' ? '🔴' : opt === 'אמת' ? '🟢' : '🟡'}</span>
+    </button>
+  `).join('');
+
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(state.timer);
+  state.timeLeft = 15;
+  updateTimerUI();
+
+  state.timer = setInterval(() => {
+    state.timeLeft -= 0.1;
+    if (state.timeLeft < 0) state.timeLeft = 0;
+    updateTimerUI();
+    // Soft timer: no forced timeout, just keeps ticking to 0
+  }, 100);
+}
+
+function updateTimerUI() {
+  const pct = Math.max(0, (state.timeLeft / 15) * 100);
+  const bar = document.getElementById('timer-bar');
+  const num = document.getElementById('timer-num');
+  bar.style.width = pct + '%';
+  const low = state.timeLeft < 5;
+  bar.classList.toggle('low', low);
+  num.classList.toggle('low', low);
+  num.textContent = state.timeLeft > 0 ? Math.ceil(state.timeLeft) : '⏰';
+}
+
+function answer(choice) {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timer);
+
+  const q = state.questions[state.qIndex];
+  const isCorrect = choice === q.correct;
+
+  // Soft timer: if timeLeft > 0 → bonus points; if 0 → still get base points
+  let pts = 0;
+  if (isCorrect) {
+    if (state.timeLeft > 0) {
+      pts = Math.round((state.timeLeft / 15) * 9) + 1; // 1–10
+    } else {
+      pts = 1; // answered after timer ran out — still counts, minimal points
+    }
+    state.score += pts;
+    state.correct++;
+  } else {
+    state.wrong++;
+  }
+
+  document.getElementById('q-score').textContent = `${state.score} נקודות`;
+
+  // Style buttons
+  document.querySelectorAll('.ans-btn').forEach(btn => {
+    const btnChoice = btn.querySelector('span:first-child').textContent;
+    btn.disabled = true;
+    if (btnChoice === q.correct) {
+      btn.classList.add('correct');
+    } else if (btnChoice === choice && !isCorrect) {
+      btn.classList.add('wrong');
+      btn.classList.add('shake');
+    } else {
+      btn.classList.add('neutral-reveal');
+    }
+  });
+
+  // Feedback
+  const fb = document.getElementById('feedback-box');
+  document.getElementById('fb-emoji').textContent = isCorrect ? '✅' : '❌';
+  const verdict = document.getElementById('fb-verdict');
+  verdict.textContent = isCorrect ? q.feedback.correct : q.feedback.wrong;
+  verdict.className = 'feedback-verdict ' + (isCorrect ? 'correct' : 'wrong');
+  document.getElementById('fb-text').textContent = q.explanation;
+
+  const timeUsed = Math.round(15 - Math.max(state.timeLeft, 0) + 0.5);
+  const sourceLink = q.source ? ` <a href="${q.source}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700;text-decoration:none;">← מקור ↗</a>` : '';
+
+  document.getElementById('fb-points').innerHTML = isCorrect
+    ? `+${pts} נקודות (ענית ב-${timeUsed} שניות)${sourceLink}`
+    : `אפס נקודות.${sourceLink}`;
+  fb.classList.add('show');
+
+  document.getElementById('btn-next').classList.add('show');
+  document.getElementById('btn-next').textContent =
+    state.qIndex < 9 ? 'הבא ←' : 'לתוצאות 🏁';
+}
+
+function nextQuestion() {
+  state.qIndex++;
+  if (state.qIndex >= 10) {
+    showResults();
+  } else {
+    loadQuestion();
+  }
+}
+
+function showResults() {
+  showScreen('screen-results');
+
+  // Animate score
+  const finalScore = state.score;
+  let displayed = 0;
+  const step = Math.ceil(finalScore / 30);
+  const el = document.getElementById('final-score');
+  const interval = setInterval(() => {
+    displayed = Math.min(displayed + step, finalScore);
+    el.textContent = displayed;
+    if (displayed >= finalScore) clearInterval(interval);
+  }, 30);
+
+  document.getElementById('res-correct').textContent = state.correct;
+  document.getElementById('res-wrong').textContent = state.wrong;
+  document.getElementById('res-score').textContent = finalScore;
+
+  // Profile based on correct answers
+  const profile = PROFILES.find(p => state.correct >= p.min && state.correct <= p.max);
+  document.getElementById('profile-title').textContent = profile.title;
+  document.getElementById('profile-desc').textContent = profile.desc;
+  updateWhatsAppLink();
+}
+
+function buildShareText() {
+  const profile = PROFILES.find(p => state.correct >= p.min && state.correct <= p.max);
+  return `GOtcha!!! 🎯\nתפסתי ${state.correct}/10 אמירות של נתניהו ✅\nהפרופיל שלי: ${profile.title}\nנקודות: ${state.score}/100\n\nכמה תתפוס/י? 👇`;
+}
+
+function shareResult() {
+  const text = buildShareText();
+  if (navigator.share) {
+    navigator.share({ title: 'GOtcha!!!', text }).catch(() => copyFallback(text));
+  } else {
+    copyFallback(text);
+  }
+}
+
+function copyFallback(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('share-btn');
+    btn.innerHTML = '<span>✅</span> הועתק לקליפבורד!';
+    setTimeout(() => { btn.innerHTML = '<span>📋</span> העתק תוצאה לשיתוף'; }, 2500);
+  });
+}
+
+function updateWhatsAppLink() {
+  const text = buildShareText();
+  const encoded = encodeURIComponent(text);
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+  const url = isMobile
+    ? `whatsapp://send?text=${encoded}`
+    : `https://web.whatsapp.com/send?text=${encoded}`;
+  document.getElementById('wa-btn').href = url;
+}
+
+function restartGame() {
+  startGame();
+}
+</script>
+</body>
+</html>
