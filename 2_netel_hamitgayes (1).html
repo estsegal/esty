@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מחיר ההשתמטות לאזרח המשרת</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  :root{ --txt:#1a1d24; --txt2:#5a6072; --line:#e3e6ec; --accent:#D81224; --teal:#1d7a5f; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Assistant',sans-serif; background:#fff; color:var(--txt); padding:24px;}
+  .card{max-width:720px; margin:0 auto;}
+  .eyebrow{font-size:12px; font-weight:600; color:var(--accent); letter-spacing:.4px; text-transform:uppercase; margin-bottom:6px;}
+  h1{font-size:22px; font-weight:700; line-height:1.3; margin-bottom:16px;}
+  .bignum-row{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:24px;}
+  .bignum{flex:1; min-width:200px; background:#fdf2f0; border:1px solid #f3d6d0; border-radius:12px; padding:18px 20px;}
+  .bignum .v{font-size:34px; font-weight:800; color:var(--accent); line-height:1;}
+  .bignum .l{font-size:13.5px; color:var(--txt2); margin-top:8px; line-height:1.4;}
+  h2{font-size:16px; font-weight:600; margin:18px 0 10px; line-height:1.4;}
+  .chart-wrap{position:relative; height:240px;}
+  .src{font-size:11.5px; color:#9aa0ad; margin-top:18px; border-top:1px solid var(--line); padding-top:10px; line-height:1.5;}
+  @media (max-width:600px){
+    body{padding:16px;}
+    h1{font-size:18px;}
+    .bignum-row{flex-direction:column; gap:10px;}
+    .bignum{min-width:0; padding:14px 16px;}
+    .bignum .v{font-size:28px;}
+    .bignum .l{font-size:12.5px;}
+    h2{font-size:14.5px;}
+    .chart-wrap{height:280px;}
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>מחיר ההשתמטות לאזרח המשרת — בכסף ובזמן</h1>
+
+  <div class="bignum-row">
+    <div class="bignum">
+      <div class="v">72,000 ₪</div>
+      <div class="l">עלות הסבסוד שכל מתגייס מעניק לצעיר חרדי שאינו מתגייס — לכל שנת שירות</div>
+    </div>
+    <div class="bignum">
+      <div class="v">220,000 ₪</div>
+      <div class="l">עלות הסבסוד המצטבר לאורך שנות השירות של האזרח המתגייס</div>
+    </div>
+  </div>
+
+  <h2>וזה מה שהיה נחסך מכל אזרח משרת אם החרדים היו מתגייסים כמו שאר הציבור</h2>
+  <div class="chart-wrap"><canvas id="c" role="img" aria-label="קיצור שירות אפשרי"></canvas></div>
+
+  <p class="src">מקורות: גלעד כהן-קובץ' וגלעד מלאך, "חרדים לביטחון", המכון הישראלי לדמוקרטיה, כנס אלי הורביץ 2026 (נתוני הסבסוד לפרט); אגף התקציבים, משרד האוצר, עמדה בנושא חוק שירות הביטחון, 24.3.2024, עמ' 2 (קיצור השירות וימי המילואים).</p>
+</div>
+
+<script>
+const vals1 = [36, 30];   // המצב הקיים: 36 ימי מילואים ; 30 חודשי שירות חובה
+const vals2 = [5, 23];    // אילו התגייסו: 5 ימי מילואים ; 23 חודשי שירות (קיצור 7)
+const units = [' ימים', ' חודשים'];
+
+Chart.register(ChartDataLabels);
+
+new Chart(document.getElementById('c'), {
+  type:'bar',
+  data:{
+    labels:['ימי מילואים בתעסוקה מבצעית\n(ללוחם בשנה)','משך שירות החובה\n(חודשים)'],
+    datasets:[
+      { label:'המצב הקיים', data:vals1, backgroundColor:'#D81224', barPercentage:0.7 },
+      { label:'אילו החרדים היו מתגייסים', data:vals2, backgroundColor:'#27AAE1', barPercentage:0.7 }
+    ]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    layout:{padding:{left:40}},
+    plugins:{
+      legend:{ position:'top', labels:{ font:{family:'Assistant',size:13,weight:'600'}, boxWidth:14, padding:14 } },
+      tooltip:{ rtl:true, callbacks:{ label:(c)=> c.dataset.label+': '+c.raw+units[c.dataIndex] } },
+      datalabels:{
+        color:'#ffffff',
+        font:{ family:'Assistant', size:15, weight:'800' },
+        anchor:'end',
+        align:'start',
+        offset:8,
+        formatter:(value, ctx)=>{
+          // בר צר (ערך קטן) - מספר בלבד כדי שייכנס; אחרת טקסט מלא
+          return value <= 8 ? String(value) : value + units[ctx.dataIndex];
+        }
+      }
+    },
+    scales:{
+      x:{ display:false, grid:{display:false}, beginAtZero:true },
+      y:{ grid:{display:false}, ticks:{font:{family:'Assistant',size: window.innerWidth < 600 ? 11 : 13, weight:'600'}} }
+    }
+  }
+});
+</script>
+</body>
+</html>
