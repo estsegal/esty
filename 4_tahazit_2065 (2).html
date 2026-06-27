@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>תחזית 2065</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  :root{ --txt:#1a1d24; --txt2:#5a6072; --line:#e3e6ec; --black:#1a1d24; --red:#D81224; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Assistant',sans-serif; background:#fff; color:var(--txt); padding:24px;}
+  .card{max-width:700px; margin:0 auto;}
+  .eyebrow{font-size:12px; font-weight:600; color:var(--red); letter-spacing:.4px; text-transform:uppercase; margin-bottom:6px;}
+  h1{font-size:22px; font-weight:700; line-height:1.3; margin-bottom:6px;}
+  .sub{font-size:14px; color:var(--txt2); margin-bottom:16px;}
+  .legend-custom{display:flex; gap:22px; justify-content:center; flex-wrap:wrap; margin-bottom:6px;}
+  .legend-custom span{display:flex; align-items:center; gap:8px; font-size:16px; font-weight:700;}
+  .legend-custom .ln{width:26px; height:5px; border-radius:3px; display:inline-block;}
+  .chart-wrap{position:relative; height:360px;}
+  .replay{display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-size:13px; font-weight:600; color:var(--txt2); background:#f5f6f9; border:1px solid var(--line); border-radius:8px; padding:7px 14px; cursor:pointer; margin-top:6px; transition:.15s;}
+  .replay:hover{background:#ececf1;}
+  .src{font-size:11.5px; color:#9aa0ad; margin-top:14px; border-top:1px solid var(--line); padding-top:10px; line-height:1.5;}
+
+  @media (max-width:600px){
+    body{padding:16px;}
+    h1{font-size:18px;}
+    .sub{font-size:13px;}
+    .legend-custom{gap:14px;}
+    .legend-custom span{font-size:14px;}
+    .chart-wrap{height:340px;}
+    .src{font-size:11px;}
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="eyebrow">תחזית · בנק ישראל ואגף התקציבים</div>
+  <h1>עליית המסים הצפויה אם לא יחול שינוי</h1>
+  <p class="sub">הגידול הצפוי בשיעור החרדים באוכלוסייה, מול הנטל המאקרו-כלכלי הנגזר ממנו</p>
+
+  <div class="legend-custom">
+    <span style="color:#D81224"><i class="ln" style="background:#D81224"></i> אחוז העלאת מסים ישירים</span>
+    <span style="color:#1a1d24"><i class="ln" style="background:#1a1d24"></i> אחוז החרדים באוכלוסייה</span>
+  </div>
+
+  <div class="chart-wrap"><canvas id="c" role="img" aria-label="תחזית דמוגרפיה ומסים 2065"></canvas></div>
+  <button class="replay" onclick="play()">▶ הצג שוב</button>
+
+  <p class="src">מקורות: שיעור החרדים — תחזית האוכלוסייה של הלמ"ס (13% כיום → 32% ב-2065). אובדן תוצר 13% והעלאת מסים 16% — מיקוד שבועי 19.11.2019 של אגף הכלכלנית הראשית, והרצאת נגיד בנק ישראל פרופ' אמיר ירון, 31.12.2019. נקודות הביניים מחושבות להמחשה בלבד.</p>
+</div>
+
+<script>
+Chart.register(ChartDataLabels);
+
+const labels = ['2024','2035','2045','2055','2065'];
+const haredim = [13,17,22,27,32];
+const taxes   = [0,4,8,12,16];
+
+const POINT_DELAY = 600; // מילישניות בין שנה לשנה
+const totalDuration = labels.length * POINT_DELAY;
+const delayBetweenPoints = POINT_DELAY;
+
+// אנימציה מתקדמת אמינה: כל נקודה "ממתינה" עד שתורה מגיע לפי האינדקס
+const previousY = (ctx) => ctx.index === 0
+  ? ctx.chart.scales.y.getPixelForValue(0)
+  : ctx.chart.getDatasetMeta(ctx.datasetIndex).data[ctx.index - 1].getProps(['y'], true).y;
+
+const progressiveAnim = {
+  x:{
+    type:'number', easing:'linear', duration:delayBetweenPoints, from:NaN,
+    delay(ctx){
+      if(ctx.type !== 'data' || ctx.xStarted){ return 0; }
+      ctx.xStarted = true;
+      return ctx.index * delayBetweenPoints;
+    }
+  },
+  y:{
+    type:'number', easing:'linear', duration:delayBetweenPoints,
+    from: previousY,
+    delay(ctx){
+      if(ctx.type !== 'data' || ctx.yStarted){ return 0; }
+      ctx.yStarted = true;
+      return ctx.index * delayBetweenPoints;
+    }
+  }
+};
+
+let chart;
+function build(){
+  if(chart) chart.destroy();
+  chart = new Chart(document.getElementById('c'), {
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        { label:'אחוז החרדים באוכלוסייה', data:haredim, borderColor:'#1a1d24', fill:false, tension:.35, borderWidth:3, pointRadius:5, pointBackgroundColor:'#1a1d24',
+          datalabels:{ align:'top', anchor:'end', offset:6, color:'#1a1d24', font:{family:'Assistant',size:15,weight:'800'}, formatter:v=>v+'%' } },
+        { label:'אחוז העלאת מסים ישירים', data:taxes, borderColor:'#D81224', fill:false, tension:.35, borderWidth:3, pointRadius:5, pointBackgroundColor:'#D81224', borderDash:[6,4],
+          datalabels:{ align:'top', anchor:'end', offset:6, color:'#D81224', font:{family:'Assistant',size:15,weight:'800'}, formatter:v=>v+'%' } }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:20}},
+      animation: progressiveAnim,
+      plugins:{
+        legend:{ display:false },
+        tooltip:{ enabled:false },
+        datalabels:{
+          display:(ctx)=> ctx.dataIndex <= (ctx.chart.$revealed ?? -1)
+        }
+      },
+      scales:{
+        y:{ display:false, beginAtZero:true, grace:'14%' },
+        x:{ grid:{display:false}, ticks:{font:{family:'Assistant',size:13,weight:'600'}} }
+      }
+    }
+  });
+}
+
+function revealLabelsProgressively(){
+  chart.$revealed = -1;
+  labels.forEach((_, i)=>{
+    setTimeout(()=>{
+      chart.$revealed = i;
+      chart.update('none');
+    }, i * delayBetweenPoints + 250);
+  });
+}
+
+function play(){
+  build();
+  revealLabelsProgressively();
+}
+
+play();
+</script>
+</body>
+</html>
