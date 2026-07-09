@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>טיימליין - השפעה זרה בישראל</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  html, body { overflow-x: hidden; width: 100%; }
+  body {
+    font-family: 'Assistant', sans-serif;
+    background: transparent;
+    color: #1c1c1c;
+    padding: 50px 20px 80px;
+    direction: rtl;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; }
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #14312f;
+  }
+  .subtitle {
+    text-align: center;
+    color: #6b6b66;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  .legend {
+    display:flex; justify-content:center; flex-wrap: wrap; gap:12px; margin-bottom: 46px; font-size: 14px; font-weight:700;
+  }
+  .legend-btn {
+    display:flex; align-items:center; gap:8px;
+    border: 1.5px solid #d8d5cc;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 7px 16px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    color: #6b6b66;
+    transition: all 0.2s;
+    opacity: 0.55;
+  }
+  .legend-btn.active { opacity: 1; border-color: transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  .legend-btn[data-filter="action"].active { color: #1a4d8f; background: #eaf2fb; }
+  .legend-btn[data-filter="block"].active { color: #b6242c; background: #fbebec; }
+  .legend-btn:hover { opacity: 0.85; }
+  .legend-btn .sw { width:14px; height:14px; border-radius:5px; flex-shrink:0; }
+
+  #timeline { position: relative; }
+  #timeline::before {
+    content:'';
+    position: absolute;
+    right: calc(50% - 1px);
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: repeating-linear-gradient(to bottom, #7a8896 0 6px, transparent 6px 12px);
+    z-index: 1;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 44px 1fr;
+    align-items: start;
+    position: relative;
+    margin-bottom: 20px;
+    min-height: 30px;
+  }
+
+  .side { display:flex; flex-direction:column; }
+  .side-right { align-items:flex-end; padding-left: 10px; }
+  .side-left { align-items:flex-start; padding-right: 10px; }
+
+  .year { font-size: 20px; font-weight: 800; margin-bottom: 8px; position: relative; z-index: 3; }
+  .side-right .year { color: #1a4d8f; }
+  .side-left .year { color: #a91e1e; }
+
+  .card { width: 100%; padding: 20px 22px; }
+
+  .card-teal {
+    background: #d7e6f6;
+    color: #123561;
+    border-radius: 14px;
+    border: 1px solid #b9d2ea;
+  }
+
+  .card-pink {
+    background: #b6242c;
+    color: #fdeceb;
+    border-radius: 0;
+    position: relative;
+    margin-right: -34px;
+    padding-right: 46px;
+    z-index: 3;
+    box-shadow: -6px 0 14px rgba(0,0,0,0.15);
+  }
+
+  .card-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; line-height: 1.35; }
+
+  .card-quote {
+    font-size: 14.5px;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1.55;
+    padding-right: 12px;
+    border-right: 3px solid;
+    margin-bottom: 6px;
+  }
+  .card-teal .card-quote { border-color: #6b9bd1; color: #1a4d8f; }
+  .card-pink .card-quote { border-color: #f3b3b3; color: #ffffff; }
+
+  .expand-toggle {
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 20px;
+    padding: 5px 14px;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .card-teal .expand-toggle { color: #123561; background: rgba(26,77,143,0.12); }
+  .card-teal .expand-toggle:hover { background: rgba(26,77,143,0.2); }
+  .card-pink .expand-toggle { color: #fdeceb; background: rgba(255,255,255,0.16); border-radius: 4px; }
+  .card-pink .expand-toggle:hover { background: rgba(255,255,255,0.26); }
+  .expand-toggle .plus { transition: transform 0.2s; display:inline-block; font-size:16px; }
+  .expand-toggle.open .plus { transform: rotate(45deg); }
+
+  .expand-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, margin-top 0.35s ease;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .expand-body.open { max-height: 500px; margin-top: 14px; }
+  .card-teal .expand-body { color: #1c3f6b; }
+  .card-pink .expand-body { color: #fdeceb; }
+
+  .names-block { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(26,77,143,0.2); }
+  .card-pink .names-block { border-top: 1px solid rgba(255,255,255,0.25); }
+  .names-block .n-item { margin-bottom: 6px; }
+  .names-block .role { font-size: 12.5px; opacity: 0.75; }
+  .names-block .name { font-size: 16px; font-weight: 800; margin-right: 4px; }
+
+  .dot-col { display:flex; justify-content:center; padding-top: 6px; position: relative; z-index: 2; }
+  .dot {
+    width: 14px; height:14px; border-radius:50%;
+    background: #1a4d8f; border: 3px solid #faf8f4; z-index: 2;
+    flex-shrink: 0;
+  }
+  .dot.dot-fail { background: #b6242c; }
+
+  .final-banner {
+    margin-top: 30px; text-align: center; background: #1c1c1c; border-radius: 0;
+    padding: 34px 24px; color: #faf8f4;
+  }
+  .final-banner .big { font-size: 30px; font-weight: 800; color: #e3a9ac; }
+  .final-banner .small { font-size: 15.5px; line-height: 1.8; margin-top: 10px; color: #d6d4cc; }
+  .final-banner .name-final { color: #ffffff; font-weight: 800; }
+
+  /* אנימציית כניסה לכרטיסי חסימה (אדומים) */
+  .card-pink {
+    opacity: 0;
+    transform: translateX(22px) scale(0.96);
+  }
+  .card-pink.is-visible {
+    animation: stampIn 0.6s cubic-bezier(.22,.68,.36,1.15) forwards;
+  }
+  @keyframes stampIn {
+    0%   { opacity: 0; transform: translateX(22px) scale(0.95); }
+    55%  { opacity: 1; transform: translateX(-5px) scale(1.015); }
+    75%  { transform: translateX(2px) scale(0.998); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card-pink { opacity: 1; transform: none; }
+    .card-pink.is-visible { animation: none; }
+  }
+
+  /* --- מובייל: טור אחד מלא, בלי גלישה אופקית --- */
+  @media (max-width: 720px) {
+    body { padding: 36px 16px 60px; }
+    h1 { font-size: 22px; }
+    .subtitle { font-size: 13.5px; }
+    .legend { font-size: 12.5px; gap: 14px; margin-bottom: 34px; }
+
+    .row {
+      grid-template-columns: 1fr;
+      row-gap: 6px;
+      margin-bottom: 26px;
+    }
+    #timeline::before { display: none; }
+
+    .side { align-items: stretch !important; padding: 0 !important; }
+    .side-right, .side-left { width: 100%; }
+    .year { text-align: right; display: flex; align-items: center; gap: 9px; font-size: 17px; }
+    .year::before {
+      content: '';
+      width: 11px; height: 11px; border-radius: 50%;
+      flex-shrink: 0;
+      background: currentColor;
+    }
+
+    .dot-col { display: none; }
+
+    .card { padding: 16px 16px; width: 100%; }
+    .card-title { font-size: 16px; word-break: break-word; }
+    .card-quote { font-size: 13.5px; }
+    .names-block .name { font-size: 15px; }
+
+    .card-pink {
+      width: calc(100% + 14px);
+      margin-right: -14px;
+      padding-right: 26px;
+      box-shadow: -4px 4px 12px rgba(0,0,0,0.16);
+    }
+  }
+
+  @media (max-width: 380px) {
+    .card-pink { width: 100%; margin-right: 0; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>כישלון ההתמודדות עם השפעה זרה בישראל</h1>
+  <div class="subtitle">2017–2026 · מבוסס על דוח מבקר המדינה, יולי 2026</div>
+  <div class="legend">
+    <button class="legend-btn active" data-filter="action"><span class="sw" style="background:#1a4d8f"></span> זיהוי / פעולה</button>
+    <button class="legend-btn active" data-filter="block"><span class="sw" style="background:#b6242c;border-radius:2px"></span> חסימה / ביטול / אי-עשייה</button>
+  </div>
+
+  <div id="timeline"></div>
+
+  <div class="final-banner">
+    <div class="big">מרץ 2026</div>
+    <div class="small">
+      כתשע שנים לאחר שזוהה האיום לראשונה - עדיין אין מדיניות לאומית ואין גורם ממשלתי אחד שמוביל את ההתמודדות הבין-ארגונית.<br>
+      ראש המל"ל (ממלא מקום): <span class="name-final">גיל רייך</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const events = [
+  { side:"R", year:"נובמבר 2017", title:"ראש המל\"ל מזהה את האיום",
+    quote:"\"מדינת ישראל מהווה יעד להשפעה זרה מצד מעצמות ומצד יריבים נוספים\"",
+    body:"מערך הסייבר מבצע עבודת מטה המעלה כי המענה הלאומי חסר וכי נדרש לגבש מענה בין-משרדי ופעילות הסברה. ראש המל\"ל מנחה לבדוק פערים בתחום.",
+    names:[["ראש המל\"ל","מאיר בן שבת"],["ראש מערך הסייבר","ד\"ר אביתר מתניה"]] },
+
+  { side:"L", year:"מרץ–יולי 2018", title:"המל\"ל לא ממשיך",
+    quote:"\"המל\"ל לא המשיך לקדם את הטיפול... ועבודת המטה הבין-ארגונית לא קודמה\"",
+    body:"עבודת המטה מוצגת בדיונים במל\"ל, המדגישים את הצורך במדיניות לאומית לאכיפה וסיכול בתחום ההשפעה הזרה - אך ללא המשך בפועל.",
+    names:[["ראש המל\"ל","מאיר בן שבת"],["ראש מערך הסייבר","יגאל אונא"]] },
+
+  { side:"R", year:"2021", title:"משרד המודיעין נכנס לתמונה",
+    quote:"מתחיל לבחון כלים טכנולוגיים ומתודולוגיים לניטור השפעה זרה ברשת",
+    body:"משרד המודיעין פותח בבחינת פתרונות טכנולוגיים לאיתור וניטור ניסיונות השפעה זרה, כחלק מבניית תשתית ידע בתחום.",
+    names:[["שר המודיעין","אלעזר שטרן"],["ראש המל\"ל","איל חולתא"]] },
+
+  { side:"R", year:"פברואר 2022", title:"דיון נוסף במל\"ל",
+    quote:"\"מדינת אויב משקיעה בתחום משאבים בהיקף הולך וגדל\"",
+    body:"דיון בראשות רח\"ט סייבר במל\"ל, בהשתתפות גופים ביטחוניים ומערך הסייבר, סוקר את איום ההשפעה במרחב הדיגיטלי ואת דרכי ההתמודדות עימו.",
+    names:[["ראש המל\"ל","איל חולתא"]] },
+
+  { side:"R", year:"יוני–יולי 2022", title:"מסמך תובנות של המל\"ל",
+    quote:"המל\"ל מציין כי ימשיך להוביל, ביחד עם הגופים הרלוונטיים, עבודת מטה לתיאום",
+    body:"דיון עם משרד המודיעין מדגיש שוב את חוסר התיאום והסנכרון בין הגופים. המל\"ל מגבש מסמך תובנות ומזהה את הפערים המרכזיים בטיפול.",
+    names:[["ראש המל\"ל","איל חולתא"],["ראש מערך הסייבר","גבי פורטנוי"]] },
+
+  { side:"L", year:"בהמשך 2022", title:"שוב אותו דפוס. שוב לא קודם",
+    quote:"\"הביקורת העלתה כי הטיפול בנושא שוב לא קודם\"",
+    body:"על אף ההצהרה על המשך הובלת עבודת המטה, בפועל לא בוצע קידום אפקטיבי של הנושא ברמה הבין-ארגונית.",
+    names:[["ראש המל\"ל","איל חולתא"],["ראש מערך הסייבר","גבי פורטנוי"]] },
+
+  { side:"R", year:"דצמבר 2022", title:"נכנס להערכת המצב הלאומית",
+    quote:"\"העמקת הטיפול בניטור וסיכול השפעות זרות באמצעות רשתות חברתיות\"",
+    body:"הערכת מצב הביטחון הלאומי לשנת 2023, שגיבש המל\"ל, כוללת המלצה מפורשת להעמקת הטיפול בנושא - אחת המשימות המרכזיות שהחוק מטיל על המל\"ל.",
+    names:[["ראש המל\"ל","איל חולתא"]] },
+
+  { side:"L", year:"מרץ 2024", title:"משרד המודיעין נסגר",
+    quote:"\"נושא ההשפעה הזרה לא הועבר, מבלי שנקבע גורם אחראי לטיפול בנושא\"",
+    body:"למרות שעסק בבניית תשתית ידע וטכנולוגיה בנושא, עם סגירת המשרד לא הועבר העיסוק בהשפעה זרה לגורם אחר, ולא מונה גורם אחראי חלופי.",
+    names:[["שרת המודיעין","גילה גמליאל"],["ראש המל\"ל","צחי הנגבי"]] },
+
+  { side:"R", year:"יולי 2024", title:"מערך הסייבר מציף פערים",
+    quote:"\"הקהל הישראלי הוא יעד למאמצי השפעה... כלי אסטרטגי בשימוש אויביה של ישראל\"",
+    body:"לאחר פרוץ מלחמת חרבות ברזל, מערך הסייבר מזהה עלייה חדה בניסיונות השפעה זרה ומפרט שורה של פערים בהתמודדות עם האיום.",
+    names:[["ראש מערך הסייבר","גבי פורטנוי"]] },
+
+  { side:"R", year:"אוגוסט 2024", title:"מוצג לראש הממשלה",
+    quote:"ראש מערך הסייבר מציג את איום ההשפעה הזרה ואת השלכותיו לפני רה\"ם",
+    body:"רה\"ם מנחה את ראש מערך הסייבר לגבש הצעה להתארגנות לאומית, תוך אזהרה מפני \"הסיכונים בעיסוק זה למול האפשרות להגיע ל'השתלטות' על השיח\".",
+    names:[["ראש מערך הסייבר","גבי פורטנוי"],["ראש המל\"ל","צחי הנגבי"]] },
+
+  { side:"R", year:"ספטמבר 2024", title:"הצעת תוכנית פעולה בין-משרדית",
+    quote:"תוכנית פעולה מלאה עם דרישות תקציביות וארגוניות מועברת ללשכת רה\"ם",
+    body:"התוכנית כוללת שלושה שולחנות תיאום: מודיעין ומבצעים, הסברה ומודעות, ומדיניות. ראש מערך הסייבר מבקש לקדמה בהקדם האפשרי.",
+    names:[["ראש מערך הסייבר","גבי פורטנוי"]] },
+
+  { side:"R", year:"2024–תחילת 2025", title:"מערך הסייבר ממשיך לבד",
+    quote:"ללא אישור תקציב, המערך פועל בעיקר בתחומי החינוך וההסברה",
+    body:"בהיעדר אישור מצד רה\"ם לתוכנית ובהיעדר תקצוב, מערך הסייבר מקדם על דעת עצמו פעולות ראשוניות בלבד, כולל פיילוט טכנולוגי לניטור.",
+    names:[["ראש מערך הסייבר","גבי פורטנוי"]] },
+
+  { side:"L", year:"עד יולי 2025", title:"שנה שלמה של שתיקה",
+    quote:"\"בחלוף כשנה... התוכנית שהוצעה לא נבחנה על ידי רה\"ם או מי מטעמו\"",
+    body:"רק בעקבות פניית משרד מבקר המדינה ללשכת רה\"ם, הועברה התוכנית ביולי 2025 למל\"ל לצורך בחינתה.",
+    names:[["ראש המל\"ל","צחי הנגבי"]] },
+
+  { side:"L", year:"אוגוסט 2025", title:"שני הגופים המרכזיים נסוגים",
+    quote:"\"מל\"ל ומערך הסייבר הפסיקו לעסוק בנושא\"",
+    body:"המל\"ל מחליט שלא לקדם את הנושא כפי שתכנן. מערך הסייבר, תחת הנהגה חדשה, מחליט לצמצם את פעילותו רק למקרים שבהם ההשפעה נובעת מתקיפות סייבר.",
+    names:[["ראש המל\"ל","צחי הנגבי"],["ראש מערך הסייבר","יוסי כראדי"]] }
+];
+
+const container = document.getElementById('timeline');
+let idx = 0;
+
+events.forEach(e => {
+  idx++;
+  const id = 'ev' + idx;
+  const isR = e.side === 'R';
+  const cardClass = isR ? 'card-teal' : 'card-pink';
+  const dotClass = isR ? '' : 'dot-fail';
+
+  const cardHtml = `
+    <div class="year">${e.year}</div>
+    <div class="card ${cardClass}">
+      <div class="card-title">${e.title}</div>
+      <div class="card-quote">${e.quote}</div>
+      <div class="expand-toggle" data-id="${id}"><span class="plus">+</span> להרחבה</div>
+      <div class="expand-body" id="body-${id}">
+        <div>${e.body}</div>
+        <div class="names-block">
+          ${e.names.map(n => `<div class="n-item"><span class="role">${n[0]}:</span><span class="name">${n[1]}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  const row = document.createElement('div');
+  row.className = 'row ' + (isR ? 'type-action' : 'type-block');
+  row.innerHTML = `
+    <div class="side side-right">${isR ? cardHtml : ''}</div>
+    <div class="dot-col"><div class="dot ${dotClass}"></div></div>
+    <div class="side side-left">${!isR ? cardHtml : ''}</div>
+  `;
+  container.appendChild(row);
+});
+
+document.addEventListener('click', function(ev) {
+  const t = ev.target.closest('.expand-toggle');
+  if (!t) return;
+  const id = t.getAttribute('data-id');
+  const body = document.getElementById('body-' + id);
+  const isOpen = body.classList.toggle('open');
+  t.classList.toggle('open', isOpen);
+});
+
+// פילטר אינטראקטיבי
+const filterButtons = document.querySelectorAll('.legend-btn');
+function applyFilters() {
+  const activeFilters = Array.from(filterButtons)
+    .filter(b => b.classList.contains('active'))
+    .map(b => b.getAttribute('data-filter'));
+  document.querySelectorAll('.row').forEach(row => {
+    const isAction = row.classList.contains('type-action');
+    const type = isAction ? 'action' : 'block';
+    row.style.display = activeFilters.includes(type) ? '' : 'none';
+  });
+}
+filterButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const currentlyActive = Array.from(filterButtons).filter(b => b.classList.contains('active'));
+    if (btn.classList.contains('active') && currentlyActive.length === 1) return; // לא לכבות את האחרון
+    btn.classList.toggle('active');
+    applyFilters();
+  });
+});
+
+if ('IntersectionObserver' in window) {
+  const blockCards = document.querySelectorAll('.card-pink');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.35 });
+  blockCards.forEach(card => io.observe(card));
+} else {
+  document.querySelectorAll('.card-pink').forEach(c => c.classList.add('is-visible'));
+}
+</script>
+</body>
+</html>
