@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מפת איומים | קמפייני השפעה זרים נגד ישראל 2019–2024</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf7f1;
+    --bg-band-a:#f3ede1;
+    --bg-band-b:#faf7f1;
+    --ink:#2b2620;
+    --ink-soft:#6b6255;
+    --line:#c9c0af;
+    --panel-bg:#fffdf9;
+    --state:#c1440e;
+    --state-soft:#e9c3a8;
+    --network:#8b5e34;
+    --network-soft:#ddc7ab;
+    --unknown:#b5a642;
+    --unknown-soft:#e6dfad;
+    --shadow: 0 12px 34px rgba(43,38,32,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Assistant',sans-serif;}
+  body{min-height:100vh;}
+
+  .app-header{
+    padding:28px 32px 16px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fffdf9,var(--bg));
+    position:sticky;top:0;z-index:30;
+  }
+  .app-header h1{
+    margin:0 0 6px;
+    font-size:1.9rem;
+    font-weight:800;
+    letter-spacing:-0.3px;
+  }
+  .app-header p.sub{
+    margin:0 0 16px;
+    color:var(--ink-soft);
+    font-size:0.98rem;
+    font-weight:500;
+  }
+  .app-header p.hint{
+    margin:0 0 14px;
+    color:var(--ink-soft);
+    font-size:0.85rem;
+    font-weight:500;
+  }
+
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    align-items:center;
+  }
+  .filter-btn{
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    padding:8px 16px;
+    border-radius:999px;
+    font-family:'Assistant',sans-serif;
+    font-weight:600;
+    font-size:0.88rem;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .filter-btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,0.08);}
+  .filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .filter-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  .legend-note{
+    text-align:center;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-top:10px;
+  }
+
+  .canvas-wrap{
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:20px 0 40px;
+    scroll-behavior:smooth;
+  }
+  .canvas-wrap::-webkit-scrollbar{height:10px;}
+  .canvas-wrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px;}
+  .canvas-wrap::-webkit-scrollbar-track{background:transparent;}
+
+  svg{display:block;}
+
+  .era-band-label{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:20px;
+    fill:var(--ink);
+  }
+  .era-band-sub{
+    font-family:'Assistant',sans-serif;
+    font-weight:500;
+    font-size:12.5px;
+    fill:var(--ink-soft);
+  }
+  .row-label{
+    font-family:'Assistant',sans-serif;
+    font-weight:700;
+    font-size:14px;
+  }
+
+  .node-group{cursor:pointer;}
+  .node-halo{transition:opacity .25s ease, r .25s ease;}
+  .node-circle{
+    stroke:#fff;
+    stroke-width:3;
+    transition:transform .18s ease, filter .18s ease;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  .node-group:hover .node-circle{transform:scale(1.08);filter:drop-shadow(0 6px 14px rgba(0,0,0,0.25));}
+  .node-title{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:16.5px;
+    fill:var(--ink);
+  }
+  .node-date{
+    font-family:'Assistant',sans-serif;
+    font-weight:600;
+    font-size:12px;
+    fill:var(--ink-soft);
+  }
+  .node-scale-badge{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:12px;
+    fill:#fff;
+  }
+
+  .fade{opacity:0.15 !important;}
+
+  .edge-path{
+    fill:none;
+    stroke:var(--line);
+    stroke-width:2.4;
+    marker-end:url(#arrowGray);
+  }
+  .edge-path.dashed{
+    stroke-dasharray:6 6;
+    stroke-width:2;
+    opacity:0.75;
+  }
+
+  /* Side panel */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(30,26,20,0.45);
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease;
+    z-index:40;
+  }
+  .overlay.open{opacity:1;pointer-events:auto;}
+
+  .side-panel{
+    position:fixed;
+    top:0;right:0;
+    height:100%;
+    width:min(440px, 92vw);
+    background:var(--panel-bg);
+    box-shadow:var(--shadow);
+    transform:translateX(105%);
+    transition:transform .3s cubic-bezier(.22,.9,.32,1);
+    z-index:50;
+    display:flex;
+    flex-direction:column;
+    border-left:1px solid var(--line);
+  }
+  .side-panel.open{transform:translateX(0);}
+
+  .panel-head{
+    padding:22px 22px 16px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .panel-close{
+    position:absolute;
+    top:16px;left:16px;
+    width:32px;height:32px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:16px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft);
+  }
+  .panel-close:hover{background:#f2ede3;color:var(--ink);}
+
+  .panel-cat-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:0.78rem;font-weight:700;
+    padding:4px 10px;border-radius:999px;
+    color:#fff;
+    margin-bottom:10px;
+  }
+  .panel-title{
+    font-size:1.35rem;
+    font-weight:800;
+    margin:0 0 6px;
+    line-height:1.3;
+  }
+  .panel-date{
+    font-size:0.88rem;
+    color:var(--ink-soft);
+    font-weight:600;
+    margin:0;
+  }
+
+  .panel-body{
+    padding:20px 22px 30px;
+    overflow-y:auto;
+    flex:1;
+  }
+  .panel-section-title{
+    font-size:0.78rem;
+    font-weight:800;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin:0 0 8px;
+  }
+  .panel-desc{
+    font-size:1rem;
+    line-height:1.75;
+    margin:0 0 22px;
+    color:var(--ink);
+  }
+  .panel-tags{
+    display:flex;flex-wrap:wrap;gap:8px;
+    margin-bottom:22px;
+  }
+  .panel-tag{
+    font-size:0.78rem;
+    font-weight:600;
+    background:#f2ede3;
+    color:var(--ink-soft);
+    padding:5px 11px;
+    border-radius:8px;
+  }
+  .panel-source{
+    background:#f6f1e7;
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    line-height:1.6;
+    border:1px solid var(--line);
+  }
+  .panel-source b{color:var(--ink);}
+
+  .scale-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:0.78rem;font-weight:700;
+    background:#2b2620;color:#fff;
+    padding:4px 10px;border-radius:8px;
+    margin-bottom:18px;
+  }
+
+  /* ==================== תצוגת מובייל: ציר אנכי ==================== */
+  .mobile-timeline{
+    display:none;
+    padding:8px 16px 60px;
+    max-width:640px;
+    margin:0 auto;
+  }
+  .mobile-era{
+    margin-bottom:18px;
+    border-radius:18px;
+    padding:2px 2px 12px;
+  }
+  .mobile-era-head{
+    position:sticky;
+    top:0;
+    padding:14px 12px 8px;
+    z-index:5;
+    backdrop-filter:blur(2px);
+    border-radius:18px 18px 0 0;
+  }
+  .mobile-era-title{
+    font-weight:800;
+    font-size:1.02rem;
+    margin:0 0 2px;
+  }
+  .mobile-era-sub{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    font-weight:500;
+    margin:0;
+  }
+  .mobile-track{
+    position:relative;
+    padding:2px 12px 2px 4px;
+    margin-top:2px;
+  }
+  .mobile-wave-svg{
+    position:absolute;
+    top:0; right:0;
+    width:56px; height:100%;
+    pointer-events:none;
+    z-index:0;
+    overflow:visible;
+  }
+  .mobile-card{
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:10px 0;
+    cursor:pointer;
+    text-align:right;
+  }
+  .mobile-dot-slot{
+    flex:0 0 56px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding-top:2px;
+  }
+  .mobile-dot{
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;
+    border:3px solid var(--bg);
+    box-shadow:0 0 0 2px var(--line), 0 3px 8px rgba(43,38,32,0.18);
+    position:relative;
+    transition:transform .15s ease;
+    flex-shrink:0;
+  }
+  .mobile-dot svg{ width:52%; height:52%; }
+  .mobile-scale-badge{
+    position:absolute;
+    bottom:-4px; left:-4px;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:var(--ink);
+    color:#fff;
+    font-size:10px;
+    font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    border:2px solid var(--bg);
+  }
+  .mobile-card:active .mobile-dot{transform:scale(0.92);}
+  .mobile-card-body{
+    flex:1;
+    background:#fffdf9;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 14px;
+    box-shadow:0 2px 6px rgba(43,38,32,0.06);
+    margin-top:2px;
+  }
+  .mobile-card-title{
+    font-weight:800;
+    font-size:0.98rem;
+    margin:0 0 3px;
+    line-height:1.35;
+  }
+  .mobile-card-date{
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    font-weight:600;
+    margin:0 0 6px;
+  }
+  .mobile-card-snippet{
+    font-size:0.85rem;
+    color:var(--ink);
+    line-height:1.55;
+    margin:0;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .mobile-card-cat{
+    display:inline-block;
+    font-size:0.7rem;
+    font-weight:700;
+    color:#fff;
+    padding:2px 8px;
+    border-radius:999px;
+    margin-top:7px;
+  }
+  .mobile-card.fade{opacity:0.25;}
+
+  .desktop-only{display:block;}
+
+  @media (max-width:860px){
+    .canvas-wrap{display:none;}
+    .mobile-timeline{display:block;}
+    .desktop-only{display:none;}
+    #mobileHint{display:block !important;}
+    .app-header{padding:20px 16px 14px;}
+    .app-header h1{font-size:1.25rem;}
+    .app-header .sub{font-size:0.86rem;}
+    .app-header .hint{font-size:0.78rem;}
+    .controls{gap:8px;}
+    .filter-btn{padding:7px 12px;font-size:0.8rem;}
+    .side-panel{width:100vw;}
+  }
+
+  @media (max-width:640px){
+    .app-header h1{font-size:1.15rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>מפת איומים: קמפייני השפעה זרים נגד ישראל</h1>
+  <p class="sub">ציר זמן אינטראקטיבי 2019–2024 · לפי ממצאי דו״ח מבקר המדינה</p>
+  <p class="hint desktop-only">לחצו על כל צומת בציר כדי לפתוח חלונית עם פירוט מלא · גללו אופקית לצפייה בכל השנים →</p>
+  <p class="hint" style="display:none" id="mobileHint">הקישו על כל אירוע כדי לפתוח פירוט מלא · גללו למטה לפי סדר כרונולוגי ↓</p>
+  <div class="controls" id="filterControls"></div>
+  <div class="legend-note">גודל הצומת משקף את היקף/עוצמת הקמפיין · מיקום אופקי = סדר כרונולוגי · שורה = זהות הגורם המפעיל</div>
+</div>
+
+<div class="canvas-wrap" id="canvasWrap" dir="ltr">
+  <svg id="mainSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="mobile-timeline" id="mobileTimeline"></div>
+
+<div class="overlay" id="overlay"></div>
+<div class="side-panel" id="sidePanel">
+  <div class="panel-head">
+    <button class="panel-close" id="panelClose">✕</button>
+    <div id="panelCatBadge" class="panel-cat-badge"></div>
+    <h2 class="panel-title" id="panelTitle"></h2>
+    <p class="panel-date" id="panelDate"></p>
+  </div>
+  <div class="panel-body">
+    <div id="panelScalePill"></div>
+    <div class="panel-section-title">מה קרה</div>
+    <p class="panel-desc" id="panelDesc"></p>
+    <div class="panel-tags" id="panelTags"></div>
+    <div class="panel-source" id="panelSource"></div>
+  </div>
+</div>
+
+<script>
+/* ==================== נתונים ==================== */
+const CATEGORIES = {
+  state:   { label: 'מדינה עוינת מזוהה — איראן', color: '#c1440e', soft:'#e9c3a8' },
+  network: { label: 'רשת מתואמת (לא-מדינתית)', color: '#8b5e34', soft:'#ddc7ab' },
+  unknown: { label: 'גורם בינלאומי / לא מזוהה', color: '#b5a642', soft:'#e6dfad' },
+};
+
+const ROWS = {
+  state:   { y: 250, label: 'איראן (מדינתי)' },
+  network: { y: 450, label: 'רשתות מתואמות' },
+  unknown: { y: 650, label: 'לא מזוהה / בינ״ל' },
+};
+
+// x גדל = מוקדם יותר בזמן (כדי שהאירוע הראשון יופיע ראשון בגלילה מימין ב-RTL)
+const nodes = [
+  {
+    id:'n1', x:2340, category:'unknown', scale:2,
+    title:'קמפיין נגד האירוויזיון', date:'2019',
+    desc:'חשיפת פעילות מתואמת של ארגונים ברחבי העולם שיצרו מראית עין של קמפיין עממי רחב היקף נגד קיום תחרות האירוויזיון בישראל, במטרה להפעיל לחץ על אמנים משתתפים ועל גופי שידור בינלאומיים לצמצם את מעורבותם או להחרים את האירוע.',
+    tags:['תרבות ואירועים בינלאומיים','לחץ על אמנים וגופי שידור','מראית עין של קמפיין עממי'],
+  },
+  {
+    id:'n2', x:2050, category:'state', scale:2,
+    title:'התחזות לקידום אינטרסים איראניים', date:'2019–2020',
+    desc:'זוהתה פלטפורמה של חשבונות פיקטיביים שהתחזו לפוליטיקאים ולגופי תקשורת אמריקאיים, במטרה לקדם אינטרסים איראניים במרחב הציבורי האמריקאי — תוך ניסיון להשפיע גם על השיח הישראלי דרך אותה תשתית תוכן.',
+    tags:['חשבונות פיקטיביים','התחזות לתקשורת אמריקאית','תשתית תעמולה איראנית'],
+  },
+  {
+    id:'n3', x:1780, category:'state', scale:3,
+    title:'קמפיינים סביב מועדים רגישים ובחירות', date:'2021–2022',
+    desc:'זוהו מאמצים איראניים ליצירת תסיסה ופילוג בציבור הישראלי, שתוזמנו סביב מערכות בחירות, "יום ירושלים האיראני" ופתיחת שנת הלימודים — תוך שימוש במסרוני SMS ובפעילות מתואמת ברשתות החברתיות.',
+    tags:['הפצת SMS המונית','בחירות בישראל','ניצול מועדים סמליים'],
+  },
+  {
+    id:'n4', x:1500, category:'state', scale:3,
+    title:'קמפיין סביב מחאת הרפורמה המשפטית', date:'יוני 2023',
+    desc:'המשטרה הזהירה מפני קמפיין מטעם מדינה זרה (המיוחס לאיראן) שנועד להעמיק את הקיטוב החברתי ולעודד אלימות בין קבוצות שונות בתוך המחאה נגד הרפורמה המשפטית, במטרה לערער את היציבות הפנימית של המדינה.',
+    tags:['ניצול מחאה פנימית','עידוד אלימות בין קבוצות','אזהרת משטרת ישראל'],
+  },
+  {
+    id:'n5', x:1260, category:'state', scale:2,
+    title:'קמפיין "משפט הבוגדים"', date:'שלהי 2023',
+    desc:'קמפיין המיוחס לאיראן שבמסגרתו פורסמו תמונות של שוטרים תחת הכיתוב "בוגדים", כחלק ממאמץ שיטתי לנצל מחלוקות פנימיות בחברה הישראלית ולפגוע באמון הציבור במוסדות אכיפת החוק.',
+    tags:['תיוג שוטרים כ"בוגדים"','ניצול מחלוקות פנימיות','פגיעה באמון במוסדות'],
+  },
+  {
+    id:'n6', x:1080, category:'state', scale:4,
+    title:'קמפיין #Gazagenocide', date:'החל מ-11.10.2023',
+    desc:'קמפיין איראני מאורגן שהחל בימים הראשונים של מלחמת "חרבות ברזל", שמטרתו לקבע ברשתות החברתיות נרטיב גורף של "רצח עם" ולעצב באמצעותו את דעת הקהל הבינלאומית נגד ישראל בשלב הקריטי הראשון של הלחימה.',
+    tags:['נרטיב "רצח עם"','דעת קהל בינלאומית','ימי הלחימה הראשונים'],
+  },
+  {
+    id:'n7', x:860, category:'unknown', scale:3,
+    title:'אירוע בית החולים אל-אהלי', date:'אוקטובר 2023',
+    desc:'זוהו מניפולציה ושימוש בבוטים ברשתות החברתיות להדהוד מיידי ומואץ של נרטיב שקרי שהאשים את ישראל בהפצצת בית החולים אל-אהלי בעזה, זמן קצר בלבד לאחר האירוע — עוד בטרם התאפשרה בדיקה עצמאית של הנסיבות.',
+    tags:['שימוש בבוטים','הדהוד נרטיב שקרי','תזמון מיידי לאחר האירוע'],
+  },
+  {
+    id:'n8', x:680, category:'network', scale:4,
+    title:'רשת ההשפעה "איסנאד" (ISNAD)', date:'דצמבר 2023 – אוגוסט 2024',
+    desc:'רשת השפעה אסלאמיסטית שפעלה באופן מתואם להשגת הפסקת אש בתנאים הנוחים לחמאס, באמצעות ניסיון שיטתי להשפיע על דעת הקהל הישראלית פנימה. הרשת כללה מאות פרופילים מזויפים בפלטפורמת X (טוויטר לשעבר) שפעלו במקביל להטיית השיח הציבורי.',
+    tags:['מאות פרופילים מזויפים ב-X','לחץ להפסקת אש בתנאי חמאס','פעילות אסלאמיסטית מתואמת'],
+  },
+  {
+    id:'n9', x:420, category:'state', scale:4,
+    title:'ניצול מחאת החטופים', date:'נחשף ינואר 2024',
+    desc:'השב"כ חשף פלטפורמות איראניות — ובהן "דמעות המלחמה" — שגייסו אזרחים ישראלים לביצוע משימות בשטח, כגון תליית שלטים וצילום מפגינים, תחת אצטלה של פעילות אזרחית עצמאית. בהקשר זה זוהו גם קמפיינים נוספים תחת השמות "ישראל השנייה" ו"הנוקמים".',
+    tags:['גיוס אזרחים ישראלים לביצוע משימות','"דמעות המלחמה"','"ישראל השנייה" ו"הנוקמים"'],
+  },
+  {
+    id:'n10', x:140, category:'state', scale:5,
+    title:'קמפיין ה-SMS המבהיל', date:'ספטמבר 2024',
+    desc:'משלוח המוני של כ-5 מיליון מסרוני SMS מבהילים לאזרחי ישראל, חלקם התחזו להודעות רשמיות מטעם פיקוד העורף, שקראו לציבור להיכנס מיידית למרחב מוגן ללא אזעקה בפועל. הפעולה יוחסה לאיראן ולחיזבאללה, וזוהתה כניסיון לוחמה פסיכולוגית ישירה נגד העורף האזרחי.',
+    tags:['כ-5 מיליון מסרונים','התחזות לפיקוד העורף','לוחמה פסיכולוגית נגד העורף'],
+  },
+];
+
+// קווי-על תקופתיים (רקע)
+const eras = [
+  { from:1960, to:2400, title:'2019–2020: השפעה בשגרה ובאירועי תרבות', sub:'ניצול תשתיות תרבות ורשתות חברתיות בשגרה' },
+  { from:1600, to:1960, title:'2021–2022: ניצול מועדים רגישים ובחירות', sub:'תזמון סביב אירועים פוליטיים וסמליים' },
+  { from:1180, to:1600, title:'2023: העמקת הקיטוב החברתי', sub:'ניסיון לערער יציבות פנימית טרם המלחמה' },
+  { from:760,  to:1180, title:'אוקטובר 2023: פרוץ "חרבות ברזל"', sub:'עיצוב נרטיב מהיר בזירה הבינלאומית' },
+  { from:0,    to:760,  title:'2024: לוחמה פסיכולוגית', sub:'ניצול מחאת החטופים והעורף האזרחי' },
+];
+
+// קווי קישור ידניים בין שורות (קשר תמטי חוצה-קטגוריה)
+const crossLinks = [
+  { from:'n6', to:'n8', dashed:true },
+  { from:'n8', to:'n9', dashed:true },
+];
+
+/* ==================== גיאומטריה ==================== */
+const W = 2450, H = 820;
+const svg = document.getElementById('mainSvg');
+svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+svg.setAttribute('width', W);
+svg.setAttribute('height', H);
+
+function ns(tag){ return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+function radiusFor(scale){ return 20 + scale*5; }
+
+// defs: markers + shadow
+const defs = ns('defs');
+defs.innerHTML = `
+  <marker id="arrowGray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#c9c0af"></path>
+  </marker>
+`;
+svg.appendChild(defs);
+
+// era bands
+eras.forEach((era, i) => {
+  const rect = ns('rect');
+  rect.setAttribute('x', era.from);
+  rect.setAttribute('y', 0);
+  rect.setAttribute('width', era.to - era.from);
+  rect.setAttribute('height', H);
+  rect.setAttribute('fill', i % 2 === 0 ? 'var(--bg-band-a)' : 'var(--bg-band-b)');
+  svg.appendChild(rect);
+
+  const title = ns('text');
+  title.setAttribute('x', (era.from + era.to)/2);
+  title.setAttribute('y', 50);
+  title.setAttribute('text-anchor','middle');
+  title.setAttribute('class','era-band-label');
+  title.textContent = era.title;
+  svg.appendChild(title);
+
+  const sub = ns('text');
+  sub.setAttribute('x', (era.from + era.to)/2);
+  sub.setAttribute('y', 74);
+  sub.setAttribute('text-anchor','middle');
+  sub.setAttribute('class','era-band-sub');
+  sub.textContent = era.sub;
+  svg.appendChild(sub);
+
+  if (i > 0){
+    const divider = ns('line');
+    divider.setAttribute('x1', era.to); divider.setAttribute('x2', era.to);
+    divider.setAttribute('y1', 0); divider.setAttribute('y2', H);
+    divider.setAttribute('stroke', 'var(--line)');
+    divider.setAttribute('stroke-dasharray','3 6');
+    svg.appendChild(divider);
+  }
+});
+
+// row labels (right edge, once)
+Object.entries(ROWS).forEach(([key, row]) => {
+  const bg = ns('rect');
+  bg.setAttribute('x', W-190); bg.setAttribute('y', row.y-16);
+  bg.setAttribute('width', 170); bg.setAttribute('height', 30);
+  bg.setAttribute('rx', 15);
+  bg.setAttribute('fill', CATEGORIES[key].soft);
+  svg.appendChild(bg);
+
+  const t = ns('text');
+  t.setAttribute('x', W-105); t.setAttribute('y', row.y+4);
+  t.setAttribute('text-anchor','middle');
+  t.setAttribute('class','row-label');
+  t.setAttribute('fill', '#3a3226');
+  t.textContent = row.label;
+  svg.appendChild(t);
+});
+
+// helper: get node by id
+function nodeById(id){ return nodes.find(n => n.id === id); }
+
+// build sequential edges per row (sorted by x desc = chronological)
+function buildRowEdges(){
+  const byRow = {};
+  nodes.forEach(n => {
+    if(!byRow[n.category]) byRow[n.category] = [];
+    byRow[n.category].push(n);
+  });
+  const edges = [];
+  Object.values(byRow).forEach(list => {
+    list.sort((a,b) => b.x - a.x);
+    for(let i=0;i<list.length-1;i++){
+      edges.push({ from:list[i].id, to:list[i+1].id, dashed:false });
+    }
+  });
+  return edges;
+}
+const rowEdges = buildRowEdges();
+
+function pathBetween(a, b, curveStrength){
+  const ay = ROWS[a.category].y, by = ROWS[b.category].y;
+  const midX = (a.x + b.x)/2;
+  const midY = (ay + by)/2 - curveStrength;
+  return `M ${a.x} ${ay} Q ${midX} ${midY} ${b.x} ${by}`;
+}
+
+// draw edges group (behind nodes)
+const edgeLayer = ns('g');
+svg.appendChild(edgeLayer);
+
+[...rowEdges, ...crossLinks].forEach(e => {
+  const a = nodeById(e.from), b = nodeById(e.to);
+  if(!a || !b) return;
+  const p = ns('path');
+  const sameRow = a.category === b.category;
+  p.setAttribute('d', pathBetween(a, b, sameRow ? -40 : (e.dashed ? 90 : 0)));
+  p.setAttribute('class', 'edge-path' + (e.dashed ? ' dashed' : ''));
+  edgeLayer.appendChild(p);
+});
+
+// draw nodes
+const nodeLayer = ns('g');
+svg.appendChild(nodeLayer);
+
+nodes.forEach(n => {
+  const row = ROWS[n.category];
+  const cat = CATEGORIES[n.category];
+  const r = radiusFor(n.scale);
+
+  const g = ns('g');
+  g.setAttribute('class','node-group');
+  g.setAttribute('data-id', n.id);
+  g.setAttribute('data-cat', n.category);
+
+  const halo = ns('circle');
+  halo.setAttribute('cx', n.x); halo.setAttribute('cy', row.y);
+  halo.setAttribute('r', r+16);
+  halo.setAttribute('fill', cat.soft);
+  halo.setAttribute('opacity', 0.55);
+  halo.setAttribute('class','node-halo');
+  g.appendChild(halo);
+
+  const circle = ns('circle');
+  circle.setAttribute('cx', n.x); circle.setAttribute('cy', row.y);
+  circle.setAttribute('r', r);
+  circle.setAttribute('fill', cat.color);
+  circle.setAttribute('class','node-circle');
+  g.appendChild(circle);
+
+  const badge = ns('text');
+  badge.setAttribute('x', n.x); badge.setAttribute('y', row.y+4);
+  badge.setAttribute('text-anchor','middle');
+  badge.setAttribute('class','node-scale-badge');
+  badge.textContent = n.scale;
+  g.appendChild(badge);
+
+  const title = ns('text');
+  title.setAttribute('x', n.x); title.setAttribute('y', row.y + r + 30);
+  title.setAttribute('text-anchor','middle');
+  title.setAttribute('class','node-title');
+  title.textContent = n.title;
+  g.appendChild(title);
+
+  const date = ns('text');
+  date.setAttribute('x', n.x); date.setAttribute('y', row.y + r + 50);
+  date.setAttribute('text-anchor','middle');
+  date.setAttribute('class','node-date');
+  date.textContent = n.date;
+  g.appendChild(date);
+
+  g.addEventListener('click', () => openPanel(n));
+  nodeLayer.appendChild(g);
+});
+
+/* ==================== תצוגת מובייל (אנכית) ==================== */
+const mobileTimeline = document.getElementById('mobileTimeline');
+
+// אייקון SVG פשוט לכל קטגוריה — מזהה חזותי של סוג הגורם המפעיל
+const CATEGORY_ICONS = {
+  // מדינה עוינת — חץ/יעד
+  state: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="3.4"></circle></svg>`,
+  // רשת מתואמת — צמתים מחוברים
+  network: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.4"></circle><circle cx="18" cy="6" r="2.4"></circle><circle cx="12" cy="18" r="2.4"></circle><path d="M7.8 7.6 L10.6 16 M16.2 7.6 L13.4 16 M8.4 6 L15.6 6"></path></svg>`,
+  // לא מזוהה — סימן שאלה
+  unknown: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9c0-2 1.6-3.4 3.4-3.4S15.4 7 15.4 9c0 1.7-1 2.4-2.1 3.2-.9.6-1.3 1.2-1.3 2.3"></path><circle cx="12" cy="17.6" r="0.9" fill="#fff" stroke="none"></circle></svg>`,
+};
+
+// גוני רקע רכים לפי תקופה (מתאימים לרצועות שברקע הגרסה הרחבה)
+const ERA_TINTS = ['#f3ede1', '#faf7f1', '#f3ede1', '#faf7f1', '#f3ede1'];
+
+// סדר כרונולוגי: x גדול = מוקדם, אז ממיינים יורד לפי x כדי לקבל הקדום קודם מלמעלה למטה
+const chronological = [...nodes].sort((a,b) => b.x - a.x);
+
+function mobileDotSize(scale){ return 32 + scale*5; } // קטן יותר מהדסקטופ, אך יחסי לעוצמה
+
+eras.forEach((era, eraIdx) => {
+  const eraNodes = chronological.filter(n => n.x >= era.from && n.x <= era.to);
+  if (eraNodes.length === 0) return;
+
+  const section = document.createElement('div');
+  section.className = 'mobile-era';
+  section.style.background = ERA_TINTS[eraIdx % ERA_TINTS.length];
+
+  const head = document.createElement('div');
+  head.className = 'mobile-era-head';
+  head.style.background = ERA_TINTS[eraIdx % ERA_TINTS.length];
+  head.innerHTML = `<p class="mobile-era-title">${era.title}</p><p class="mobile-era-sub">${era.sub}</p>`;
+  section.appendChild(head);
+
+  const track = document.createElement('div');
+  track.className = 'mobile-track';
+
+  eraNodes.forEach(n => {
+    const cat = CATEGORIES[n.category];
+    const size = mobileDotSize(n.scale);
+    const card = document.createElement('div');
+    card.className = 'mobile-card node-group';
+    card.setAttribute('data-cat', n.category);
+    card.innerHTML = `
+      <div class="mobile-dot-slot">
+        <div class="mobile-dot" style="background:${cat.color};width:${size}px;height:${size}px">
+          ${CATEGORY_ICONS[n.category]}
+          <span class="mobile-scale-badge">${n.scale}</span>
+        </div>
+      </div>
+      <div class="mobile-card-body">
+        <p class="mobile-card-title">${n.title}</p>
+        <p class="mobile-card-date">${n.date}</p>
+        <p class="mobile-card-snippet">${n.desc}</p>
+        <span class="mobile-card-cat" style="background:${cat.color}">${cat.label}</span>
+      </div>
+    `;
+    card.addEventListener('click', () => openPanel(n));
+    track.appendChild(card);
+  });
+
+  section.appendChild(track);
+  mobileTimeline.appendChild(section);
+
+  // בניית קו-חיבור גלי שעובר דרך מרכזי הנקודות בפועל (אחרי שהדפדפן חישב את הגובה בפועל)
+  requestAnimationFrame(() => {
+    const dots = track.querySelectorAll('.mobile-dot');
+    if (dots.length < 1) return;
+    const trackHeight = track.offsetHeight;
+    const baseX = 28; // מרכז עמודת הנקודות בתוך ה-slot (56px רוחב)
+    const amp = 9;     // עוצמת התנודה של הגל
+
+    const points = Array.from(dots).map((dot, i) => {
+      const rect = dot.getBoundingClientRect();
+      const trackRect = track.getBoundingClientRect();
+      const centerY = rect.top - trackRect.top + rect.height/2;
+      const x = baseX + (i % 2 === 0 ? -amp : amp) * (dots.length > 1 ? 1 : 0);
+      return { x, y: centerY };
+    });
+
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 1; i < points.length; i++) {
+      const midY = (points[i-1].y + points[i].y) / 2;
+      d += ` C ${points[i-1].x} ${midY}, ${points[i].x} ${midY}, ${points[i].x} ${points[i].y}`;
+    }
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('class', 'mobile-wave-svg');
+    svg.setAttribute('viewBox', `0 0 56 ${trackHeight}`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', 'var(--line)');
+    path.setAttribute('stroke-width', '2.5');
+    path.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(path);
+    track.insertBefore(svg, track.firstChild);
+  });
+});
+
+/* ==================== פילטרים ==================== */
+const filterControls = document.getElementById('filterControls');
+let activeFilter = 'all';
+
+function renderFilters(){
+  filterControls.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-btn' + (activeFilter==='all' ? ' active' : '');
+  allBtn.textContent = 'הצג הכל';
+  allBtn.onclick = () => { activeFilter='all'; applyFilter(); renderFilters(); };
+  filterControls.appendChild(allBtn);
+
+  Object.entries(CATEGORIES).forEach(([key, cat]) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (activeFilter===key ? ' active' : '');
+    btn.innerHTML = `<span class="filter-dot" style="background:${cat.color}"></span>${cat.label}`;
+    btn.onclick = () => { activeFilter = key; applyFilter(); renderFilters(); };
+    filterControls.appendChild(btn);
+  });
+}
+
+function applyFilter(){
+  document.querySelectorAll('.node-group').forEach(g => {
+    const cat = g.getAttribute('data-cat');
+    if(activeFilter === 'all' || cat === activeFilter){
+      g.classList.remove('fade');
+    } else {
+      g.classList.add('fade');
+    }
+  });
+}
+renderFilters();
+
+/* ==================== חלונית פרטים ==================== */
+const overlay = document.getElementById('overlay');
+const sidePanel = document.getElementById('sidePanel');
+const panelClose = document.getElementById('panelClose');
+
+function openPanel(n){
+  const cat = CATEGORIES[n.category];
+  document.getElementById('panelCatBadge').style.background = cat.color;
+  document.getElementById('panelCatBadge').textContent = cat.label;
+  document.getElementById('panelTitle').textContent = n.title;
+  document.getElementById('panelDate').textContent = n.date;
+  document.getElementById('panelDesc').textContent = n.desc;
+
+  const scaleWrap = document.getElementById('panelScalePill');
+  scaleWrap.innerHTML = '';
+  const pill = document.createElement('span');
+  pill.className = 'scale-pill';
+  pill.textContent = `רמת היקף/עוצמה משוערת: ${n.scale}/5`;
+  scaleWrap.appendChild(pill);
+
+  const tagsWrap = document.getElementById('panelTags');
+  tagsWrap.innerHTML = '';
+  n.tags.forEach(t => {
+    const el = document.createElement('span');
+    el.className = 'panel-tag';
+    el.textContent = t;
+    tagsWrap.appendChild(el);
+  });
+
+  document.getElementById('panelSource').innerHTML =
+    `<b>מקור:</b> דו״ח מבקר המדינה בנושא היערכות ישראל להתמודדות עם קמפייני השפעה זרים (כפי שנמסר לצורך מפה זו). לשילוב קישור ישיר לסעיף הרלוונטי בדו״ח — יש להוסיפו כאן בהמשך.`;
+
+  overlay.classList.add('open');
+  sidePanel.classList.add('open');
+}
+
+function closePanel(){
+  overlay.classList.remove('open');
+  sidePanel.classList.remove('open');
+}
+overlay.addEventListener('click', closePanel);
+panelClose.addEventListener('click', closePanel);
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closePanel(); });
+
+/* גלילה התחלתית לצד ימין (האירועים המוקדמים) */
+const canvasWrap = document.getElementById('canvasWrap');
+canvasWrap.scrollLeft = canvasWrap.scrollWidth;
+</script>
+</body>
+</html>
