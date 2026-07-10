@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>קמפיינים זרים להשפעה על התודעה בישראל 2019–2024</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#1f1a17;
+    --ink-soft:#6b6255;
+    --red:#9e1b28;
+    --red-dark:#7a1420;
+    --red-soft:#f3d9db;
+    --line:#c9515c;
+    --box-border:#c9515c;
+    --panel-bg:#fffdf9;
+    --shadow: 0 12px 34px rgba(43,38,32,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Assistant',sans-serif;}
+
+  .app-header{
+    padding:26px 24px 14px;
+    text-align:center;
+  }
+  .app-header h1{
+    margin:0 0 8px;
+    font-size:2rem;
+    font-weight:800;
+    line-height:1.25;
+  }
+  .app-header .subtitle{
+    margin:0 0 6px;
+    color:var(--ink);
+    font-size:1.08rem;
+    font-weight:600;
+  }
+  .app-header .hint{
+    margin:0 0 16px;
+    color:var(--ink-soft);
+    font-size:0.85rem;
+    font-weight:500;
+  }
+
+  .legend{
+    display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+    margin-bottom:6px;
+  }
+  .legend-btn{
+    display:inline-flex;align-items:center;gap:7px;
+    font-family:'Assistant',sans-serif;
+    font-size:0.82rem;font-weight:700;
+    color:var(--ink-soft);
+    background:#fff;
+    border:1.5px solid #ddd3c0;
+    border-radius:999px;
+    padding:7px 15px;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease, color .15s ease;
+  }
+  .legend-btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,0.08);}
+  .legend-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .legend-btn .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  .canvas-wrap{
+    display:flex;justify-content:center;
+    padding:10px 12px 50px;
+    overflow-x:auto;
+  }
+  svg{display:block;max-width:100%;height:auto;}
+
+  .era-circle{
+    fill:var(--red);
+    stroke:#fff;
+    stroke-width:3;
+    cursor:pointer;
+    transition:filter .15s ease, transform .15s ease;
+    transform-box:fill-box;
+    transform-origin:center;
+  }
+  .era-group:hover .era-circle{filter:drop-shadow(0 8px 16px rgba(0,0,0,0.28));transform:scale(1.03);}
+  .era-year{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:21px;
+    fill:#fff;
+    text-anchor:middle;
+    pointer-events:none;
+  }
+  .era-label{
+    font-family:'Assistant',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    fill:#fff;
+    text-anchor:middle;
+    pointer-events:none;
+  }
+
+  .ring{
+    fill:none;
+    stroke:var(--red);
+    stroke-width:1.6;
+    opacity:0.75;
+  }
+
+  .fade{opacity:0.18 !important;}
+
+  /* Side panel — זהה במנגנון לפרויקטים קודמים */
+  .overlay{
+    position:fixed;inset:0;background:rgba(30,26,20,0.45);
+    opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:40;
+  }
+  .overlay.open{opacity:1;pointer-events:auto;}
+  .side-panel{
+    position:fixed;top:0;right:0;height:100%;width:min(440px, 92vw);
+    background:var(--panel-bg);box-shadow:var(--shadow);
+    transform:translateX(105%);transition:transform .3s cubic-bezier(.22,.9,.32,1);
+    z-index:50;display:flex;flex-direction:column;border-left:1px solid #ddd;
+  }
+  .side-panel.open{transform:translateX(0);}
+  .panel-head{padding:22px 22px 16px;border-bottom:1px solid #eee;position:relative;}
+  .panel-close{
+    position:absolute;top:16px;left:16px;width:32px;height:32px;border-radius:50%;
+    border:1px solid #ddd;background:#fff;font-size:16px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;color:var(--ink-soft);
+  }
+  .panel-close:hover{background:#f2ede3;color:var(--ink);}
+  .panel-cat-badge{
+    display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:700;
+    padding:4px 10px;border-radius:999px;color:#fff;margin-bottom:10px;
+  }
+  .panel-title{font-size:1.3rem;font-weight:800;margin:0 0 6px;line-height:1.3;}
+  .panel-date{font-size:0.88rem;color:var(--ink-soft);font-weight:600;margin:0;}
+  .panel-body{padding:20px 22px 30px;overflow-y:auto;flex:1;}
+  .panel-section-title{
+    font-size:0.78rem;font-weight:800;color:var(--ink-soft);
+    text-transform:uppercase;letter-spacing:0.4px;margin:16px 0 10px;
+  }
+  .panel-section-title:first-of-type{margin-top:0;}
+  .panel-desc{font-size:1rem;line-height:1.75;margin:0 0 4px;}
+
+  .panel-item{
+    border-right:4px solid var(--red);
+    background:#faf7f1;
+    border-radius:10px;
+    padding:13px 15px;
+    margin-bottom:14px;
+  }
+  .panel-item-head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:2px;
+  }
+  .panel-item-title{font-weight:800;font-size:0.95rem;line-height:1.35;}
+  .panel-item-date{font-size:0.76rem;color:var(--ink-soft);font-weight:600;white-space:nowrap;}
+  .panel-item-cat{display:block;font-size:0.74rem;font-weight:700;margin-bottom:8px;}
+  .panel-item-desc{font-size:0.87rem;line-height:1.6;margin:0 0 10px;color:var(--ink);}
+  .panel-item-tags{display:flex;flex-wrap:wrap;gap:6px;}
+  .panel-item-tag{
+    font-size:0.72rem;font-weight:600;background:#fff;border:1px solid #e5ddcd;
+    color:var(--ink-soft);padding:3px 9px;border-radius:6px;
+  }
+  .panel-item-source-link{
+    display:inline-block;
+    margin-top:10px;
+    font-size:0.76rem;
+    font-weight:700;
+    color:var(--red);
+    text-decoration:underline;
+  }
+  .panel-item-source-link:hover{color:var(--red-dark);}
+
+  .panel-source{
+    background:#f6f1e7;border-radius:10px;padding:14px 16px;font-size:0.85rem;
+    color:var(--ink-soft);line-height:1.6;border:1px solid #e5ddcd;
+  }
+  .panel-source b{color:var(--ink);}
+
+  @media (max-width:640px){
+    .app-header h1{font-size:1.55rem;}
+    .app-header .subtitle{font-size:0.95rem;}
+    .side-panel{width:100vw;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>קמפיינים זרים להשפעה על התודעה בישראל</h1>
+  <p class="subtitle">מפת נסיונות ההשפעה על הישראלים שזוהו לאורך השנים</p>
+  <p class="hint">לחצו על כל בועה להרחבה מלאה · המספר על כל בועה מציין את <b>מספר הקמפיינים שזוהו</b> באותה תקופה</p>
+  <div class="legend" id="legendFilter">
+    <button class="legend-btn active" data-filter="all">הצג הכל</button>
+    <button class="legend-btn" data-filter="state"><span class="dot" style="background:#c1440e"></span>מדינה עוינת מזוהה — איראן</button>
+    <button class="legend-btn" data-filter="network"><span class="dot" style="background:#8b5e34"></span>רשת מתואמת (לא-מדינתית)</button>
+    <button class="legend-btn" data-filter="unknown"><span class="dot" style="background:#b5a642"></span>גורם בינלאומי / לא מזוהה</button>
+  </div>
+</div>
+
+<div class="canvas-wrap">
+  <svg id="mainSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="side-panel" id="sidePanel">
+  <div class="panel-head">
+    <button class="panel-close" id="panelClose">✕</button>
+    <div id="panelCatBadge" class="panel-cat-badge"></div>
+    <h2 class="panel-title" id="panelTitle"></h2>
+    <p class="panel-date" id="panelDate"></p>
+  </div>
+  <div class="panel-body">
+    <div class="panel-section-title">על התקופה</div>
+    <p class="panel-desc" id="panelDesc"></p>
+    <div class="panel-section-title">קמפיינים מתועדים בתקופה זו</div>
+    <div id="panelItems"></div>
+    <div class="panel-source" id="panelSource"></div>
+  </div>
+</div>
+
+<script>
+/* ==================== נתונים ==================== */
+// כתובת דוח מבקר המדינה — מקור יחיד לכל קישורי המקור במפה
+const REPORT_URL = 'https://library.mevaker.gov.il/sites/DigitalLibrary/Documents/2026/Digital/2026-Digital.pdf';
+
+const CATS = {
+  state:   { label:'מדינה עוינת מזוהה — איראן', color:'#c1440e' },
+  network: { label:'רשת מתואמת (לא-מדינתית)', color:'#8b5e34' },
+  unknown: { label:'גורם בינלאומי / לא מזוהה', color:'#b5a642' },
+};
+
+// חמש התקופות המרכזיות (הבועות האדומות שעל הטבעת)
+const eras = [
+  {
+    id:'e1', angle:-90, year:'2019–2020', label:'השפעה בשגרה ובאירועי תרבות',
+    desc:'ניצול תשתיות תרבות ורשתות חברתיות בשגרה, טרם כל אירוע ביטחוני מיוחד — כבסיס להטמעת דפוסי פעולה שישמשו בהמשך.',
+    items:[
+      { date:'2019', title:'קמפיין נגד האירוויזיון', category:'unknown',
+        desc:'חשיפת פעילות מתואמת של ארגונים ברחבי העולם שיצרו מראית עין של קמפיין עממי רחב היקף נגד קיום תחרות האירוויזיון בישראל, במטרה להפעיל לחץ על אמנים משתתפים ועל גופי שידור בינלאומיים.',
+        tags:['תרבות ואירועים בינלאומיים','לחץ על אמנים וגופי שידור'] },
+      { date:'2019–2020', title:'התחזות לקידום אינטרסים איראניים', category:'state',
+        desc:'זוהתה פלטפורמה של חשבונות פיקטיביים שהתחזו לפוליטיקאים ולגופי תקשורת אמריקאיים, במטרה לקדם אינטרסים איראניים — תוך ניסיון להשפיע גם על השיח הישראלי.',
+        tags:['חשבונות פיקטיביים','התחזות לתקשורת אמריקאית'] },
+    ],
+  },
+  {
+    id:'e2', angle:-18, year:'2021–2022', label:'ניצול מועדים רגישים ובחירות',
+    desc:'תזמון מדויק סביב אירועים פוליטיים וסמליים בלוח השנה הישראלי.',
+    items:[
+      { date:'2021–2022', title:'קמפיינים סביב מועדים רגישים ובחירות', category:'state',
+        desc:'זוהו מאמצים איראניים ליצירת תסיסה ופילוג בציבור הישראלי, שתוזמנו סביב מערכות בחירות, "יום ירושלים האיראני" ופתיחת שנת הלימודים — תוך שימוש במסרוני SMS ובפעילות מתואמת ברשתות החברתיות.',
+        tags:['הפצת SMS המונית','בחירות בישראל','ניצול מועדים סמליים'] },
+    ],
+  },
+  {
+    id:'e3', angle:54, year:'2023', label:'ניצול ההפיכה המשטרית להעמקת הקיטוב החברתי',
+    desc:'ניסיון לערער את היציבות הפנימית של ישראל טרם המלחמה, באמצעות ניצול מחלוקות פנימיות קיימות.',
+    items:[
+      { date:'יוני 2023', title:'קמפיין סביב מחאת ההפיכה המשטרית', category:'state',
+        desc:'המשטרה הזהירה מפני קמפיין מטעם מדינה זרה (המיוחס לאיראן) שנועד להעמיק את הקיטוב החברתי ולעודד אלימות בין קבוצות שונות בתוך המחאה נגד ההפיכה המשטרית.',
+        tags:['ניצול מחאה פנימית','עידוד אלימות בין קבוצות'] },
+      { date:'שלהי 2023', title:'קמפיין "משפט הבוגדים"', category:'state', page:11,
+        desc:'קמפיין המיוחס לאיראן שבמסגרתו פורסמו תמונות של שוטרים תחת הכיתוב "בוגדים", כחלק ממאמץ שיטתי לנצל מחלוקות פנימיות בחברה הישראלית.',
+        tags:['תיוג שוטרים כ"בוגדים"','ניצול מחלוקות פנימיות'] },
+    ],
+  },
+  {
+    id:'e4', angle:126, year:'אוק׳ 2023', label:'מיד לאחר הטבח — עיצוב הנרטיב בזירה הבינלאומית',
+    desc:'עיצוב מהיר של נרטיב בזירה הבינלאומית בימים הראשונים והקריטיים של הלחימה.',
+    items:[
+      { date:'החל מ-11.10.2023', title:'קמפיין #Gazagenocide', category:'state', page:16,
+        desc:'קמפיין איראני מאורגן שהחל בימים הראשונים של המלחמה, שמטרתו לקבע ברשתות החברתיות נרטיב גורף של "רצח עם" ולעצב באמצעותו את דעת הקהל הבינלאומית נגד ישראל.',
+        tags:['נרטיב "רצח עם"','דעת קהל בינלאומית'] },
+      { date:'אוקטובר 2023', title:'אירוע בית החולים אל-אהלי', category:'unknown',
+        desc:'זוהו מניפולציה ושימוש בבוטים ברשתות החברתיות להדהוד מיידי של נרטיב שקרי שהאשים את ישראל בהפצצת בית החולים אל-אהלי בעזה, זמן קצר בלבד לאחר האירוע.',
+        tags:['שימוש בבוטים','הדהוד נרטיב שקרי'] },
+    ],
+  },
+  {
+    id:'e5', angle:198, year:'2024', label:'לוחמה פסיכולוגית וניצול מחאת החטופים',
+    desc:'הסלמה בעוצמת הפעולה: רשתות מתואמות רחבות היקף וניצול ישיר של העורף האזרחי.',
+    items:[
+      { date:'דצמבר 2023 – אוגוסט 2024', title:'רשת ההשפעה "איסנאד" (ISNAD)', category:'network', page:14,
+        desc:'רשת השפעה אסלאמיסטית שפעלה באופן מתואם להשגת הפסקת אש בתנאים הנוחים לחמאס, באמצעות ניסיון שיטתי להשפיע על דעת הקהל הישראלית. לפי הדוח, בין דצמבר 2023 לאוגוסט 2024 נוסחו במסגרת הקמפיין אלפי מסרים, ומספר הפרופילים המזויפים שפעלו ברשת X (טוויטר לשעבר) היה בין 300 ל-1,000.',
+        tags:['300–1,000 פרופילים מזויפים ב-X','לחץ להפסקת אש בתנאי חמאס'] },
+      { date:'נחשף ינואר 2024', title:'ניצול מחאת החטופים', category:'state',
+        desc:'השב"כ חשף פלטפורמות איראניות — ובהן "דמעות המלחמה" — שגייסו אזרחים ישראלים לביצוע משימות בשטח, כגון תליית שלטים וצילום מפגינים. זוהו גם "ישראל השנייה" ו"הנוקמים".',
+        tags:['גיוס אזרחים ישראלים','"דמעות המלחמה"','"ישראל השנייה" / "הנוקמים"'] },
+      { date:'ספטמבר 2024', title:'קמפיין ה-SMS המבהיל', category:'state',
+        desc:'משלוח המוני של כ-5 מיליון מסרוני SMS מבהילים לאזרחי ישראל, חלקם התחזו להודעות רשמיות מטעם פיקוד העורף. הפעולה יוחסה לאיראן ולחיזבאללה.',
+        tags:['כ-5 מיליון מסרונים','התחזות לפיקוד העורף'] },
+    ],
+  },
+];
+
+/* ==================== גיאומטריה — רספונסיבי ==================== */
+// שתי קונפיגורציות: דסקטופ (כפי שהיה) ומובייל (בועות ופונטים גדולים בהרבה,
+// כדי שהטקסט יישאר קריא גם כשה-SVG מוצג ברוחב מסך קטן בפועל).
+const CONFIGS = {
+  desktop: { W:820, H:820, R:260, eraR:105, yearFont:21, labelFont:13.5, labelLineH:17, maxChars:16, badgeR:15, badgeFont:13 },
+  mobile:  { W:420, H:420, R:118, eraR:76,  yearFont:16, labelFont:11,   labelLineH:13, maxChars:12, badgeR:13, badgeFont:11 },
+};
+function currentConfig(){ return window.innerWidth < 700 ? CONFIGS.mobile : CONFIGS.desktop; }
+
+let W, H, cx, cy, R, eraR;
+const svg = document.getElementById('mainSvg');
+
+function ns(tag){ return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+function toRad(deg){ return deg * Math.PI/180; }
+function pointOnCircle(radius, deg){
+  const r = toRad(deg);
+  return { x: cx + radius*Math.cos(r), y: cy + radius*Math.sin(r) };
+}
+function wrapLabel(text, maxChars){
+  const words = text.split(' ');
+  const lines = [];
+  let cur = '';
+  words.forEach(w => {
+    if ((cur + ' ' + w).trim().length > maxChars){ lines.push(cur.trim()); cur = w; }
+    else { cur = (cur + ' ' + w).trim(); }
+  });
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+let activeFilter = 'all';
+
+function renderMap(){
+  const cfg = currentConfig();
+  W = cfg.W; H = cfg.H; cx = W/2; cy = H/2; R = cfg.R; eraR = cfg.eraR;
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+  svg.innerHTML = '';
+
+  // שכבות ציור (מהתחתונה לעליונה) — אין יותר שכבת "hub" כי העיגול המרכזי ריק בכוונה
+  const ringLayer = ns('g'); svg.appendChild(ringLayer);
+  const eraLayer = ns('g'); svg.appendChild(eraLayer);
+
+  // טבעת מקשרת בין בועות התקופה
+  const ring = ns('circle');
+  ring.setAttribute('cx', cx); ring.setAttribute('cy', cy); ring.setAttribute('r', R);
+  ring.setAttribute('class', 'ring');
+  ringLayer.appendChild(ring);
+
+  eras.forEach(era => {
+    const pos = pointOnCircle(R, era.angle);
+
+    // ---- בועת התקופה ----
+    const g = ns('g');
+    g.setAttribute('class','era-group');
+    g.setAttribute('data-cats', [...new Set(era.items.map(it => it.category))].join(','));
+    g.style.cursor = 'pointer';
+
+    const circle = ns('circle');
+    circle.setAttribute('cx', pos.x); circle.setAttribute('cy', pos.y);
+    circle.setAttribute('r', eraR);
+    circle.setAttribute('class','era-circle');
+    g.appendChild(circle);
+
+    const yearText = ns('text');
+    yearText.setAttribute('x', pos.x);
+    yearText.setAttribute('class','era-year');
+    yearText.style.fontSize = cfg.yearFont + 'px';
+    yearText.textContent = era.year;
+
+    const labelLines = wrapLabel(era.label, cfg.maxChars);
+
+    // מרכוז אנכי דינמי של כל בלוק הטקסט (שנה + כותרת) בתוך העיגול,
+    // כך שהמספר בפועל של שורות הכותרת לא ישבור את היישור למרכז
+    const blockHeight = cfg.yearFont + 6 + labelLines.length*cfg.labelLineH;
+    const topY = pos.y - blockHeight/2;
+    yearText.setAttribute('y', topY + cfg.yearFont*0.8);
+    g.appendChild(yearText);
+
+    const labelBaseY = topY + cfg.yearFont + 6 + cfg.labelLineH*0.8;
+    labelLines.forEach((line, i) => {
+      const t = ns('text');
+      t.setAttribute('x', pos.x);
+      t.setAttribute('y', labelBaseY + i*cfg.labelLineH);
+      t.setAttribute('class','era-label');
+      t.style.fontSize = cfg.labelFont + 'px';
+      t.textContent = line;
+      g.appendChild(t);
+    });
+
+    const gTitle = ns('title');
+    gTitle.textContent = `${era.items.length} קמפיינים שזוהו בתקופה זו — לחצו להרחבה`;
+    g.appendChild(gTitle);
+
+    g.addEventListener('click', () => openEraPanel(era));
+    eraLayer.appendChild(g);
+
+    // תג קטן על העיגול עם מספר הקמפיינים בתקופה
+    const badgeCx = pos.x + eraR*0.72, badgeCy = pos.y - eraR*0.72;
+    const countBadge = ns('circle');
+    countBadge.setAttribute('cx', badgeCx); countBadge.setAttribute('cy', badgeCy);
+    countBadge.setAttribute('r', cfg.badgeR);
+    countBadge.setAttribute('fill', '#fff');
+    countBadge.setAttribute('stroke', 'var(--red)');
+    countBadge.setAttribute('stroke-width', '2');
+    g.appendChild(countBadge);
+
+    const countText = ns('text');
+    countText.setAttribute('x', badgeCx);
+    countText.setAttribute('y', badgeCy + cfg.badgeFont*0.35);
+    countText.setAttribute('text-anchor', 'middle');
+    countText.setAttribute('font-family', 'Assistant, sans-serif');
+    countText.setAttribute('font-weight', '800');
+    countText.setAttribute('font-size', cfg.badgeFont);
+    countText.setAttribute('fill', 'var(--red)');
+    countText.textContent = era.items.length;
+    g.appendChild(countText);
+  });
+
+  applyFilter(activeFilter);
+}
+
+function applyFilter(filter){
+  activeFilter = filter;
+  document.querySelectorAll('.era-group').forEach(g => {
+    const cats = (g.getAttribute('data-cats') || '').split(',');
+    if (filter === 'all' || cats.includes(filter)) {
+      g.classList.remove('fade');
+    } else {
+      g.classList.add('fade');
+    }
+  });
+}
+
+renderMap();
+
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(renderMap, 200);
+});
+
+/* ==================== חלונית פרטים ==================== */
+const overlay = document.getElementById('overlay');
+const sidePanel = document.getElementById('sidePanel');
+document.getElementById('panelClose').addEventListener('click', closePanel);
+overlay.addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+/* ==================== פילטר אינטראקטיבי (מקרא) ==================== */
+const legendButtons = document.querySelectorAll('.legend-btn');
+legendButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    legendButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter(btn.getAttribute('data-filter'));
+  });
+});
+
+function openEraPanel(era){
+  document.getElementById('panelCatBadge').style.background = 'var(--red)';
+  document.getElementById('panelCatBadge').textContent = `${era.items.length} קמפיינים בתקופה`;
+  document.getElementById('panelTitle').textContent = `${era.year} — ${era.label}`;
+  document.getElementById('panelDate').textContent = era.year;
+  document.getElementById('panelDesc').textContent = era.desc;
+
+  const itemsWrap = document.getElementById('panelItems');
+  itemsWrap.innerHTML = '';
+  era.items.forEach(item => {
+    const cat = CATS[item.category];
+    const card = document.createElement('div');
+    card.className = 'panel-item';
+    card.style.borderRightColor = cat.color;
+
+    const head = document.createElement('div');
+    head.className = 'panel-item-head';
+    head.innerHTML = `<span class="panel-item-title">${item.title}</span><span class="panel-item-date">${item.date}</span>`;
+    card.appendChild(head);
+
+    const catTag = document.createElement('span');
+    catTag.className = 'panel-item-cat';
+    catTag.style.color = cat.color;
+    catTag.textContent = cat.label;
+    card.appendChild(catTag);
+
+    const desc = document.createElement('p');
+    desc.className = 'panel-item-desc';
+    desc.textContent = item.desc;
+    card.appendChild(desc);
+
+    const tagsRow = document.createElement('div');
+    tagsRow.className = 'panel-item-tags';
+    (item.tags||[]).forEach(t => {
+      const tag = document.createElement('span');
+      tag.className = 'panel-item-tag';
+      tag.textContent = t;
+      tagsRow.appendChild(tag);
+    });
+    card.appendChild(tagsRow);
+
+    if (item.page) {
+      const srcLink = document.createElement('a');
+      srcLink.href = `${REPORT_URL}#page=${item.page}`;
+      srcLink.target = '_blank';
+      srcLink.rel = 'noopener';
+      srcLink.className = 'panel-item-source-link';
+      srcLink.textContent = `מקור: דוח מבקר המדינה, עמ׳ ${item.page} ↗`;
+      card.appendChild(srcLink);
+    }
+
+    itemsWrap.appendChild(card);
+  });
+
+  document.getElementById('panelSource').innerHTML =
+    `<b>מקור:</b> מבקר המדינה, דוח מיוחד — "ההתמודדות הלאומית עם השפעה זרה במרחב הדיגיטלי" (תמוז התשפ"ו, יולי 2026). <a href="${REPORT_URL}" target="_blank" rel="noopener" style="color:var(--red);font-weight:700;text-decoration:underline;">לצפייה בדוח המלא (PDF)</a>`;
+
+  overlay.classList.add('open');
+  sidePanel.classList.add('open');
+}
+function closePanel(){
+  overlay.classList.remove('open');
+  sidePanel.classList.remove('open');
+}
+</script>
+</body>
+</html>
