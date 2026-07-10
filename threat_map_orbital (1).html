@@ -161,6 +161,15 @@
     font-size:0.72rem;font-weight:600;background:#fff;border:1px solid #e5ddcd;
     color:var(--ink-soft);padding:3px 9px;border-radius:6px;
   }
+  .panel-item-source-link{
+    display:inline-block;
+    margin-top:10px;
+    font-size:0.76rem;
+    font-weight:700;
+    color:var(--red);
+    text-decoration:underline;
+  }
+  .panel-item-source-link:hover{color:var(--red-dark);}
 
   .panel-source{
     background:#f6f1e7;border-radius:10px;padding:14px 16px;font-size:0.85rem;
@@ -212,6 +221,9 @@
 
 <script>
 /* ==================== נתונים ==================== */
+// כתובת דוח מבקר המדינה — מקור יחיד לכל קישורי המקור במפה
+const REPORT_URL = 'https://library.mevaker.gov.il/sites/DigitalLibrary/Documents/2026/Digital/2026-Digital.pdf';
+
 const CATS = {
   state:   { label:'מדינה עוינת מזוהה — איראן', color:'#c1440e' },
   network: { label:'רשת מתואמת (לא-מדינתית)', color:'#8b5e34' },
@@ -248,7 +260,7 @@ const eras = [
       { date:'יוני 2023', title:'קמפיין סביב מחאת ההפיכה המשטרית', category:'state',
         desc:'המשטרה הזהירה מפני קמפיין מטעם מדינה זרה (המיוחס לאיראן) שנועד להעמיק את הקיטוב החברתי ולעודד אלימות בין קבוצות שונות בתוך המחאה נגד ההפיכה המשטרית.',
         tags:['ניצול מחאה פנימית','עידוד אלימות בין קבוצות'] },
-      { date:'שלהי 2023', title:'קמפיין "משפט הבוגדים"', category:'state',
+      { date:'שלהי 2023', title:'קמפיין "משפט הבוגדים"', category:'state', page:11,
         desc:'קמפיין המיוחס לאיראן שבמסגרתו פורסמו תמונות של שוטרים תחת הכיתוב "בוגדים", כחלק ממאמץ שיטתי לנצל מחלוקות פנימיות בחברה הישראלית.',
         tags:['תיוג שוטרים כ"בוגדים"','ניצול מחלוקות פנימיות'] },
     ],
@@ -257,7 +269,7 @@ const eras = [
     id:'e4', angle:126, year:'אוק׳ 2023', label:'מיד לאחר הטבח — עיצוב הנרטיב בזירה הבינלאומית',
     desc:'עיצוב מהיר של נרטיב בזירה הבינלאומית בימים הראשונים והקריטיים של הלחימה.',
     items:[
-      { date:'החל מ-11.10.2023', title:'קמפיין #Gazagenocide', category:'state',
+      { date:'החל מ-11.10.2023', title:'קמפיין #Gazagenocide', category:'state', page:16,
         desc:'קמפיין איראני מאורגן שהחל בימים הראשונים של המלחמה, שמטרתו לקבע ברשתות החברתיות נרטיב גורף של "רצח עם" ולעצב באמצעותו את דעת הקהל הבינלאומית נגד ישראל.',
         tags:['נרטיב "רצח עם"','דעת קהל בינלאומית'] },
       { date:'אוקטובר 2023', title:'אירוע בית החולים אל-אהלי', category:'unknown',
@@ -269,9 +281,9 @@ const eras = [
     id:'e5', angle:198, year:'2024', label:'לוחמה פסיכולוגית וניצול מחאת החטופים',
     desc:'הסלמה בעוצמת הפעולה: רשתות מתואמות רחבות היקף וניצול ישיר של העורף האזרחי.',
     items:[
-      { date:'דצמבר 2023 – אוגוסט 2024', title:'רשת ההשפעה "איסנאד" (ISNAD)', category:'network',
-        desc:'רשת השפעה אסלאמיסטית שפעלה באופן מתואם להשגת הפסקת אש בתנאים הנוחים לחמאס, באמצעות ניסיון שיטתי להשפיע על דעת הקהל הישראלית. הרשת כללה מאות פרופילים מזויפים בפלטפורמת X.',
-        tags:['מאות פרופילים מזויפים ב-X','לחץ להפסקת אש בתנאי חמאס'] },
+      { date:'דצמבר 2023 – אוגוסט 2024', title:'רשת ההשפעה "איסנאד" (ISNAD)', category:'network', page:14,
+        desc:'רשת השפעה אסלאמיסטית שפעלה באופן מתואם להשגת הפסקת אש בתנאים הנוחים לחמאס, באמצעות ניסיון שיטתי להשפיע על דעת הקהל הישראלית. לפי הדוח, בין דצמבר 2023 לאוגוסט 2024 נוסחו במסגרת הקמפיין אלפי מסרים, ומספר הפרופילים המזויפים שפעלו ברשת X (טוויטר לשעבר) היה בין 300 ל-1,000.',
+        tags:['300–1,000 פרופילים מזויפים ב-X','לחץ להפסקת אש בתנאי חמאס'] },
       { date:'נחשף ינואר 2024', title:'ניצול מחאת החטופים', category:'state',
         desc:'השב"כ חשף פלטפורמות איראניות — ובהן "דמעות המלחמה" — שגייסו אזרחים ישראלים לביצוע משימות בשטח, כגון תליית שלטים וצילום מפגינים. זוהו גם "ישראל השנייה" ו"הנוקמים".',
         tags:['גיוס אזרחים ישראלים','"דמעות המלחמה"','"ישראל השנייה" / "הנוקמים"'] },
@@ -484,11 +496,21 @@ function openEraPanel(era){
     });
     card.appendChild(tagsRow);
 
+    if (item.page) {
+      const srcLink = document.createElement('a');
+      srcLink.href = `${REPORT_URL}#page=${item.page}`;
+      srcLink.target = '_blank';
+      srcLink.rel = 'noopener';
+      srcLink.className = 'panel-item-source-link';
+      srcLink.textContent = `מקור: דוח מבקר המדינה, עמ׳ ${item.page} ↗`;
+      card.appendChild(srcLink);
+    }
+
     itemsWrap.appendChild(card);
   });
 
   document.getElementById('panelSource').innerHTML =
-    `<b>מקור:</b> דו״ח מבקר המדינה בנושא היערכות ישראל להתמודדות עם קמפייני השפעה זרים (כפי שנמסר לצורך מפה זו). לשילוב קישור ישיר לסעיף הרלוונטי — יש להוסיפו כאן בהמשך.`;
+    `<b>מקור:</b> מבקר המדינה, דוח מיוחד — "ההתמודדות הלאומית עם השפעה זרה במרחב הדיגיטלי" (תמוז התשפ"ו, יולי 2026). <a href="${REPORT_URL}" target="_blank" rel="noopener" style="color:var(--red);font-weight:700;text-decoration:underline;">לצפייה בדוח המלא (PDF)</a>`;
 
   overlay.classList.add('open');
   sidePanel.classList.add('open');
