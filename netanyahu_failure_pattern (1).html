@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מר כישלון: דפוס הפעולה שחוזר בכל חזית | זמן ישראל</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf7f1;
+    --bg-band-a:#f3ede1;
+    --bg-band-b:#faf7f1;
+    --ink:#2b2620;
+    --ink-soft:#6b6255;
+    --line:#c9c0af;
+    --panel-bg:#fffdf9;
+    --state:#c1440e;
+    --state-soft:#e9c3a8;
+    --network:#8b5e34;
+    --network-soft:#ddc7ab;
+    --unknown:#b5a642;
+    --unknown-soft:#e6dfad;
+    --shadow: 0 12px 34px rgba(43,38,32,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Assistant',sans-serif;}
+  body{min-height:100vh;}
+
+  .app-header{
+    padding:28px 32px 16px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fffdf9,var(--bg));
+    position:sticky;top:0;z-index:30;
+  }
+  .app-header h1{
+    margin:0 0 6px;
+    font-size:1.9rem;
+    font-weight:800;
+    letter-spacing:-0.3px;
+  }
+  .app-header p.sub{
+    margin:0 0 16px;
+    color:var(--ink-soft);
+    font-size:0.98rem;
+    font-weight:500;
+  }
+  .app-header p.hint{
+    margin:0 0 14px;
+    color:var(--ink-soft);
+    font-size:0.85rem;
+    font-weight:500;
+  }
+
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    align-items:center;
+  }
+  .filter-btn{
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    padding:8px 16px;
+    border-radius:999px;
+    font-family:'Assistant',sans-serif;
+    font-weight:600;
+    font-size:0.88rem;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .filter-btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,0.08);}
+  .filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .filter-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .filter-btn.cat-solid{color:#fff;border-color:transparent;}
+  .filter-btn.cat-solid.active{outline:3px solid var(--ink);outline-offset:2px;}
+
+  .legend-note{
+    text-align:center;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-top:10px;
+  }
+
+  .canvas-wrap{
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:20px 0 40px;
+    scroll-behavior:smooth;
+  }
+  .canvas-wrap::-webkit-scrollbar{height:10px;}
+  .canvas-wrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px;}
+  .canvas-wrap::-webkit-scrollbar-track{background:transparent;}
+
+  svg{display:block;}
+
+  .era-band-label{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:20px;
+    fill:var(--ink);
+  }
+  .era-band-sub{
+    font-family:'Assistant',sans-serif;
+    font-weight:500;
+    font-size:12.5px;
+    fill:var(--ink-soft);
+  }
+  .row-label{
+    font-family:'Assistant',sans-serif;
+    font-weight:700;
+    font-size:14px;
+  }
+
+  .node-group{cursor:pointer;}
+  .node-halo{transition:opacity .25s ease, r .25s ease;}
+  .node-circle{
+    stroke:#fff;
+    stroke-width:3;
+    transition:transform .18s ease, filter .18s ease;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  .node-group:hover .node-circle{transform:scale(1.08);filter:drop-shadow(0 6px 14px rgba(0,0,0,0.25));}
+  .node-title{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:16.5px;
+    fill:var(--ink);
+  }
+  .node-date{
+    font-family:'Assistant',sans-serif;
+    font-weight:600;
+    font-size:12px;
+    fill:var(--ink-soft);
+  }
+  .node-scale-badge{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:12px;
+    fill:#fff;
+  }
+
+  .fade{opacity:0.15 !important;}
+
+  .edge-path{
+    fill:none;
+    stroke:var(--line);
+    stroke-width:2.4;
+    marker-end:url(#arrowGray);
+  }
+  .edge-path.dashed{
+    stroke-dasharray:6 6;
+    stroke-width:2;
+    opacity:0.75;
+  }
+
+  /* Side panel */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(30,26,20,0.45);
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease;
+    z-index:40;
+  }
+  .overlay.open{opacity:1;pointer-events:auto;}
+
+  .side-panel{
+    position:fixed;
+    top:0;right:0;
+    height:100%;
+    width:min(440px, 92vw);
+    background:var(--panel-bg);
+    box-shadow:var(--shadow);
+    transform:translateX(105%);
+    transition:transform .3s cubic-bezier(.22,.9,.32,1);
+    z-index:50;
+    display:flex;
+    flex-direction:column;
+    border-left:1px solid var(--line);
+  }
+  .side-panel.open{transform:translateX(0);}
+
+  .panel-head{
+    padding:22px 22px 16px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .panel-close{
+    position:absolute;
+    top:16px;left:16px;
+    width:32px;height:32px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:16px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft);
+  }
+  .panel-close:hover{background:#f2ede3;color:var(--ink);}
+
+  .panel-cat-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:0.78rem;font-weight:700;
+    padding:4px 10px;border-radius:999px;
+    color:#fff;
+    margin-bottom:10px;
+  }
+  .panel-title{
+    font-size:1.35rem;
+    font-weight:800;
+    margin:0 0 6px;
+    line-height:1.3;
+  }
+  .panel-date{
+    font-size:0.88rem;
+    color:var(--ink-soft);
+    font-weight:600;
+    margin:0;
+  }
+
+  .panel-body{
+    padding:20px 22px 30px;
+    overflow-y:auto;
+    flex:1;
+  }
+  .panel-section-title{
+    font-size:0.78rem;
+    font-weight:800;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin:0 0 8px;
+  }
+  .panel-desc{
+    font-size:1rem;
+    line-height:1.75;
+    margin:0 0 22px;
+    color:var(--ink);
+  }
+  .panel-tags{
+    display:flex;flex-wrap:wrap;gap:8px;
+    margin-bottom:22px;
+  }
+  .panel-tag{
+    font-size:0.78rem;
+    font-weight:600;
+    background:#f2ede3;
+    color:var(--ink-soft);
+    padding:5px 11px;
+    border-radius:8px;
+  }
+  .panel-source{
+    background:#f6f1e7;
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    line-height:1.6;
+    border:1px solid var(--line);
+  }
+  .panel-source b{color:var(--ink);}
+
+  .scale-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:0.78rem;font-weight:700;
+    background:#2b2620;color:#fff;
+    padding:4px 10px;border-radius:8px;
+    margin-bottom:18px;
+  }
+
+  /* ==================== תצוגת מובייל: ציר אנכי ==================== */
+  .mobile-timeline{
+    display:none;
+    padding:8px 16px 60px;
+    max-width:640px;
+    margin:0 auto;
+  }
+  .mobile-era{
+    margin-bottom:18px;
+    border-radius:18px;
+    padding:2px 2px 12px;
+  }
+  .mobile-era-head{
+    position:sticky;
+    top:0;
+    padding:14px 12px 8px;
+    z-index:5;
+    backdrop-filter:blur(2px);
+    border-radius:18px 18px 0 0;
+  }
+  .mobile-era-title{
+    font-weight:800;
+    font-size:1.02rem;
+    margin:0 0 2px;
+  }
+  .mobile-era-sub{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    font-weight:500;
+    margin:0;
+  }
+  .mobile-track{
+    position:relative;
+    padding:2px 12px 2px 4px;
+    margin-top:2px;
+  }
+  .mobile-wave-svg{
+    position:absolute;
+    top:0; right:0;
+    width:56px; height:100%;
+    pointer-events:none;
+    z-index:0;
+    overflow:visible;
+  }
+  .mobile-card{
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:10px 0;
+    cursor:pointer;
+    text-align:right;
+  }
+  .mobile-dot-slot{
+    flex:0 0 56px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding-top:2px;
+  }
+  .mobile-dot{
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;
+    border:3px solid var(--bg);
+    box-shadow:0 0 0 2px var(--line), 0 3px 8px rgba(43,38,32,0.18);
+    position:relative;
+    transition:transform .15s ease;
+    flex-shrink:0;
+  }
+  .mobile-dot svg{ width:52%; height:52%; }
+  .mobile-scale-badge{
+    position:absolute;
+    bottom:-4px; left:-4px;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:var(--ink);
+    color:#fff;
+    font-size:10px;
+    font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    border:2px solid var(--bg);
+  }
+  .mobile-card:active .mobile-dot{transform:scale(0.92);}
+  .mobile-card-body{
+    flex:1;
+    background:#fffdf9;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 14px;
+    box-shadow:0 2px 6px rgba(43,38,32,0.06);
+    margin-top:2px;
+  }
+  .mobile-card-title{
+    font-weight:800;
+    font-size:0.98rem;
+    margin:0 0 3px;
+    line-height:1.35;
+  }
+  .mobile-card-date{
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    font-weight:600;
+    margin:0 0 6px;
+  }
+  .mobile-card-snippet{
+    font-size:0.85rem;
+    color:var(--ink);
+    line-height:1.55;
+    margin:0;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .mobile-card-cat{
+    display:inline-block;
+    font-size:0.7rem;
+    font-weight:700;
+    color:#fff;
+    padding:2px 8px;
+    border-radius:999px;
+    margin-top:7px;
+  }
+  .mobile-card.fade{opacity:0.25;}
+
+  .desktop-only{display:block;}
+
+  @media (max-width:860px){
+    .canvas-wrap{display:none;}
+    .mobile-timeline{display:block;}
+    .desktop-only{display:none;}
+    #mobileHint{display:block !important;}
+    .app-header{padding:20px 16px 14px;}
+    .app-header h1{font-size:1.25rem;}
+    .app-header .sub{font-size:0.86rem;}
+    .app-header .hint{font-size:0.78rem;}
+    .controls{gap:8px;}
+    .filter-btn{padding:7px 12px;font-size:0.8rem;}
+    .side-panel{width:100vw;}
+  }
+
+  @media (max-width:640px){
+    .app-header h1{font-size:1.15rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>מר כישלון: בכל חזית אותו דפוס ואותה תוצאה</h1>
+  <p class="sub">2014–2026: תבנית הפעולה מול חמאס-חיזבאללה-איראן</p>
+  <p class="hint desktop-only">לחצו על כל צומת כדי לקרוא את הציטוט המלא והמקור · הקווים המקווקווים מחברים אירועים באותו דפוס בזירות שונות · גללו אופקית →</p>
+  <p class="hint" style="display:none" id="mobileHint">הקישו על כל אירוע כדי לפתוח פירוט מלא · גללו למטה לפי סדר כרונולוגי ↓</p>
+  <div class="controls" id="filterControls"></div>
+  <div class="legend-note">צבע = דפוס הפעולה החוזר · שורה = הזירה · גודל הצומת = חומרת הכישלון · קו מקווקו = אותו דפוס שקופץ לזירה אחרת</div>
+</div>
+
+<div class="canvas-wrap" id="canvasWrap" dir="ltr">
+  <svg id="mainSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="mobile-timeline" id="mobileTimeline"></div>
+
+<div class="overlay" id="overlay"></div>
+<div class="side-panel" id="sidePanel">
+  <div class="panel-head">
+    <button class="panel-close" id="panelClose">✕</button>
+    <div id="panelCatBadge" class="panel-cat-badge"></div>
+    <h2 class="panel-title" id="panelTitle"></h2>
+    <p class="panel-date" id="panelDate"></p>
+  </div>
+  <div class="panel-body">
+    <div id="panelScalePill"></div>
+    <div class="panel-section-title">מה קרה</div>
+    <p class="panel-desc" id="panelDesc"></p>
+    <div class="panel-tags" id="panelTags"></div>
+    <div class="panel-source" id="panelSource"></div>
+  </div>
+</div>
+
+<script>
+/* ==================== נתונים ====================
+   *** זהו קובץ-תבנית ***
+   כדי לבנות מפה על נושא חדש, ערכו רק את הבלוק הזה (ועד "גיאומטריה").
+   שאר הקוד (עיצוב, אינטראקציה, גרסת מובייל) גנרי ולא צריך לגעת בו.
+
+   שלבים:
+   1. הגדירו 2–4 קטגוריות ב-CATEGORIES (סוג הגורם/השחקן) + צבע ייחודי לכל אחת
+   2. הגדירו שורה (ROWS) לכל קטגוריה — מיקום Y קבוע על הציר
+   3. מלאו את nodes: כל אירוע/ישות עם x (ראו הערה למטה על כיוון), category, scale (1–5), date, desc, tags
+   4. מלאו את eras: חלוקה לתקופות/פרקים לרקע (אופציונלי — אפשר גם era אחד גדול)
+   5. crossLinks: קווים מקווקווים חוצי-שורה לקשרים תמטיים (לא כרונולוגיים) — אופציונלי
+*/
+const CATEGORIES = {
+  // אלה דפוסי-הפעולה (לא הזירות!) — הצבע הוא ה"טביעת אצבע" שחוזרת בכל זירה
+  p1: { label: 'שרידות פוליטית קובעת החלטה', color: '#c1440e', soft:'#e9c3a8' },
+  p2: { label: 'בורות וחובבנות אסטרטגית', color: '#8b5e34', soft:'#ddc7ab' },
+  p3: { label: 'שכתוב נרטיב וניפוח הישג', color: '#a6821c', soft:'#e6dfad' },
+};
+
+// הזירות — אלה השורות הקבועות. שימו לב: y קבוע לכל זירה, בלי קשר לצבע/דפוס
+const ROWS = {
+  hamas:      { y: 250, label: 'חמאס',      rowColor:'#ead9c3' },
+  hezbollah:  { y: 450, label: 'חיזבאללה',  rowColor:'#e3d6c0' },
+  iran:       { y: 650, label: 'איראן',      rowColor:'#ddceb6' },
+};
+
+// x גדל = מוקדם יותר בזמן. category=דפוס (צבע) | arena=זירה (שורה)
+// הערה: כותרת הצומת (title) קצרה בכוונה — הציטוט המלא נמצא ב-desc, בחלונית הפרטים.
+// שני אירועים באותו יום ובאותה זירה מוזגו לצומת אחד עם שני ציטוטים, כדי למנוע צפיפות על הציר.
+const nodes = [
+  {
+    id:'n2', x:2280, arena:'hamas', category:'p3', scale:3,
+    title:'שכתוב נרטיב: צוק איתן', date:'27.7.2014',
+    desc:'"נתניהו מציג עצמו כמי שרצה לפעול נגד חמאס אך הודף אחריות לכישלון לכיבוש על הדרג הביטחוני" — בדיוני קבינט בזמן מבצע "צוק איתן", ולאחר מכן בשימוש חוזר בציטוטים, נתניהו מטיל את האחריות לאי-ההכרעה על הדרג הביטחוני.',
+    tags:['חמאס','שכתוב נרטיב','הטיית אחריות'],
+    source:'https://www.ynet.co.il/news/article/sjcvxeqdbl',
+  },
+  {
+    id:'n1', x:1980, arena:'hamas', category:'p1', scale:5,
+    title:'הפרד ומשול בעזה', date:'11.3.2019',
+    desc:'"מי שמתנגד למדינה פלסטינית צריך לתמוך בהעברת כספים לעזה... ההפרדה בין הרשות בגדה לחמאס בעזה מסייעת למנוע הקמת מדינה פלסטינית" — בישיבת סיעת הליכוד נתניהו מנסח במפורש את מדיניות "הפרד ומשול", תוך חיזוק פעיל של חמאס שיהפוך לאיום קיומי.',
+    tags:['חמאס','שרידות פוליטית','יסוד המדיניות'],
+    source:'https://shakuf.co.il/45434',
+  },
+  {
+    id:'n4', x:1680, arena:'hamas', category:'p2', scale:5,
+    title:'קונספציית ההרתעה', date:'1.5.2023',
+    desc:'"למיטב ידיעתי יש אפס... הם לא ירו לשטחנו – כי הם מורתעים" — כחצי שנה לפני ה-7 באוקטובר, בישיבת סיעת הליכוד, נתניהו מציג את השקט הטקטי מול חמאס כהוכחה להרתעה מוצלחת — קיבוע קונספציה מסוכנת על בסיס נתון חלקי.',
+    tags:['חמאס','קונספציית הרתעה','בורות'],
+    source:'https://www.kan.org.il/content/kan-news/politic/583371/',
+  },
+  {
+    id:'n3', x:1380, arena:'hamas', category:'p1', scale:5,
+    title:'6 ימים לפני ה-7.10', date:'1.10.2023',
+    desc:'"עלינו לפעול באיזון וניהוג מול האיומים... ולהימנע מצעדים שעלולים להסלים שלא לצורך" — שישה ימים בלבד לפני הטבח, בישיבה ביטחונית, נתניהו דוחה הקשחת קו מול חמאס לטובת שמירה על "שגרה", ימים ספורים לפני האסון.',
+    tags:['חמאס','שרידות פוליטית','6 ימים לפני ה-7.10'],
+    source:'https://www.mako.co.il/news-politics/2026_q1/Article-f402a29eefd3c91027.htm',
+  },
+  {
+    id:'n5', x:1030, arena:'hezbollah', category:'p2', scale:4,
+    title:'ניפוח ההסכם בלבנון', date:'26.11.2024',
+    desc:'שני ציטוטים מאותו יום: (1) בהכרזה על הסכם הפסקת האש — "חמאס \'בנה\' על חיזבאללה שיילחם לצדו, כשחיזבאללה מחוץ לתמונה חמאס נותר לבד". (2) בהערכת מצב על סיום סבב הלחימה — "זה כבר לא אותו חיזבאללה, החזרנו אותו עשרות שנים אחורה". הישג טקטי חלקי הוצג פעמיים כניצחון אסטרטגי כולל.',
+    tags:['חיזבאללה','חובבנות אסטרטגית','ניפוח הישג'],
+    source:'https://www.kan.org.il/content/kan-news/politic/829293/',
+  },
+  {
+    id:'n7', x:680, arena:'iran', category:'p3', scale:5,
+    title:'"עם כלביא": ניצחון היסטורי', date:'15.6.2025',
+    desc:'שני ציטוטים מאותו יום: (1) "הבטחתי שמתקני הגרעין של איראן יושמדו... ב-12 ימים השגנו ניצחון היסטורי". (2) "אם לא היינו יוצאים ל\'עם כלביא\'... לאיראן כבר היה מזמן נשק גרעיני... את האיום הקיומי הכפול הזה הרחקנו מעל ראשנו". פער בין נרטיב הניצחון להערכות המצב האסטרטגיות בפועל.',
+    tags:['איראן','ניפוח איום','בורות'],
+    source:'https://www.ynet.co.il/news/article/ryswl11yjfe',
+  },
+  {
+    id:'n9', x:330, arena:'iran', category:'p1', scale:4,
+    title:'המערכה החשאית באיראן', date:'2025–2026',
+    desc:'"נתניהו דוחף למהלך חילופי משטר באיראן מתוך פנטזיית \'ניצחון מוחלט\' שיציל אותו פוליטית ומשפטית" — חיבור ישיר בין אינטרס אישי-משפטי למהלך אסטרטגי הרפתקני שמנותק מהקשר ההיסטורי.',
+    tags:['איראן','שרידות פוליטית','חילופי משטר'],
+    source:'https://www.haaretz.co.il/opinions/2026-07-15/ty-article-opinion/.premium/0000019f-5ff9-d8b8-a7df-5ffff7800000',
+  },
+  {
+    id:'n10', x:30, arena:'iran', category:'p2', scale:2,
+    title:'תקיפה נוספת: "תהליך שיטתי"', date:'28.2.2026',
+    desc:'"אנחנו פועלים בתהליך שיטתי להסרת איראן כאיום אסטרטגי, פיזי ואידיאולוגי על מדינת ישראל" — הודעה על תקיפה נוספת ממשיכה את רצף המבצעים ללא הצגת תפיסת סיום סכסוך ברורה.',
+    tags:['איראן','חובבנות אסטרטגית','ללא אסטרטגיית יציאה'],
+    source:'https://israeled.org/ראש-הממשלה-נתניהו-הודיע-מודיע-על-תקיפה-על-איראן-פברואר-2026-28/',
+  },
+];
+
+// תקופות הרקע — פרקים כרונולוגיים רצופים שמכסים את כל טווח ה-x בשימוש
+const eras = [
+  { from:1830, to:2380, title:'2014–2019 | ביסוס המתודה', sub:'הפרד ומשול מול חמאס, ושכתוב נרטיב אחרי צוק איתן' },
+  { from:1230, to:1830, title:'2023 | קונספציה ושבעה באוקטובר', sub:'מהרתעה מדומה ועד לישיבה שישה ימים לפני הטבח' },
+  { from:830,  to:1230, title:'2024 | חיזבאללה: ניצחון על הנייר', sub:'ניפוח הסכם חלקי לכדי ניצחון אסטרטגי מלא' },
+  { from:0,    to:830,  title:'2025–2026 | איראן והכישלון המוחלט', sub:'מ"ניצחון היסטורי" למערכה חשאית לטובת שרידות פוליטית' },
+];
+
+// קווים מקווקווים חוצי-זירה: מחברים אירועים באותו דפוס (אותו צבע) בזירות שונות —
+// זה החלק שמוכיח ויזואלית שהדפוס חוזר, לא מקרי
+const crossLinks = [
+  { from:'n1', to:'n9', dashed:true }, // שרידות פוליטית: חמאס 2019 -> איראן 2025-26
+  { from:'n3', to:'n9', dashed:true }, // שרידות פוליטית: חמאס 2023 -> איראן 2025-26
+  { from:'n4', to:'n5', dashed:true }, // בורות/חובבנות: חמאס 2023 -> חיזבאללה 2024
+  { from:'n5', to:'n10', dashed:true }, // בורות/חובבנות: חיזבאללה 2024 -> איראן 2026
+  { from:'n2', to:'n7', dashed:true }, // שכתוב נרטיב/ניפוח: חמאס 2014 -> איראן 2025
+];
+
+/* ==================== גיאומטריה ==================== */
+const W = 2380, H = 820;
+const svg = document.getElementById('mainSvg');
+svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+svg.setAttribute('width', W);
+svg.setAttribute('height', H);
+
+function ns(tag){ return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+function radiusFor(scale){ return 20 + scale*5; }
+
+// defs: markers + shadow
+const defs = ns('defs');
+defs.innerHTML = `
+  <marker id="arrowGray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#c9c0af"></path>
+  </marker>
+`;
+svg.appendChild(defs);
+
+// era bands
+eras.forEach((era, i) => {
+  const rect = ns('rect');
+  rect.setAttribute('x', era.from);
+  rect.setAttribute('y', 0);
+  rect.setAttribute('width', era.to - era.from);
+  rect.setAttribute('height', H);
+  rect.setAttribute('fill', i % 2 === 0 ? 'var(--bg-band-a)' : 'var(--bg-band-b)');
+  svg.appendChild(rect);
+
+  const title = ns('text');
+  title.setAttribute('x', (era.from + era.to)/2);
+  title.setAttribute('y', 50);
+  title.setAttribute('text-anchor','middle');
+  title.setAttribute('class','era-band-label');
+  title.textContent = era.title;
+  svg.appendChild(title);
+
+  const sub = ns('text');
+  sub.setAttribute('x', (era.from + era.to)/2);
+  sub.setAttribute('y', 74);
+  sub.setAttribute('text-anchor','middle');
+  sub.setAttribute('class','era-band-sub');
+  sub.textContent = era.sub;
+  svg.appendChild(sub);
+
+  if (i > 0){
+    const divider = ns('line');
+    divider.setAttribute('x1', era.to); divider.setAttribute('x2', era.to);
+    divider.setAttribute('y1', 0); divider.setAttribute('y2', H);
+    divider.setAttribute('stroke', 'var(--line)');
+    divider.setAttribute('stroke-dasharray','3 6');
+    svg.appendChild(divider);
+  }
+});
+
+// הערה: תגיות הזירה בצד ימין (חמאס/חיזבאללה/איראן) הוסרו לפי בקשה — הזיהוי לזירה
+// עדיין ברור מהתוכן והמיקום האנכי של כל שורה (וגם מוצג בחלונית הפרטים בלחיצה).
+
+// helper: get node by id
+function nodeById(id){ return nodes.find(n => n.id === id); }
+
+// build sequential edges per arena/row (sorted by x desc = chronological)
+function buildRowEdges(){
+  const byRow = {};
+  nodes.forEach(n => {
+    if(!byRow[n.arena]) byRow[n.arena] = [];
+    byRow[n.arena].push(n);
+  });
+  const edges = [];
+  Object.values(byRow).forEach(list => {
+    list.sort((a,b) => b.x - a.x);
+    for(let i=0;i<list.length-1;i++){
+      edges.push({ from:list[i].id, to:list[i+1].id, dashed:false });
+    }
+  });
+  return edges;
+}
+const rowEdges = buildRowEdges();
+
+function pathBetween(a, b, curveStrength){
+  const ay = ROWS[a.arena].y, by = ROWS[b.arena].y;
+  const midX = (a.x + b.x)/2;
+  const midY = (ay + by)/2 - curveStrength;
+  return `M ${a.x} ${ay} Q ${midX} ${midY} ${b.x} ${by}`;
+}
+
+// draw edges group (behind nodes)
+const edgeLayer = ns('g');
+svg.appendChild(edgeLayer);
+
+[...rowEdges, ...crossLinks].forEach(e => {
+  const a = nodeById(e.from), b = nodeById(e.to);
+  if(!a || !b) return;
+  const p = ns('path');
+  const sameRow = a.arena === b.arena;
+  p.setAttribute('d', pathBetween(a, b, sameRow ? -40 : (e.dashed ? 90 : 0)));
+  p.setAttribute('class', 'edge-path' + (e.dashed ? ' dashed' : ''));
+  edgeLayer.appendChild(p);
+});
+
+// draw nodes
+const nodeLayer = ns('g');
+svg.appendChild(nodeLayer);
+
+nodes.forEach(n => {
+  const row = ROWS[n.arena];
+  const cat = CATEGORIES[n.category];
+  const r = radiusFor(n.scale);
+
+  const g = ns('g');
+  g.setAttribute('class','node-group');
+  g.setAttribute('data-id', n.id);
+  g.setAttribute('data-cat', n.category);
+
+  const halo = ns('circle');
+  halo.setAttribute('cx', n.x); halo.setAttribute('cy', row.y);
+  halo.setAttribute('r', r+16);
+  halo.setAttribute('fill', cat.soft);
+  halo.setAttribute('opacity', 0.55);
+  halo.setAttribute('class','node-halo');
+  g.appendChild(halo);
+
+  const circle = ns('circle');
+  circle.setAttribute('cx', n.x); circle.setAttribute('cy', row.y);
+  circle.setAttribute('r', r);
+  circle.setAttribute('fill', cat.color);
+  circle.setAttribute('class','node-circle');
+  g.appendChild(circle);
+
+  const badge = ns('text');
+  badge.setAttribute('x', n.x); badge.setAttribute('y', row.y+4);
+  badge.setAttribute('text-anchor','middle');
+  badge.setAttribute('class','node-scale-badge');
+  badge.textContent = n.scale;
+  g.appendChild(badge);
+
+  const title = ns('text');
+  title.setAttribute('x', n.x); title.setAttribute('y', row.y + r + 30);
+  title.setAttribute('text-anchor','middle');
+  title.setAttribute('class','node-title');
+  title.textContent = n.title;
+  g.appendChild(title);
+
+  const date = ns('text');
+  date.setAttribute('x', n.x); date.setAttribute('y', row.y + r + 50);
+  date.setAttribute('text-anchor','middle');
+  date.setAttribute('class','node-date');
+  date.textContent = n.date;
+  g.appendChild(date);
+
+  g.addEventListener('click', () => openPanel(n));
+  nodeLayer.appendChild(g);
+});
+
+/* ==================== תצוגת מובייל (אנכית) ==================== */
+const mobileTimeline = document.getElementById('mobileTimeline');
+
+// אייקון SVG פשוט לכל קטגוריה — מזהה חזותי של סוג הגורם המפעיל
+const CATEGORY_ICONS = {
+  // שרידות פוליטית — עיגול בתוך עיגול (אינטרס אישי במרכז ההחלטה)
+  p1: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="3.4"></circle></svg>`,
+  // בורות/חובבנות — רשת לא-מחוברת כהלכה
+  p2: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.4"></circle><circle cx="18" cy="6" r="2.4"></circle><circle cx="12" cy="18" r="2.4"></circle><path d="M7.8 7.6 L10.6 16 M16.2 7.6 L13.4 16 M8.4 6 L15.6 6"></path></svg>`,
+  // שכתוב נרטיב/ניפוח — סימן קריאה בתוך מגלופון
+  p3: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9c0-2 1.6-3.4 3.4-3.4S15.4 7 15.4 9c0 1.7-1 2.4-2.1 3.2-.9.6-1.3 1.2-1.3 2.3"></path><circle cx="12" cy="17.6" r="0.9" fill="#fff" stroke="none"></circle></svg>`,
+};
+
+// גוני רקע רכים לפי תקופה (מתאימים לרצועות שברקע הגרסה הרחבה)
+const ERA_TINTS = ['#f3ede1', '#faf7f1', '#f3ede1', '#faf7f1', '#f3ede1'];
+
+// סדר כרונולוגי: x גדול = מוקדם, אז ממיינים יורד לפי x כדי לקבל הקדום קודם מלמעלה למטה
+const chronological = [...nodes].sort((a,b) => b.x - a.x);
+
+function mobileDotSize(scale){ return 32 + scale*5; } // קטן יותר מהדסקטופ, אך יחסי לעוצמה
+
+eras.forEach((era, eraIdx) => {
+  const eraNodes = chronological.filter(n => n.x >= era.from && n.x <= era.to);
+  if (eraNodes.length === 0) return;
+
+  const section = document.createElement('div');
+  section.className = 'mobile-era';
+  section.style.background = ERA_TINTS[eraIdx % ERA_TINTS.length];
+
+  const head = document.createElement('div');
+  head.className = 'mobile-era-head';
+  head.style.background = ERA_TINTS[eraIdx % ERA_TINTS.length];
+  head.innerHTML = `<p class="mobile-era-title">${era.title}</p><p class="mobile-era-sub">${era.sub}</p>`;
+  section.appendChild(head);
+
+  const track = document.createElement('div');
+  track.className = 'mobile-track';
+
+  eraNodes.forEach(n => {
+    const cat = CATEGORIES[n.category];
+    const size = mobileDotSize(n.scale);
+    const card = document.createElement('div');
+    card.className = 'mobile-card node-group';
+    card.setAttribute('data-cat', n.category);
+    card.innerHTML = `
+      <div class="mobile-dot-slot">
+        <div class="mobile-dot" style="background:${cat.color};width:${size}px;height:${size}px">
+          ${CATEGORY_ICONS[n.category]}
+          <span class="mobile-scale-badge">${n.scale}</span>
+        </div>
+      </div>
+      <div class="mobile-card-body">
+        <p class="mobile-card-title">${n.title}</p>
+        <p class="mobile-card-date">${n.date} · זירה: ${ROWS[n.arena].label}</p>
+        <p class="mobile-card-snippet">${n.desc}</p>
+        <span class="mobile-card-cat" style="background:${cat.color}">${cat.label}</span>
+      </div>
+    `;
+    card.addEventListener('click', () => openPanel(n));
+    track.appendChild(card);
+  });
+
+  section.appendChild(track);
+  mobileTimeline.appendChild(section);
+
+  // בניית קו-חיבור גלי שעובר דרך מרכזי הנקודות בפועל (אחרי שהדפדפן חישב את הגובה בפועל)
+  requestAnimationFrame(() => {
+    const dots = track.querySelectorAll('.mobile-dot');
+    if (dots.length < 1) return;
+    const trackHeight = track.offsetHeight;
+    const baseX = 28; // מרכז עמודת הנקודות בתוך ה-slot (56px רוחב)
+    const amp = 9;     // עוצמת התנודה של הגל
+
+    const points = Array.from(dots).map((dot, i) => {
+      const rect = dot.getBoundingClientRect();
+      const trackRect = track.getBoundingClientRect();
+      const centerY = rect.top - trackRect.top + rect.height/2;
+      const x = baseX + (i % 2 === 0 ? -amp : amp) * (dots.length > 1 ? 1 : 0);
+      return { x, y: centerY };
+    });
+
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 1; i < points.length; i++) {
+      const midY = (points[i-1].y + points[i].y) / 2;
+      d += ` C ${points[i-1].x} ${midY}, ${points[i].x} ${midY}, ${points[i].x} ${points[i].y}`;
+    }
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('class', 'mobile-wave-svg');
+    svg.setAttribute('viewBox', `0 0 56 ${trackHeight}`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', 'var(--line)');
+    path.setAttribute('stroke-width', '2.5');
+    path.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(path);
+    track.insertBefore(svg, track.firstChild);
+  });
+});
+
+/* ==================== פילטרים ==================== */
+const filterControls = document.getElementById('filterControls');
+let activeFilter = 'all';
+
+function renderFilters(){
+  filterControls.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-btn' + (activeFilter==='all' ? ' active' : '');
+  allBtn.textContent = 'הצג הכל';
+  allBtn.onclick = () => { activeFilter='all'; applyFilter(); renderFilters(); };
+  filterControls.appendChild(allBtn);
+
+  Object.entries(CATEGORIES).forEach(([key, cat]) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn cat-solid' + (activeFilter===key ? ' active' : '');
+    btn.style.background = cat.color;
+    btn.textContent = cat.label;
+    btn.onclick = () => { activeFilter = key; applyFilter(); renderFilters(); };
+    filterControls.appendChild(btn);
+  });
+}
+
+function applyFilter(){
+  document.querySelectorAll('.node-group').forEach(g => {
+    const cat = g.getAttribute('data-cat');
+    if(activeFilter === 'all' || cat === activeFilter){
+      g.classList.remove('fade');
+    } else {
+      g.classList.add('fade');
+    }
+  });
+}
+renderFilters();
+
+/* ==================== חלונית פרטים ==================== */
+const overlay = document.getElementById('overlay');
+const sidePanel = document.getElementById('sidePanel');
+const panelClose = document.getElementById('panelClose');
+
+function openPanel(n){
+  const cat = CATEGORIES[n.category];
+  document.getElementById('panelCatBadge').style.background = cat.color;
+  document.getElementById('panelCatBadge').textContent = cat.label;
+  document.getElementById('panelTitle').textContent = n.title;
+  document.getElementById('panelDate').textContent = `${n.date} · זירה: ${ROWS[n.arena].label}`;
+  document.getElementById('panelDesc').textContent = n.desc;
+
+  const scaleWrap = document.getElementById('panelScalePill');
+  scaleWrap.innerHTML = '';
+  const pill = document.createElement('span');
+  pill.className = 'scale-pill';
+  pill.textContent = `חומרת הכישלון (הערכת עורכת): ${n.scale}/5`;
+  scaleWrap.appendChild(pill);
+
+  const tagsWrap = document.getElementById('panelTags');
+  tagsWrap.innerHTML = '';
+  n.tags.forEach(t => {
+    const el = document.createElement('span');
+    el.className = 'panel-tag';
+    el.textContent = t;
+    tagsWrap.appendChild(el);
+  });
+
+  document.getElementById('panelSource').innerHTML = n.source
+    ? `<b>מקור:</b> <a href="${n.source}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;word-break:break-all;">${n.source}</a>`
+    : `<b>מקור:</b> טרם הוגדר מקור לצומת זה — הוסיפו שדה source לכל node ברשימת הנתונים.`;
+
+  overlay.classList.add('open');
+  sidePanel.classList.add('open');
+}
+
+function closePanel(){
+  overlay.classList.remove('open');
+  sidePanel.classList.remove('open');
+}
+overlay.addEventListener('click', closePanel);
+panelClose.addEventListener('click', closePanel);
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closePanel(); });
+
+/* גלילה התחלתית לצד ימין (האירועים המוקדמים) */
+const canvasWrap = document.getElementById('canvasWrap');
+canvasWrap.scrollLeft = canvasWrap.scrollWidth;
+</script>
+</body>
+</html>
