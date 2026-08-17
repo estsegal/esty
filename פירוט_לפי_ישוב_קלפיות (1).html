@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>פירוט לפי יישוב — פערי חלוקת קלפיות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f7fb; --surface:#ffffff; --surface2:#eef2f9; --border:#dce3ef;
+  --text:#172033; --text2:#5b6b88;
+  --arab:#1b6f57;      /* ירוק כהה — יישובים ערביים, תואם לגרף המצורף */
+  --arab-soft:#e4f2ec;
+  --jew:#3aa8dc;        /* כחול בהיר — יישובים יהודיים, תואם לגרף המצורף */
+  --jew-soft:#e6f5fc;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { direction: rtl; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Assistant', sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform:none;} }
+.card { animation: fadeIn .45s ease both; }
+
+.header { margin-bottom: 26px; border-bottom: 1px solid var(--border); padding-bottom: 18px; }
+.header h1 { font-size: 26px; font-weight: 800; }
+.header .sub { color: var(--text2); font-size: 15px; margin-top: 8px; max-width: 780px; }
+.legend { display:flex; gap:22px; flex-wrap:wrap; margin-top:14px; font-size:13.5px; color:var(--text2); }
+.legend span.dot { display:inline-block; width:11px; height:11px; border-radius:50%; margin-left:7px; vertical-align:middle; }
+
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media (max-width:420px){ .grid-2 { grid-template-columns:1fr; gap:20px; } }
+
+.panel { background: var(--surface); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:0 1px 2px rgba(23,32,51,.04); }
+.panel.arab { border-top:4px solid var(--arab); }
+.panel.jew { border-top:4px solid var(--jew); }
+.panel h3 { font-size:17px; font-weight:700; margin-bottom:4px; }
+.panel .panel-sub { font-size:12.5px; color:var(--text2); margin-bottom:16px; }
+
+.row { border-radius:10px; margin-bottom:8px; overflow:hidden; border:1px solid transparent; }
+.row.open { border-color: var(--border); background: var(--surface2); }
+.row-head { display:grid; grid-template-columns:1fr 120px 60px 20px; align-items:center; gap:10px; padding:9px 10px; cursor:pointer; user-select:none; }
+.row-head:hover { background: var(--surface2); }
+.row-name { font-size:14px; font-weight:600; }
+.row-track { background: var(--surface2); border-radius:8px; height:22px; overflow:hidden; }
+.row-fill { height:100%; border-radius:8px; }
+.row.arab .row-fill { background: var(--arab); }
+.row.jew .row-fill { background: var(--jew); }
+.row-value { font-weight:700; font-size:17px; text-align:left; }
+.row.arab .row-value { color: var(--arab); }
+.row.jew .row-value { color: var(--jew); }
+.row-arrow { font-size:11px; color: var(--text2); transition: transform .2s ease; text-align:center; }
+.row.open .row-arrow { transform: rotate(180deg); }
+
+.row-detail { display:none; padding: 4px 14px 16px; }
+.row.open .row-detail { display:block; animation: fadeIn .25s ease both; }
+.detail-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px 16px; margin-top:6px; }
+.detail-item { background: var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+.detail-label { font-size:11.5px; color:var(--text2); }
+.detail-value { font-size:16px; font-weight:800; margin-top:2px; }
+.row.arab .detail-value.accent { color: var(--arab); }
+.row.jew .detail-value.accent { color: var(--jew); }
+.detail-note { font-size:11.5px; color:var(--text2); margin-top:8px; }
+
+.footer { margin-top:32px; padding-top:16px; border-top:1px solid var(--border); font-size:12px; color:var(--text2); }
+
+/* ===== Responsive: wide embeds / tablets (panels still side-by-side) ===== */
+@media (max-width:760px){
+  .wrap { padding:26px 16px 48px; }
+}
+
+/* ===== Responsive: compact — kicks in early so the two panels stay
+   side-by-side even in a narrow embed iframe (e.g. ~550-700px), just
+   with tighter bars/text. Panels only stack under 420px (see .grid-2). ===== */
+@media (max-width:700px){
+  .wrap { padding:18px 12px 36px; }
+  .header h1 { font-size:20px; }
+  .header .sub { font-size:13.5px; }
+  .legend { gap:14px; font-size:12.5px; }
+  .panel { padding:12px; border-radius:14px; }
+  .panel h3 { font-size:14.5px; }
+  .panel .panel-sub { font-size:11px; }
+
+  .row-head {
+    grid-template-columns: 1fr 60px 40px 12px;
+    gap:5px;
+    padding:7px 5px;
+  }
+  .row-name { font-size:11.5px; line-height:1.25; }
+  .row-track { height:15px; border-radius:5px; }
+  .row-value { font-size:14px; }
+  .row-arrow { font-size:8px; }
+
+  .row-detail { padding:2px 4px 10px; }
+  .detail-grid { grid-template-columns: 1fr; gap:7px; }
+  .detail-item { padding:7px 9px; }
+  .detail-label { font-size:10.5px; }
+  .detail-value { font-size:13px; }
+  .detail-note { font-size:10.5px; }
+
+  .footer { font-size:11px; }
+}
+
+/* extra-narrow phones */
+@media (max-width:360px){
+  .row-head { grid-template-columns: 1fr 60px 40px 12px; }
+  .row-name { font-size:11.5px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header card">
+    <h1>פירוט לפי יישוב — שינוי במספר הקלפיות, 2022→2026</h1>
+    <div class="sub">10 היישובים הערביים עם הירידה החדה ביותר במספר הקלפיות, מול 10 היישובים היהודיים עם העלייה החדה ביותר. לחצו על יישוב כדי לפתוח את הנתונים המלאים.</div>
+    <div class="legend">
+      <div><span class="dot" style="background:var(--arab)"></span>יישובים ערביים</div>
+      <div><span class="dot" style="background:var(--jew)"></span>יישובים יהודיים</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- ARAB PANEL -->
+    <div class="panel arab card">
+      <h3>ירידה חדה — יישובים ערביים</h3>
+      <div class="panel-sub">שינוי במספר הקלפיות, 2022→2026</div>
+      <div id="arab-list"></div>
+    </div>
+
+    <!-- JEW PANEL -->
+    <div class="panel jew card">
+      <h3>עלייה חדה — יישובים יהודיים</h3>
+      <div class="panel-sub">שינוי במספר הקלפיות, 2022→2026</div>
+      <div id="jew-list"></div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    מקור: ועדת הבחירות המרכזית לכנסת — תוצאות ברמת קלפי (כנסת 25, נובמבר 2022) ורשימת מיקום קלפיות/דוח ריכוזים ביישוב לפנקס הבוחרים (31.05.2026). "שינוי בפנקס הבוחרים" משקף גידול במספר הזכאים להצביע ביישוב, לא נתון אוכלוסייה של הלמ"ס.
+  </div>
+
+</div>
+
+<script>
+const arabData = [
+  {name:"אעבלין",     k22:20, k26:14, change:-6,  blk26:741.5, v22:9638,  v26:10381, dens:1126},
+  {name:"בענה",       k22:15, k26:9,  change:-6,  blk26:721.3, v22:6004,  v26:6492,  dens:2517},
+  {name:"מג'אר",      k22:31, k26:25, change:-6,  blk26:731.3, v22:17008, v26:18282, dens:1098},
+  {name:"דבוריה",     k22:16, k26:11, change:-5,  blk26:741.9, v22:7492,  v26:8161,  dens:1897},
+  {name:"יפיע",       k22:25, k26:20, change:-5,  blk26:743.1, v22:13860, v26:14863, dens:4558},
+  {name:"קלנסווה",    k22:29, k26:24, change:-5,  blk26:705.5, v22:15420, v26:16932, dens:2933},
+  {name:"שפרעם",      k22:54, k26:49, change:-5,  blk26:676.6, v22:30875, v26:33152, dens:2206},
+  {name:"אבו סנאן",   k22:19, k26:15, change:-4,  blk26:727.4, v22:10013, v26:10911, dens:2205},
+  {name:"ג'לג'וליה",  k22:15, k26:11, change:-4,  blk26:688.7, v22:6876,  v26:7576,  dens:4353},
+  {name:"ג'סר א-זרקא",k22:19, k26:15, change:-4,  blk26:694.1, v22:9560,  v26:10412, dens:9522},
+];
+
+const jewData = [
+  {name:"ראשון לציון", k22:344, k26:379, change:35, blk26:588.8, v22:211845, v26:223168, dens:4365},
+  {name:"אשקלון",      k22:198, k26:230, change:32, blk26:591.6, v22:119846, v26:136072, dens:3566},
+  {name:"באר שבע",     k22:283, k26:312, change:29, blk26:552.1, v22:164728, v26:172247, dens:1866},
+  {name:"בית שמש",     k22:133, k26:161, change:28, blk26:603.0, v22:78064,  v26:97082,  dens:4370},
+  {name:"נתניה",       k22:319, k26:346, change:27, blk26:620.4, v22:195220, v26:214645, dens:7408},
+  {name:"חולון",       k22:259, k26:283, change:24, blk26:574.3, v22:159831, v26:162517, dens:10134},
+  {name:"אשדוד",       k22:302, k26:324, change:22, blk26:579.0, v22:181784, v26:187590, dens:4859},
+  {name:"פתח תקווה",   k22:320, k26:342, change:22, blk26:605.0, v22:197815, v26:206894, dens:7450},
+  {name:"הרצליה",      k22:144, k26:162, change:18, blk26:595.4, v22:88932,  v26:96459,  dens:4978},
+  {name:"בת ים",       k22:211, k26:227, change:16, blk26:571.3, v22:124742, v26:129682, dens:15998},
+];
+
+function fmt(n) { return n.toLocaleString('he-IL'); }
+
+function buildRows(data, containerId, sector) {
+  const maxAbs = Math.max(...data.map(d => Math.abs(d.change)));
+  const container = document.getElementById(containerId);
+  data.forEach((d, i) => {
+    const pct = ((d.v26 / d.v22 - 1) * 100).toFixed(1);
+    const vdiff = d.v26 - d.v22;
+    const widthPct = Math.round((Math.abs(d.change) / maxAbs) * 100);
+    const sign = d.change > 0 ? '+' : '';
+
+    const row = document.createElement('div');
+    row.className = 'row ' + sector;
+    row.id = sector + '-row-' + i;
+
+    row.innerHTML = `
+      <div class="row-head" onclick="toggleRow('${row.id}')">
+        <div class="row-name">${d.name}</div>
+        <div class="row-track"><div class="row-fill" style="width:${widthPct}%"></div></div>
+        <div class="row-value">${sign}${d.change}</div>
+        <div class="row-arrow">▾</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">קלפיות 2022 → 2026</div>
+            <div class="detail-value">${d.k22} → ${d.k26} <span class="accent">(${sign}${d.change})</span></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">בוחרים לקלפי, 2026</div>
+            <div class="detail-value accent">${d.blk26}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">פנקס הבוחרים 2022 → 2026</div>
+            <div class="detail-value">${fmt(d.v22)} → ${fmt(d.v26)}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">שינוי בפנקס הבוחרים</div>
+            <div class="detail-value accent">${vdiff > 0 ? '+' : ''}${fmt(vdiff)} (${pct > 0 ? '+' : ''}${pct}%)</div>
+          </div>
+        </div>
+        <div class="detail-note">צפיפות אוכלוסין: ${fmt(d.dens)} נפש/קמ"ר</div>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function toggleRow(id) {
+  const row = document.getElementById(id);
+  const wasOpen = row.classList.contains('open');
+  row.parentElement.querySelectorAll('.row.open').forEach(r => r.classList.remove('open'));
+  if (!wasOpen) row.classList.add('open');
+}
+
+buildRows(arabData, 'arab-list', 'arab');
+buildRows(jewData, 'jew-list', 'jew');
+</script>
+</body>
+</html>
