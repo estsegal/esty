@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מסמך מעקב | הצבעות רשימת הליכוד מול מארז החקיקה החרדי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F3EA;
+    --paper:#FFFFFF;
+    --border:#E4DFD0;
+    --ink:#1C1B18;
+    --ink-soft:#5B584F;
+    --brand:#9B2F1F;
+
+    /* single-hue red scale: lightest = absent, darkest = for */
+    --absent-bg:#F6E1DC;   --absent-tx:#B98F86;
+    --for-bg:#B14330;      --for-tx:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:'Assistant',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:28px 20px 60px;}
+
+  .card{
+    background:var(--paper); border:1px solid var(--border); border-radius:16px;
+    padding:16px;
+  }
+
+  .table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+
+  table.heat{border-collapse:collapse; width:100%; min-width:520px;}
+  thead th{
+    padding:0 0 12px; font-size:14.5px; font-weight:800; color:var(--ink);
+    text-align:center; border-bottom:2px solid var(--border);
+    white-space:nowrap;
+  }
+  thead th.name-col{
+    text-align:right; padding-right:10px;
+    position:sticky; right:0; background:var(--paper); z-index:2;
+  }
+
+  tbody tr{border-bottom:1px solid var(--border);}
+  tbody tr:last-child{border-bottom:none;}
+  tbody th.row-name{
+    text-align:right; padding:14px 10px; font-weight:800; font-size:15.5px; white-space:nowrap;
+    position:sticky; right:0; background:var(--paper); z-index:1;
+    box-shadow:-8px 0 8px -8px rgba(0,0,0,.05);
+  }
+  tbody th.row-name .ttl{display:block; font-size:12px; color:var(--ink-soft); font-weight:600; margin-top:1px;}
+
+  .heat-cell{padding:0; text-align:center; border-left:1px solid var(--paper); min-width:96px;}
+  .swatch{
+    height:56px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14.5px; font-weight:800;
+    cursor:pointer; transition:filter .12s;
+  }
+  .swatch:hover{filter:brightness(1.06);}
+  .swatch.v-absent{background:var(--absent-bg); color:var(--absent-tx);}
+  .swatch.v-for{background:var(--for-bg); color:var(--for-tx);}
+
+  footer{margin-top:18px; font-size:12px; color:var(--ink-soft); text-align:center;}
+
+  /* modal */
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(28,27,24,.55); display:none;
+    align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal-bg.open{display:flex;}
+  .modal{
+    background:var(--paper); border-radius:18px; max-width:420px; width:100%;
+    padding:26px; position:relative;
+  }
+  .modal-close{
+    position:absolute; top:16px; left:16px; background:var(--bg); border:none; width:30px;height:30px;
+    border-radius:50%; cursor:pointer; font-size:16px; color:var(--ink-soft);
+  }
+  .modal .m-eyebrow{font-size:12px; font-weight:700; color:var(--brand); margin-bottom:4px;}
+  .modal h4{margin:0 0 2px; font-size:19px; font-weight:800;}
+  .modal .m-person{color:var(--ink-soft); font-weight:600; font-size:13.5px; margin-bottom:18px;}
+  .modal .m-status{
+    display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:999px;
+    font-weight:800; font-size:14.5px; margin-bottom:18px;
+  }
+  .modal .m-status.st-for{background:var(--for-bg); color:#fff;}
+  .modal .m-status.st-absent{background:var(--absent-bg); color:#8A5A50;}
+  .modal .m-row{
+    display:flex; justify-content:space-between; align-items:center; padding:10px 0;
+    border-top:1px solid var(--border); font-size:14px;
+  }
+  .modal .m-row .lbl{color:var(--ink-soft);}
+  .modal .m-row .val{font-weight:800;}
+  .modal .m-row .val.for-val{color:var(--for-bg);}
+
+  @media (max-width:640px){
+    .wrap{padding:14px 8px 40px;}
+    .card{padding:6px;}
+    table.heat{min-width:0; width:100%; table-layout:fixed;}
+    thead th{font-size:11px; padding-bottom:8px; white-space:normal; line-height:1.25;}
+    thead th.name-col{padding-right:6px; width:27%;}
+    tbody th.row-name{
+      font-size:12.5px; padding:9px 6px; white-space:normal; line-height:1.25; width:27%;
+    }
+    tbody th.row-name .ttl{font-size:10px;}
+    .swatch{height:44px; font-size:11.5px; padding:2px;}
+    .heat-cell{min-width:0;}
+  }
+  @media (max-width:380px){
+    thead th{font-size:10.2px;}
+    tbody th.row-name{font-size:11.5px;}
+    tbody th.row-name .ttl{font-size:9.3px;}
+    .swatch{height:40px; font-size:10.8px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="table-scroll">
+      <table class="heat">
+        <thead>
+          <tr>
+            <th class="name-col">ח"כ / שר</th>
+            <th>פטור<br>עריקים חרדים</th>
+            <th>חוק-יסוד<br>לימוד תורה</th>
+            <th>הפרדה<br>באקדמיה</th>
+          </tr>
+        </thead>
+        <tbody id="heatBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>מקומות 3, 9, 11 ו-15 ברשימת הליכוד לא נמסרו ואינם כלולים בטבלה זו.</footer>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="m-eyebrow" id="mLawEyebrow"></div>
+    <h4 id="mLawName"></h4>
+    <div class="m-person" id="mPerson"></div>
+    <div class="m-status" id="mStatus"></div>
+    <div class="m-row"><span class="lbl">הצביעו בעד במליאה</span><span class="val for-val" id="mFor"></span></div>
+    <div class="m-row"><span class="lbl">הצביעו נגד במליאה</span><span class="val" id="mAgainst"></span></div>
+  </div>
+</div>
+
+<script>
+const LAW_META = {
+  deserters:      {name:"פטור זמני ממעצר עריקים חרדים", full:"חוק שירות ביטחון (תיקון 28 – הוראת שעה), התשפ\"ו–2026", forC:58, againstC:46},
+  torah_study:    {name:"חוק-יסוד: לימוד תורה", full:"חוק-יסוד: לימוד תורה", forC:63, againstC:52},
+  student_rights: {name:"הפרדה מגדרית באקדמיה", full:"חוק זכויות הסטודנט (תיקון 12), התשפ\"ו–2026", forC:52, againstC:43},
+};
+
+const DATA = [
+ {rank:1,  name:"בנימין נתניהו", title:"ראש הממשלה",             deserters:"absent", torah_study:"absent", student_rights:"absent"},
+ {rank:2,  name:"אלי כהן",       title:"שר",                      deserters:"absent", torah_study:"absent", student_rights:"absent"},
+ {rank:4,  name:"ישראל כץ",      title:"שר (שריון)",              deserters:"for",    torah_study:"for",    student_rights:"for"},
+ {rank:5,  name:"גדעון סער",     title:"שר (שריון)",              deserters:"absent", torah_study:"absent", student_rights:"absent"},
+ {rank:6,  name:"אמיר אוחנה",    title:"יו\"ר הכנסת",             deserters:"for",    torah_study:"for",    student_rights:"for"},
+ {rank:7,  name:"יריב לוין",     title:"שר",                      deserters:"for",    torah_study:"for",    student_rights:"for"},
+ {rank:8,  name:"מירי רגב",      title:"שרה",                     deserters:"absent", torah_study:"absent", student_rights:"absent"},
+ {rank:10, name:"אופיר כץ",      title:"ח\"כ",                    deserters:"for",    torah_study:"for",    student_rights:"for"},
+ {rank:12, name:"יואב קיש",      title:"שר",                      deserters:"absent", torah_study:"absent", student_rights:"absent"},
+ {rank:13, name:"מיקי זוהר",     title:"שר",                      deserters:"absent", torah_study:"absent", student_rights:"absent"},
+ {rank:14, name:"אלמוג כהן",     title:"סגן שר",                  deserters:"absent", torah_study:"absent", student_rights:"absent"},
+ {rank:16, name:"עמיחי שיקלי",   title:"שר",                      deserters:"absent", torah_study:"absent", student_rights:"absent"},
+ {rank:17, name:"דודי אמסלם",    title:"שר",                      deserters:"absent", torah_study:"absent", student_rights:"absent"},
+ {rank:18, name:"חיים כץ",       title:"שר (שריון)",              deserters:"absent", torah_study:"absent", student_rights:"absent"},
+ {rank:19, name:"משה סעדה",      title:"ח\"כ",                    deserters:"for",    torah_study:"for",    student_rights:"for"},
+ {rank:20, name:"טלי גוטליב",    title:"ח\"כ",                    deserters:"for",    torah_study:"for",    student_rights:"for"},
+ {rank:21, name:"שלמה קרעי",     title:"שר",                      deserters:"for",    torah_study:"for",    student_rights:"for"},
+ {rank:22, name:"דוד ביטן",      title:"ח\"כ",                    deserters:"for",    torah_study:"for",    student_rights:"absent"},
+ {rank:23, name:"בועז ביסמוט",   title:"ח\"כ",                    deserters:"for",    torah_study:"for",    student_rights:"for"},
+ {rank:24, name:"ניר ברקת",      title:"שר",                      deserters:"for",    torah_study:"for",    student_rights:"for"},
+ {rank:25, name:"גילה גמליאל",   title:"שרה", deserters:"absent", torah_study:"for",    student_rights:"absent"},
+];
+function forCount(d){ return ["deserters","torah_study","student_rights"].filter(k=>d[k]==="for").length; }
+DATA.forEach(d=>d.score = forCount(d));
+
+const sorted = [...DATA].sort((a,b)=> b.score - a.score || a.rank - b.rank);
+
+const heatBody = document.getElementById('heatBody');
+function cellHtml(personName, personTitle, lawKey, value){
+  const cls = value==='for' ? 'v-for' : 'v-absent';
+  const label = value==='for' ? 'בעד' : 'נעדר';
+  return `<td class="heat-cell"><div class="swatch ${cls}" data-name="${personName}" data-title="${personTitle}" data-law="${lawKey}" data-value="${value}">${label}</div></td>`;
+}
+
+sorted.forEach(d=>{
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <th class="row-name">${d.name}<span class="ttl">${d.title}</span></th>
+    ${cellHtml(d.name, d.title, 'deserters', d.deserters)}
+    ${cellHtml(d.name, d.title, 'torah_study', d.torah_study)}
+    ${cellHtml(d.name, d.title, 'student_rights', d.student_rights)}
+  `;
+  heatBody.appendChild(tr);
+});
+
+// ---------- modal ----------
+const modalBg = document.getElementById('modalBg');
+document.querySelectorAll('.swatch').forEach(sw=>{
+  sw.addEventListener('click', ()=>{
+    const name = sw.dataset.name, title = sw.dataset.title, lawKey = sw.dataset.law, value = sw.dataset.value;
+    const meta = LAW_META[lawKey];
+    document.getElementById('mLawEyebrow').textContent = 'חוק';
+    document.getElementById('mLawName').textContent = meta.name;
+    document.getElementById('mPerson').textContent = `${name} · ${title}`;
+    const statusEl = document.getElementById('mStatus');
+    if(value==='for'){
+      statusEl.className = 'm-status st-for';
+      statusEl.textContent = '✓ הצביע/ה בעד';
+    } else {
+      statusEl.className = 'm-status st-absent';
+      statusEl.textContent = 'נעדר/ה מן ההצבעה';
+    }
+    document.getElementById('mFor').textContent = meta.forC;
+    document.getElementById('mAgainst').textContent = meta.againstC;
+    modalBg.classList.add('open');
+  });
+});
+document.getElementById('modalClose').addEventListener('click', ()=>modalBg.classList.remove('open'));
+modalBg.addEventListener('click', (e)=>{ if(e.target===modalBg) modalBg.classList.remove('open'); });
+</script>
+</body>
+</html>
