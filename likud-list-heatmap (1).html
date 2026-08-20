@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מפת חום: פעילות חברי רשימת הליכוד</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --bg-alt:#f7f7f8;
+    --text:#111111;
+    --text-dim:#5b5b62;
+    --line:#e2e2e6;
+    --accent:#111111;
+    --s0:#f2f2f4;
+    --s1:#ffe3c2;
+    --s2:#ff9f5a;
+    --s3:#e8351f;
+    --s3-text:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Assistant',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    direction:rtl;
+    line-height:1.5;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:36px 24px 80px;}
+  header{margin-bottom:28px;}
+  .subtitle{font-size:16px;color:var(--text-dim);max-width:760px;margin:0 0 20px;}
+  .meta-note{
+    background:var(--bg-alt);border:1px solid var(--line);border-radius:10px;
+    padding:14px 18px;font-size:14px;color:var(--text-dim);max-width:820px;
+  }
+  .meta-note b{color:var(--text);}
+
+  .legend{
+    display:flex;flex-wrap:wrap;gap:18px;align-items:center;
+    margin:24px 0 8px;padding:14px 18px;background:var(--bg-alt);
+    border:1px solid var(--line);border-radius:10px;font-size:13.5px;
+  }
+  .legend-title{font-weight:700;margin-left:6px;}
+  .legend-item{display:flex;align-items:center;gap:6px;}
+  .swatch{width:18px;height:18px;border-radius:4px;display:inline-block;border:1px solid rgba(0,0,0,.08);}
+
+  .table-scroll{overflow-x:auto;margin-top:22px;border:1px solid var(--line);border-radius:12px;}
+  table{border-collapse:collapse;width:100%;min-width:760px;background:var(--bg);}
+  thead th{
+    position:sticky;top:0;background:var(--bg);
+    font-size:12.5px;font-weight:700;color:var(--text-dim);
+    padding:12px 10px;border-bottom:2px solid var(--text);text-align:center;
+    white-space:normal;line-height:1.25;
+  }
+  thead th.name-col{text-align:right;padding-right:16px;}
+  tbody td{border-bottom:1px solid var(--line);text-align:center;padding:0;}
+  tbody tr:last-child td{border-bottom:none;}
+  .name-cell{
+    text-align:right;padding:12px 16px;font-weight:700;font-size:15px;
+    white-space:nowrap;background:var(--bg);position:sticky;right:0;
+  }
+  .name-cell .rank{color:var(--text-dim);font-weight:600;font-size:12px;margin-left:8px;}
+  .row-linked .name-cell{padding-top:6px;}
+  .institution-row .name-cell{font-weight:600;font-size:13.5px;color:var(--text-dim);}
+  .institution-row .name-cell .link-tag{
+    display:inline-block;font-size:10.5px;font-weight:700;color:var(--text-dim);
+    border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-left:8px;
+  }
+
+  .score-cell{
+    cursor:pointer;width:130px;height:52px;position:relative;transition:filter .15s;
+  }
+  .score-cell:hover{filter:brightness(0.94);}
+  .score-cell .num{font-weight:800;font-size:17px;}
+  .score-cell.s0 .num{color:#b9b9be;}
+  .score-cell.s1 .num,
+  .score-cell.s2 .num{color:#4a2a00;}
+  .score-cell.s3 .num{color:var(--s3-text);}
+
+  footer{margin-top:40px;font-size:12.5px;color:var(--text-dim);}
+  footer a{color:var(--text-dim);}
+
+  /* modal */
+  .overlay{
+    position:fixed;inset:0;background:rgba(17,17,17,.55);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--bg);border-radius:14px;max-width:640px;width:100%;
+    max-height:82vh;overflow-y:auto;padding:26px 26px 22px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+  }
+  .modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:4px;}
+  .modal-head h2{font-size:19px;margin:0;font-weight:800;}
+  .modal-head .cat{font-size:13px;color:var(--text-dim);font-weight:700;margin-top:4px;}
+  .modal-close{
+    border:none;background:var(--bg-alt);width:30px;height:30px;border-radius:8px;
+    cursor:pointer;font-size:16px;color:var(--text-dim);flex-shrink:0;
+  }
+  .score-badge{
+    display:inline-flex;align-items:center;gap:8px;margin:14px 0 16px;
+    padding:6px 12px;border-radius:8px;font-weight:700;font-size:14px;
+  }
+  .badge-dot{width:10px;height:10px;border-radius:50%;}
+  .event{border-top:1px solid var(--line);padding:14px 0;}
+  .event:first-child{border-top:none;padding-top:0;}
+  .event-date{font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:4px;}
+  .event-desc{font-size:14.5px;line-height:1.55;margin-bottom:6px;}
+  .event-src a{font-size:12.5px;color:#1a56db;text-decoration:none;word-break:break-all;}
+  .event-src a:hover{text-decoration:underline;}
+  .empty-state{font-size:14.5px;color:var(--text-dim);padding:6px 0;}
+  .stat-line{font-size:14.5px;margin-bottom:8px;}
+  .stat-line b{font-weight:800;}
+  .method-hint{
+    margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--text-dim);
+  }
+
+  @media (max-width:860px){
+    .wrap{padding:22px 14px 60px;}
+    table{min-width:0;table-layout:fixed;}
+    thead th{font-size:11px;padding:9px 4px;}
+    thead th.name-col{width:96px;}
+    thead th:not(.name-col){width:auto;}
+    .score-cell{width:auto;height:46px;}
+    .name-cell{
+      font-size:12.5px;padding:8px 8px;
+      white-space:normal;word-break:keep-all;line-height:1.3;
+      overflow-wrap:break-word;
+    }
+    .institution-row .name-cell{font-size:11.5px;}
+    .institution-row .name-cell .link-tag{
+      display:block;width:fit-content;margin:4px 0 0;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="subtitle">
+      פעילות נבחרי הליכוד בארבעה צירי פעילות: קידום חוק ההשתמטות, חשיפת מידע ביטחוני,
+      התבטאויות נגד מערכות הביטחון, והצבעות בעד חקיקה חרדית. לחצו על כל משבצת כדי לראות את הנתונים והמקורות שביסודה.
+    </p>
+  </header>
+
+  <div class="legend">
+    <span class="legend-title">מקרא חומרה:</span>
+    <span class="legend-item"><span class="swatch" style="background:var(--s0)"></span>0 — אין ממצא</span>
+    <span class="legend-item"><span class="swatch" style="background:var(--s1)"></span>1 — נמוך</span>
+    <span class="legend-item"><span class="swatch" style="background:var(--s2)"></span>2 — בינוני</span>
+    <span class="legend-item"><span class="swatch" style="background:var(--s3)"></span>3 — גבוה / מרכזי</span>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th class="name-col">דמות</th>
+          <th>קידום חוק<br>ההשתמטות</th>
+          <th>חשיפת מידע<br>ביטחוני</th>
+          <th>התבטאויות נגד<br>מערכות הביטחון</th>
+          <th>הצבעות בעד<br>חקיקה חרדית</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="meta-note">
+    <b>הערת מתודולוגיה:</b> לשכת/משרד ראש הממשלה מוצגת כשורה נפרדת ולא מיוחסת לנתניהו אישית — הוא הכחיש מעורבות
+    באירועי החשיפה המתועדים, ולכן הציון בקטגוריה זו שייך לגורמי הלשכה בלבד. השורה הוצבה מיד מתחת לנתניהו
+    לצורך קריאות בלבד, לא לפי סדר הניקוד.
+  </div>
+
+  <footer>
+    מקורות: דיווחי חדשות, פרוטוקולי הצבעות בכנסת וניתוח המכון הישראלי לדמוקרטיה.
+    לחצו על משבצת לפרטים מלאים ולינקים למקור.
+  </footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+const CATS = [
+  {key:'law', label:'קידום חוק ההשתמטות'},
+  {key:'leak', label:'חשיפת מידע ביטחוני'},
+  {key:'statements', label:'התבטאויות נגד מערכות הביטחון'},
+  {key:'votes', label:'הצבעות בעד חקיקה חרדית'}
+];
+
+// order intentionally places the PM's office row directly under Netanyahu (readability),
+// not strictly by total score.
+const DATA = [
+  { name:'טלי גוטליב', scores:{law:1,leak:3,statements:3,votes:3},
+    details:{
+      law:[{date:'23.7.2025', desc:'תמכה בביסמוט ובמהלך החלפת אדלשטיין: "כבר לפני שנה קראתי להחליף את יולי"; הוסיפה: "בכל מקרה יהיה חוק".', src:'https://www.emess.co.il/radio/1742030'}],
+      leak:[{date:'1.1.2024', desc:'פרסמה את זהותו ופרטיו של איש שב"כ, בן זוגה של שקמה ברסלר, למרות שהזהות חסויה לפי חוק השב"כ. ראש השב"כ רונן בר אמר בקבינט: "היא שמה עובדי שירות בסכנה". חוות דעת שב"כ קבעה שהפרסום סיכן באופן ישיר את האיש ומשפחתו; הוגש כתב אישום (אין הרשעה חלוטה).', src:'https://www.ynet.co.il/news/article/rkkpwprbmx'}],
+      statements:{count:30, note:'מספר ההתבטאויות המתועדות נגד הרמטכ"ל / צה"ל / שב"כ / מוסד (2023–2026) — הגבוה ביותר בקרב חברי הרשימה.'},
+      votes:{count:3, of:3, laws:'חוק־יסוד: לימוד תורה · תיקון 12 לחוק זכויות הסטודנט · תיקון 28 (הוראת שעה) לחוק שירות ביטחון'}
+    }},
+  { name:'בועז ביסמוט', scores:{law:2,leak:0,statements:3,votes:3},
+    details:{
+      law:[
+        {date:'23.7.2025', desc:'נבחר בידי סיעת הליכוד להחליף את אדלשטיין בראשות ועדת החוץ והביטחון, ברוב 29–4.', src:'https://13tv.co.il/item/news/politics/politics/ilf4j-904680897/'},
+        {date:'4.8.2025', desc:'מינויו ליו"ר ועדת החוץ והביטחון אושר סופית לאחר שאדלשטיין סירב לקדם חוק כפי שביקשה הקואליציה. ניהל את הדיונים בהצעה.', src:'https://www.ynet.co.il/news/article/bkq0dzawle'},
+        {date:'29.10.2025', desc:'פורסמה טיוטת/מתווה ביסמוט. לפי ניתוח המכון הישראלי לדמוקרטיה, המתווה כלל יעדים נמוכים וסנקציות חלשות, באופן המאפשר דחיית שירות עד לפטור בגיל 26.', src:'https://www.idi.org.il/articles/61986'}
+      ],
+      leak:[], statements:{count:8, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:3, of:3, laws:'חוק־יסוד: לימוד תורה · תיקון 12 לחוק זכויות הסטודנט · תיקון 28 (הוראת שעה) לחוק שירות ביטחון'}
+    }},
+  { name:'ישראל כ״ץ', scores:{law:1,leak:0,statements:3,votes:3},
+    details:{
+      law:[{date:'2–14.1.2025', desc:'נפגש עם נציגי הסיעות החרדיות כדי לגבש נוסח מוסכם; הציג בוועדת החוץ והביטחון עקרונות מתווה הכוללים יעדי גיוס מדורגים, גיל פטור 26 וסנקציות במקרה של אי־עמידה.', src:'https://www.calcalist.co.il/article/skn4lyeukg'}],
+      leak:[], statements:{count:10, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:3, of:3, laws:'חוק־יסוד: לימוד תורה · תיקון 12 לחוק זכויות הסטודנט · תיקון 28 (הוראת שעה) לחוק שירות ביטחון'}
+    }},
+  { name:'בנימין נתניהו', scores:{law:3,leak:0,statements:3,votes:0},
+    details:{
+      law:[
+        {date:'16.5.2024', desc:'הנחה להביא לוועדת השרים לחקיקה החלטה על החלת דין רציפות על הצעת חוק שירות ביטחון שאושרה בקריאה ראשונה בכנסת הקודמת.', src:'https://www.globes.co.il/news/article.aspx?did=1001478774'},
+        {date:'8.10.2024', desc:'מסר למפלגות החרדיות כי הוא "נחוש לקדם חוק גיוס מוסכם" עד סוף אוקטובר, על רקע התניית תמיכתן בתקציב 2025 בקידום החוק.', src:'https://www.ynet.co.il/news/article/bkkkrpmykg'},
+        {date:'23.4.2025', desc:'לפי הקלטה שפורסמה, יועצו נבו כץ הבטיח לנציג חרדי שהחוק יעבור, על אף לחץ מהציונות הדתית.', src:'https://www.ynet.co.il/news/article/bypfkmi1ee'},
+        {date:'5.6.2025', desc:'בהקלטה שפורסמה אמר לרב משה הלל הירש: "היו לנו מכשולים עצומים שהסרנו… כששר הביטחון והרמטכ"ל נגדך אי אפשר להתקדם".', src:'https://www.davar1.co.il/605695/'},
+        {date:'23.7.2025', desc:'תמך במועמדות ביסמוט לראשות ועדת החוץ והביטחון, לאחר שמפלגת הליכוד הדיחה את אדלשטיין; הרקע המדווח היה משבר הפטור מגיוס.', src:'https://www.ynet.co.il/news/article/b1j1llaulx'},
+        {date:'6.11.2025', desc:'הציב דדליין לקידום החוק: "היעד – תוך חודש", לפי דיווחים, כדי לייצב את הקואליציה.', src:'https://www.mako.co.il/news-politics/2025_q4/Article-d07683828455a91027.htm'},
+        {date:'11.12.2025', desc:'בפגישה עם סיעת יהדות התורה הבטיח: "אני שולט ברוב חברי הכנסת — החוק יעבור".', src:'https://www.mako.co.il/news-politics/2025_q4/Article-0905dae0e9e0b91026.htm'}
+      ],
+      leak:[], statements:{count:14, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:0, of:3, laws:'ראש הממשלה אינו נמנה על חברי הכנסת המצביעים במניין הרגיל; קטגוריה זו אינה חלה עליו במקור.'}
+    }},
+  { name:'לשכת/משרד<br>ראש הממשלה', institution:true, scores:{law:0,leak:3,statements:0,votes:0},
+    details:{
+      law:[], statements:null, votes:null,
+      leak:[
+        {date:'5.6.2024', desc:'פרשת המסמכים המסווגים בלשכת ראש הממשלה (אוריך, פלדשטיין): מסמך מודיעין סודי מצה"ל פורסם בתקשורת זרה. בהחלטת בית משפט צוין פוטנציאל לנזק ביטחוני חמור; נתניהו הכחיש מעורבות אישית.', src:'https://www.kan.org.il/content/kan-news/defense/820426/'},
+        {date:'13.11.2024', desc:'דובר רה"מ (דוסטרי) פרסם בליל תקיפה באיראן תיעוד שלפי גורם ביטחוני חשף מידע רגיש; בקשה למחוק את הציוץ נדחתה. הפרסום יוחס לדובר, לא לנתניהו אישית.', src:'https://www.kan.org.il/content/kan-news/politic/823849/'},
+        {date:'22.1.2025', desc:'אותו דובר חשף פרט אסור לפרסום בנוגע למבצע חילוץ גופתו של אורון שאול.', src:'https://www.kan.org.il/content/kan-news/politic/850456/'}
+      ],
+      note:'הציון (3) נגזר מהצטברות שלושה אירועי חשיפה תחת אותה לשכה בתוך כשנה, ומהחומרה המיוחדת שיוחסה לאירוע הראשון בהחלטת בית משפט.'
+    }},
+  { name:'שלמה קרעי', scores:{law:1,leak:0,statements:2,votes:3},
+    details:{
+      law:[{date:'4.6.2025', desc:'הציע להתפטר מתפקיד שר התקשורת ולהתמנות במקום יולי אדלשטיין ליו"ר ועדת החוץ והביטחון, במפורש כדי לקדם את העברת חוק הגיוס.', src:'https://www.makorrishon.co.il/news/politcal/article/170437'}],
+      leak:[], statements:{count:7, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:3, of:3, laws:'חוק־יסוד: לימוד תורה · תיקון 12 לחוק זכויות הסטודנט · תיקון 28 (הוראת שעה) לחוק שירות ביטחון'}
+    }},
+  { name:'משה סעדה', scores:{law:1,leak:0,statements:2,votes:3},
+    details:{
+      law:[{date:'23.7.2025', desc:'תמך בביסמוט במאבק על ראשות ועדת החוץ והביטחון. יש לסייג: סעדה מתח בעבר ביקורת חריפה על מתווים שנתפסו בעיניו כלא שוויוניים.', src:'https://news.walla.co.il/item/3716016'}],
+      leak:[], statements:{count:3, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:3, of:3, laws:'חוק־יסוד: לימוד תורה · תיקון 12 לחוק זכויות הסטודנט · תיקון 28 (הוראת שעה) לחוק שירות ביטחון'}
+    }},
+  { name:'אופיר כץ', scores:{law:2,leak:0,statements:0,votes:3},
+    details:{
+      law:[
+        {date:'17.8.2023', desc:'כיו"ר הקואליציה התחייב: "חוק הגיוס יעבור בשלוש קריאות במושב הבא"; תיאר סדר מוסכם עם הסיעות החרדיות.', src:'https://www.ynet.co.il/news/article/sji11dejnh'},
+        {date:'6.11.2024', desc:'הטיל מגבלות סיעתיות על דן אילוז, שהתנגד לחוק: איסור על הגשת הצעות חוק פרטיות והחלפתו בוועדות הכלכלה והחוץ והביטחון.', src:'https://www.calcalist.co.il/local_news/article/hk9tv9d11kl'}
+      ],
+      leak:[], statements:{count:0, note:'לא אותרו התבטאויות מתועדות נגד מערכות הביטחון במקור.'},
+      votes:{count:3, of:3, laws:'חוק־יסוד: לימוד תורה · תיקון 12 לחוק זכויות הסטודנט · תיקון 28 (הוראת שעה) לחוק שירות ביטחון'}
+    }},
+  { name:'יריב לוין', scores:{law:0,leak:0,statements:2,votes:3},
+    details:{
+      law:[], leak:[],
+      statements:{count:5, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:3, of:3, laws:'חוק־יסוד: לימוד תורה · תיקון 12 לחוק זכויות הסטודנט · תיקון 28 (הוראת שעה) לחוק שירות ביטחון'}
+    }},
+  { name:'מירי רגב', scores:{law:1,leak:2,statements:1,votes:0},
+    details:{
+      law:[{date:'19.7.2025', desc:'תקפה את אדלשטיין בטענה ש"תקע" או "טרפד" את החוק, טענה שיש לו "מניע זר" וקראה לשקול להחליפו.', src:'https://www.srugim.co.il/1152988'}],
+      leak:[{date:'27.8.2024', desc:'צייצה על מיקום/אזור מבצע חילוץ החטוף פרחאן אל־קאדי מעזה. דובר צה"ל ביקש שלא לפרסם פרטים מפאת ביטחון החטופים והכוחות; הציוץ נמחק. כלי תקשורת דיווחו על הפרת הוראות הצנזורה הצבאית.', src:'https://www.kan.org.il/content/kan-news/defense/793476/'}],
+      statements:{count:2, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:0, of:3, laws:'לא אותרה השתתפות בהצבעה בעד שלושת החוקים הנבדקים.'}
+    }},
+  { name:'אמיר אוחנה', scores:{law:0,leak:0,statements:1,votes:3},
+    details:{
+      law:[], leak:[],
+      statements:{count:1, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:3, of:3, laws:'חוק־יסוד: לימוד תורה · תיקון 12 לחוק זכויות הסטודנט · תיקון 28 (הוראת שעה) לחוק שירות ביטחון'}
+    }},
+  { name:'גילה גמליאל', scores:{law:1,leak:0,statements:1,votes:1},
+    details:{
+      law:[{date:'23.7.2025', desc:'תמכה במועמדות ביסמוט לראשות ועדת החוץ והביטחון, בשלב שבו המפלגות החרדיות דרשו יו"ר שיהיה קשוב יותר לצרכיהן בחוק הגיוס.', src:'https://news.walla.co.il/item/3767244'}],
+      leak:[], statements:{count:1, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:1, of:3, laws:'תמכה באחד משלושת החוקים הנבדקים בלבד.'}
+    }},
+  { name:'עמיחי שיקלי', scores:{law:0,leak:1,statements:2,votes:0},
+    details:{
+      law:[],
+      leak:[{date:'1.4.2025', desc:'איש מילואים בשב"כ נעצר בחשד שהעביר לשיקלי ולעיתונאים מידע מסווג. שיקלי אינו חשוד בפרסומים אלא מי שקיבל את המידע; אמר "אף אחד מהמידעים… לא עונה להגדרה חומר סודי" וכינה את המדליף "גיבור ישראל". לא אותרה קביעה רשמית שהפרסומים גרמו לנזק מבצעי.', src:'https://www.ynet.co.il/news/article/bjtr2uorjg'}],
+      statements:{count:3, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:0, of:3, laws:'לא אותרה השתתפות בהצבעה בעד שלושת החוקים הנבדקים.'}
+    }},
+  { name:'ניר ברקת', scores:{law:0,leak:0,statements:0,votes:3},
+    details:{
+      law:[], leak:[],
+      statements:{count:0, note:'לא אותרו התבטאויות מתועדות נגד מערכות הביטחון במקור.'},
+      votes:{count:3, of:3, laws:'חוק־יסוד: לימוד תורה · תיקון 12 לחוק זכויות הסטודנט · תיקון 28 (הוראת שעה) לחוק שירות ביטחון'}
+    }},
+  { name:'דודי אמסלם', scores:{law:1,leak:0,statements:2,votes:0},
+    details:{
+      law:[{date:'15.7.2025', desc:'הציב לנתניהו אולטימטום: אם לא יפטר את אדלשטיין, "כנראה שהוא לא רוצה באמת בחוק הגיוס".', src:'https://www.maariv.co.il/news/politics/article-1215085'}],
+      leak:[], statements:{count:4, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:0, of:3, laws:'לא אותרה השתתפות בהצבעה בעד שלושת החוקים הנבדקים.'}
+    }},
+  { name:'דוד ביטן', scores:{law:0,leak:0,statements:0,votes:2},
+    details:{
+      law:[], leak:[],
+      statements:{count:0, note:'לא אותרו התבטאויות מתועדות נגד מערכות הביטחון במקור.'},
+      votes:{count:2, of:3, laws:'תמך בשניים משלושת החוקים הנבדקים.'}
+    }},
+  { name:'מיקי זוהר', scores:{law:1,leak:0,statements:1,votes:0},
+    details:{
+      law:[{date:'21.7.2025', desc:'תמך בהחלפת אדלשטיין: "יולי אדלשטיין לא מצליח לקדם חוק גיוס, אין ברירה אלא להחליפו"; הדגיש מחויבות לחרדים כ"השותפים הנאמנים ביותר".', src:'https://www.emess.co.il/radio/1741423'}],
+      leak:[], statements:{count:1, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:0, of:3, laws:'לא אותרה השתתפות בהצבעה בעד שלושת החוקים הנבדקים.'}
+    }},
+  { name:'אלי כהן', scores:{law:0,leak:0,statements:1,votes:0},
+    details:{
+      law:[], leak:[],
+      statements:{count:1, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:0, of:3, laws:'לא אותרה השתתפות בהצבעה בעד שלושת החוקים הנבדקים.'}
+    }},
+  { name:'יואב קיש', scores:{law:0,leak:0,statements:1,votes:0},
+    details:{
+      law:[], leak:[],
+      statements:{count:1, note:'מספר ההתבטאויות המתועדות נגד מערכות הביטחון.'},
+      votes:{count:0, of:3, laws:'לא אותרה השתתפות בהצבעה בעד שלושת החוקים הנבדקים.'}
+    }},
+  { name:'אלמוג כהן', scores:{law:0,leak:1,statements:0,votes:0},
+    details:{
+      law:[],
+      leak:[{date:'2024–2025', desc:'הצהיר בפומבי שיפר צו איסור פרסום אם יגיע למידע שלדעתו קשור ל־7 באוקטובר; חשף פרטים על פרשיות ביטחוניות, ובדצמבר 2025 חשף בכנסת טענה על סוכן שב"כ בעזה והתרעה לפני הטבח. לא אותרה קביעה רשמית של צה"ל, שב"כ, צנזורה או בית משפט שהפרסומים גרמו לנזק מבצעי.', src:'https://www.mako.co.il/news-politics/2025_q4/Article-2630203dab05b91027.htm'}],
+      statements:{count:0, note:'לא אותרו התבטאויות מתועדות נגד מערכות הביטחון במקור.'},
+      votes:{count:0, of:3, laws:'לא אותרה השתתפות בהצבעה בעד שלושת החוקים הנבדקים.'}
+    }}
+];
+
+function scoreClass(n){ return 's'+n; }
+
+function renderTable(){
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = DATA.map((p,i)=>{
+    const cells = CATS.map(c=>{
+      const v = p.scores[c.key];
+      return `<td class="score-cell ${scoreClass(v)}" style="background:var(--${scoreClass(v)})"
+        onclick="openModal(${i},'${c.key}')"><span class="num">${v}</span></td>`;
+    }).join('');
+    return `<tr class="${p.institution?'institution-row':''}">
+      <td class="name-cell">${p.name}${p.institution?'<span class="link-tag">גוף מוסדי</span>':''}</td>
+      ${cells}
+    </tr>`;
+  }).join('');
+}
+
+function badgeColor(v){
+  return v===0?'var(--s0)':v===1?'var(--s1)':v===2?'var(--s2)':'var(--s3)';
+}
+
+function openModal(idx, catKey){
+  const p = DATA[idx];
+  const cat = CATS.find(c=>c.key===catKey);
+  const v = p.scores[catKey];
+  const det = p.details[catKey];
+  let body = '';
+
+  if (catKey==='statements' || catKey==='votes'){
+    if (det){
+      if (catKey==='statements'){
+        body += `<div class="stat-line">מספר התבטאויות מתועד: <b>${det.count}</b></div>`;
+      } else {
+        body += `<div class="stat-line">הצביע/ה בעד <b>${det.count} מתוך ${det.of}</b> חוקים שנבדקו</div>`;
+        body += `<div class="stat-line" style="color:var(--text-dim);font-size:13.5px">${det.laws}</div>`;
+      }
+      if (det.note) body += `<div class="empty-state">${det.note}</div>`;
+    } else {
+      body += `<div class="empty-state">אין נתון עבור קטגוריה זו.</div>`;
+    }
+  } else {
+    if (det && det.length){
+      body += det.map(e=>`
+        <div class="event">
+          <div class="event-date">${e.date}</div>
+          <div class="event-desc">${e.desc}</div>
+          ${e.src?`<div class="event-src"><a href="${e.src}" target="_blank" rel="noopener">${e.src}</a></div>`:''}
+        </div>`).join('');
+      if (p.details.note){
+        body += `<div class="method-hint">${p.details.note}</div>`;
+      }
+    } else {
+      body += `<div class="empty-state">לא אותר אירוע מתועד בקטגוריה זו עבור דמות זו.</div>`;
+    }
+  }
+
+  document.getElementById('modal').innerHTML = `
+    <div class="modal-head">
+      <div>
+        <h2>${p.name}</h2>
+        <div class="cat">${cat.label}</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="score-badge" style="background:${badgeColor(v)}22;color:${v===3?'#b91c1c':'#4a2a00'}">
+      <span class="badge-dot" style="background:${badgeColor(v)}"></span> ציון חומרה: ${v} / 3
+    </div>
+    ${body}
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+document.getElementById('overlay').addEventListener('click', e=>{
+  if (e.target.id==='overlay') closeModal();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+renderTable();
+</script>
+</body>
+</html>
