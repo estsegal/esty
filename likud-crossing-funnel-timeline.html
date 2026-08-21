@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>שני קווים שהתלכדו לאחד | קידום חוק הגיוס מול סילוק חסמים בביטחון</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --bg-band-a:#ffffff;
+    --bg-band-b:#ffffff;
+    --ink:#2b2620;
+    --ink-soft:#6b6255;
+    --line:#c9c0af;
+    --panel-bg:#fffdf9;
+    --state:#c1440e;
+    --state-soft:#e9c3a8;
+    --network:#8b5e34;
+    --network-soft:#ddc7ab;
+    --unknown:#b5a642;
+    --unknown-soft:#e6dfad;
+    --shadow: 0 12px 34px rgba(43,38,32,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Assistant',sans-serif;}
+  body{min-height:100vh;}
+
+  .app-header{
+    padding:28px 32px 16px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fffdf9,var(--bg));
+    position:sticky;top:0;z-index:30;
+  }
+  .app-header h1{
+    margin:0 0 6px;
+    font-size:1.9rem;
+    font-weight:800;
+    letter-spacing:-0.3px;
+  }
+  .app-header p.sub{
+    margin:0 0 16px;
+    color:var(--ink-soft);
+    font-size:0.98rem;
+    font-weight:500;
+  }
+  .app-header p.hint{
+    margin:0 0 14px;
+    color:var(--ink-soft);
+    font-size:0.85rem;
+    font-weight:500;
+  }
+
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    align-items:center;
+  }
+  .filter-btn{
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    padding:8px 16px;
+    border-radius:999px;
+    font-family:'Assistant',sans-serif;
+    font-weight:600;
+    font-size:0.88rem;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .filter-btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,0.08);}
+  .filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .filter-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  .legend-note{
+    text-align:center;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-top:10px;
+  }
+
+  .canvas-wrap{
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:20px 0 40px;
+    scroll-behavior:smooth;
+  }
+  .canvas-wrap::-webkit-scrollbar{height:10px;}
+  .canvas-wrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px;}
+  .canvas-wrap::-webkit-scrollbar-track{background:transparent;}
+
+  svg{display:block;}
+
+  .era-band-label{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:20px;
+    fill:var(--ink);
+  }
+  .era-band-sub{
+    font-family:'Assistant',sans-serif;
+    font-weight:500;
+    font-size:12.5px;
+    fill:var(--ink-soft);
+  }
+  .row-label{
+    font-family:'Assistant',sans-serif;
+    font-weight:700;
+    font-size:14px;
+  }
+
+  .node-group{cursor:pointer;}
+  .node-halo{transition:opacity .25s ease, r .25s ease;}
+  .node-circle{
+    stroke:#fff;
+    stroke-width:3;
+    transition:transform .18s ease, filter .18s ease;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  .node-group:hover .node-circle{transform:scale(1.08);filter:drop-shadow(0 6px 14px rgba(0,0,0,0.25));}
+  .node-title{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:16.5px;
+    fill:var(--ink);
+  }
+  .node-date{
+    font-family:'Assistant',sans-serif;
+    font-weight:600;
+    font-size:12px;
+    fill:var(--ink-soft);
+  }
+  .node-scale-badge{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:12px;
+    fill:#fff;
+  }
+
+  .fade{opacity:0.15 !important;}
+
+  .edge-path{
+    fill:none;
+    stroke:var(--line);
+    stroke-width:2.4;
+    marker-end:url(#arrowGray);
+  }
+  .edge-path.dashed{
+    stroke-dasharray:6 6;
+    stroke-width:2;
+    opacity:0.75;
+  }
+
+  /* Side panel */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(30,26,20,0.45);
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease;
+    z-index:40;
+  }
+  .overlay.open{opacity:1;pointer-events:auto;}
+
+  .side-panel{
+    position:fixed;
+    top:0;right:0;
+    height:100%;
+    width:min(440px, 92vw);
+    background:var(--panel-bg);
+    box-shadow:var(--shadow);
+    transform:translateX(105%);
+    transition:transform .3s cubic-bezier(.22,.9,.32,1);
+    z-index:50;
+    display:flex;
+    flex-direction:column;
+    border-left:1px solid var(--line);
+  }
+  .side-panel.open{transform:translateX(0);}
+
+  .panel-head{
+    padding:22px 22px 16px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .panel-close{
+    position:absolute;
+    top:16px;left:16px;
+    width:32px;height:32px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:16px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft);
+  }
+  .panel-close:hover{background:#f2ede3;color:var(--ink);}
+
+  .panel-cat-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:0.78rem;font-weight:700;
+    padding:4px 10px;border-radius:999px;
+    color:#fff;
+    margin-bottom:10px;
+  }
+  .panel-title{
+    font-size:1.35rem;
+    font-weight:800;
+    margin:0 0 6px;
+    line-height:1.3;
+  }
+  .panel-date{
+    font-size:0.88rem;
+    color:var(--ink-soft);
+    font-weight:600;
+    margin:0;
+  }
+
+  .panel-body{
+    padding:20px 22px 30px;
+    overflow-y:auto;
+    flex:1;
+  }
+  .panel-section-title{
+    font-size:0.78rem;
+    font-weight:800;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin:0 0 8px;
+  }
+  .panel-desc{
+    font-size:1rem;
+    line-height:1.75;
+    margin:0 0 22px;
+    color:var(--ink);
+  }
+  .panel-tags{
+    display:flex;flex-wrap:wrap;gap:8px;
+    margin-bottom:22px;
+  }
+  .panel-tag{
+    font-size:0.78rem;
+    font-weight:600;
+    background:#f2ede3;
+    color:var(--ink-soft);
+    padding:5px 11px;
+    border-radius:8px;
+  }
+  .panel-source{
+    background:#f6f1e7;
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    line-height:1.6;
+    border:1px solid var(--line);
+  }
+  .panel-source b{color:var(--ink);}
+  .panel-source a{color:#1f5f8b;font-weight:700;text-decoration:underline;}
+  .panel-source a:hover{color:#c1440e;}
+
+  .scale-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:0.78rem;font-weight:700;
+    background:#2b2620;color:#fff;
+    padding:4px 10px;border-radius:8px;
+    margin-bottom:18px;
+  }
+
+  /* ==================== תצוגת מובייל: ציר אנכי ==================== */
+  .mobile-timeline{
+    display:none;
+    position:relative;
+    padding:8px 16px 60px;
+    max-width:640px;
+    margin:0 auto;
+  }
+  .mobile-era{
+    margin-bottom:18px;
+    border-radius:18px;
+    padding:2px 2px 12px;
+  }
+  .mobile-era-head{
+    position:sticky;
+    top:0;
+    padding:14px 12px 8px;
+    z-index:5;
+    backdrop-filter:blur(2px);
+    border-radius:18px 18px 0 0;
+  }
+  .mobile-era-title{
+    font-weight:800;
+    font-size:1.02rem;
+    margin:0 0 2px;
+  }
+  .mobile-era-sub{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    font-weight:500;
+    margin:0;
+  }
+  .mobile-track{
+    position:relative;
+    padding:2px 6px 2px 6px;
+    margin-top:2px;
+  }
+  .mobile-wave-svg{
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    pointer-events:none;
+    z-index:0;
+    overflow:visible;
+  }
+  .mobile-row{
+    position:relative;
+    z-index:1;
+    padding:3px 0;
+    margin-bottom:16px;
+    cursor:pointer;
+    min-height:64px;
+  }
+  .mobile-group{
+    position:absolute;
+    top:0;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    max-width:70%;
+    z-index:2;
+  }
+  .mobile-row.side-right .mobile-group{ right: calc(var(--indent) - 20px); flex-direction:row; }
+  .mobile-row.side-left  .mobile-group{ left:  calc(var(--indent) - 20px); flex-direction:row; }
+  .mobile-dot{
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;
+    border:3px solid var(--bg);
+    box-shadow:0 0 0 2px var(--line), 0 3px 8px rgba(43,38,32,0.18);
+    position:relative;
+    transition:transform .15s ease;
+    flex-shrink:0;
+  }
+  .mobile-dot svg{ width:52%; height:52%; }
+  .mobile-row:active .mobile-dot{transform:scale(0.92);}
+  .mobile-card-body{
+    position:relative;
+    z-index:1;
+    padding-top:2px;
+    text-align:right;
+  }
+  .mobile-card-date{
+    font-size:1.05rem;
+    color:var(--ink);
+    font-weight:800;
+    margin:0 0 3px;
+  }
+  .mobile-card-title{
+    font-weight:600;
+    font-size:0.88rem;
+    color:var(--ink-soft);
+    margin:0;
+    line-height:1.35;
+  }
+  .mobile-row.fade{opacity:0.25;}
+
+
+  .pinch-guide{stroke:#8b6b2e;stroke-width:1.6;stroke-dasharray:5 7;opacity:0.55;}
+  .pinch-tag{
+    font-family:'Assistant',sans-serif;font-weight:800;font-size:15px;
+    fill:#5c4419;
+  }
+  .pinch-tag-sub{
+    font-family:'Assistant',sans-serif;font-weight:600;font-size:12px;
+    fill:#8b6b2e;
+  }
+  .pinch-chip-bg{fill:#fdf3d8;stroke:#c9a94a;stroke-width:1.4;}
+  .mobile-row.pinch-card .mobile-dot{
+    box-shadow:0 0 0 2px var(--line), 0 0 0 6px #f5dfa0, 0 4px 10px rgba(157,120,20,0.35);
+  }
+  .mobile-pinch-flag{
+    display:inline-block;font-size:0.72rem;font-weight:800;color:#5c4419;
+    background:#f5dfa0;border:1px solid #c9a94a;border-radius:999px;
+    padding:2px 9px;margin-bottom:6px;
+  }
+
+  .desktop-only{display:block;}
+
+  @media (max-width:860px){
+    .canvas-wrap{display:none;}
+    .mobile-timeline{display:block;}
+    .desktop-only{display:none;}
+    #mobileHint{display:block !important;}
+    .app-header{padding:20px 16px 14px;}
+    .app-header h1{font-size:1.25rem;}
+    .app-header .sub{font-size:0.86rem;}
+    .app-header .hint{font-size:0.78rem;}
+    .controls{gap:8px;}
+    .filter-btn{padding:7px 12px;font-size:0.8rem;}
+    .side-panel{width:100vw;}
+  }
+
+  @media (max-width:640px){
+    .app-header h1{font-size:1.15rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <p class="hint desktop-only">לחצו על כל צומת לפירוט מלא · שימו לב איך שני הקווים מתקרבים ככל שמתקדמים שמאלה, נוגעים כמעט זה בזה בקו המקווקוו, וממשיכים אחריו כמעט צמודים · גללו אופקית →</p>
+  <p class="hint" style="display:none" id="mobileHint">הקישו על כל אירוע לפירוט מלא · גללו למטה לפי סדר כרונולוגי — שימו לב לכרטיס המסומן כ"נקודת ההצטלבות" ↓</p>
+  <div class="controls" id="filterControls"></div>
+</div>
+
+<div class="canvas-wrap" id="canvasWrap" dir="ltr">
+  <svg id="mainSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="mobile-timeline" id="mobileTimeline"></div>
+
+<div class="overlay" id="overlay"></div>
+<div class="side-panel" id="sidePanel">
+  <div class="panel-head">
+    <button class="panel-close" id="panelClose">✕</button>
+    <div id="panelCatBadge" class="panel-cat-badge"></div>
+    <h2 class="panel-title" id="panelTitle"></h2>
+    <p class="panel-date" id="panelDate"></p>
+  </div>
+  <div class="panel-body">
+    <div class="panel-section-title">מה קרה</div>
+    <p class="panel-desc" id="panelDesc"></p>
+    <div class="panel-tags" id="panelTags"></div>
+    <div class="panel-source" id="panelSource"></div>
+  </div>
+</div>
+
+<script>
+/* ==================== נתונים ====================
+   שני מסלולים בלבד: catLaw (קידום חקיקתי) ו-catRemoval (הדחות והזזת חסמים).
+   הגיאומטריה מבוססת על פונקציית "היצרות" רציפה (offsetForX) שמקרבת את שני
+   המסלולים זה לזה ככל שמתקרבים לתאריך ה"צוואר" (5.6.2025 — הקלטת נתניהו),
+   וממשיכה במרחק מינימלי קבוע אחריו — כלומר שני קווים שכמעט מתמזגים לאחד.
+*/
+const CATEGORIES = {
+  catLaw:     { label: 'קידום חקיקתי — התחייבויות ומהלכי חקיקה', color: '#1f5f8b', soft:'#bcd9ea' },
+  catRemoval: { label: 'הדחות והזזת חסמים במערכת הביטחון',        color: '#c1440e', soft:'#f0c9a8' },
+};
+// חילופים בפועל (פיטורים/מינויים/כניסה לתפקיד) מודגשים בצבע אדום ייחודי ובגודל מוגדל
+const SWAP_COLOR = '#7a1f2b', SWAP_SOFT = '#e3b8bd';
+const SWAP_ICON_PATHS = `<path d="M17 2l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 22l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path>`;
+const SWAP_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">${SWAP_ICON_PATHS}</svg>`;
+
+// x גדל = מוקדם יותר בזמן (כמו במפה הקודמת, לשמירה על עקביות בין הכלים)
+const nodes = [
+  { id:'n1', x:3600, category:'catLaw', scale:2,
+    title:'אופיר כץ מתחייב כיו״ר הקואליציה לחוק הגיוס', date:'17.8.2023',
+    desc:'יו"ר הקואליציה אופיר כץ מתחייב בריאיון כי חוק הגיוס יעבור בשלוש קריאות במושב הבא, ומגדיר את סדר העבודה: קודם חוק הגיוס לחרדים, ורק לאחר מכן המשך הרפורמה המשפטית.',
+    tags:['התחייבות קואליציונית','אופיר כץ'], source:'Ynet, 17.8.2023', sourceUrl:'https://www.ynet.co.il/news/article/sji11dejnh' },
+  { id:'n2', x:3430, category:'catLaw', scale:3,
+    title:'נתניהו מחייה את החוק באמצעות דין רציפות', date:'16.5.2024',
+    desc:'ראש הממשלה בנימין נתניהו מנחה להחיל דין רציפות על הצעת חוק הגיוס מהכנסת הקודמת, כדי לעקוף את הצורך בהתחלת הליך החקיקה מאפס.',
+    tags:['דין רציפות','נתניהו'], source:'גלובס, 16.5.2024', sourceUrl:'https://www.globes.co.il/news/article.aspx?did=1001478774' },
+  { id:'n3', x:3260, category:'catLaw', scale:3,
+    title:'נתניהו מתחייב לקדם חוק גיוס עד סוף החודש', date:'8.10.2024',
+    desc:'נתניהו מצהיר בפני המפלגות החרדיות כי הוא נחוש להעביר חוק גיוס מוסכם עד סוף אוקטובר, על רקע איומי החרדים שלא להצביע בעד תקציב 2025 ללא פתרון פטור מגיוס.',
+    tags:['אולטימטום','תקציב 2025'], source:'Ynet, 8.10.2024', sourceUrl:'https://www.ynet.co.il/news/article/bkkkrpmykg' },
+  { id:'n4', x:3090, category:'catRemoval', scale:5, swap:true,
+    title:'פיטורי יואב גלנט ומינוי ישראל כ"ץ', date:'5.11.2024',
+    desc:'נתניהו מפטר את שר הביטחון יואב גלנט וממנה במקומו את ישראל כ"ץ. המהלך מסיר את אחד החסמים המרכזיים בתוך משרד הביטחון לקידום חוק פטור שאינו מוסכם על גורמי המקצוע — כפי שנתניהו עצמו הודה בהמשך בהקלטה מיוני 2025: "כששר הביטחון והרמטכ"ל נגדך אי אפשר להתקדם".',
+    tags:['פיטורים','שר ביטחון','ישראל כ"ץ'], source:'הארץ, 5.11.2024', sourceUrl:'https://www.haaretz.co.il/news/politics/2024-11-05/ty-article/00000192-fd79-d9d0-a996-fd7df7fc0000' },
+  { id:'n5', x:2920, category:'catRemoval', scale:2,
+    title:'סנקציות משמעת נגד ח"כ דן אילוז ויולי אדלשטיין', date:'6.11.2024',
+    desc:'יום אחד לאחר פיטורי גלנט, יו"ר הקואליציה אופיר כץ מטיל סנקציות חריפות על ח"כ דן אילוז, שהתנגד בפומבי לחוק הגיוס — לרבות החלפתו בוועדות ואיסור הגשת הצעות חוק פרטיות.',
+    tags:['משמעת קואליציונית','דן אילוז'], source:'כלכליסט, 6.11.2024', sourceUrl:'https://www.calcalist.co.il/local_news/article/hk9tv9d11kl' },
+  { id:'n6', x:2750, category:'catLaw', scale:3,
+    title:'כ״ץ מגבש מתווה השתמטות עם הסיעות החרדיות', date:'2–14.1.2025',
+    desc:'שר הביטחון החדש ישראל כ"ץ נפגש עם נציגי הסיעות החרדיות, מגבש איתם עקרונות ומציג בוועדת החוץ והביטחון מתווה הכולל יעדים נמוכים וגיל פטור 26.',
+    tags:['מתווה גיוס','ישראל כ"ץ'], source:'כלכליסט, ינואר 2025', sourceUrl:'https://www.calcalist.co.il/article/skn4lyeukg' },
+  { id:'n7', x:2580, category:'catRemoval', scale:4, swap:true,
+    title:'חילופי רמטכ"ל: הלוי החוצה, זמיר פנימה', date:'מרץ 2025',
+    desc:'סיום תפקידו של הרמטכ"ל הרצי הלוי, אשר ספג 40 מתקפות מתועדות מצד נבחרי הליכוד — לרבות 5 מצד שר הביטחון הנכנס ישראל כ"ץ — וכניסתו של אייל זמיר לתפקיד.',
+    tags:['רמטכ"ל','הרצי הלוי','אייל זמיר'] },
+  { id:'n8', x:2410, category:'catRemoval', scale:3,
+    title:'יועץ נתניהו מבטיח לחרדים שחוק הגיוס יעבור ורומז על החלפת אדלשטיין', date:'23.4.2025',
+    desc:'בהקלטה שנחשפת, יועצו של נתניהו מבטיח לנציג חרדי שהחוק יעבור; במקביל עולה לראשונה האפשרות להדחתו של יו"ר ועדת החוץ והביטחון יולי אדלשטיין, המעכב את החוק.',
+    tags:['יולי אדלשטיין','הקלטה'], source:'Ynet, 23.4.2025', sourceUrl:'https://www.ynet.co.il/news/article/bypfkmi1ee' },
+  { id:'n9', x:2240, category:'catRemoval', scale:3,
+    title:'קרעי מציע את עצמו להחליף את אדלשטיין', date:'4.6.2025',
+    desc:'השר שלמה קרעי, מהמבקרים החריפים של מערכת הביטחון עם 7 התבטאויות מתועדות, מציע להתפטר מתפקידו כשר התקשורת ולהתמנות במקום אדלשטיין כדי להעביר את חוק הגיוס במהירות.',
+    tags:['שלמה קרעי','יולי אדלשטיין'], source:'מקור ראשון, 4.6.2025', sourceUrl:'https://www.makorrishon.co.il/news/politcal/article/170437' },
+  { id:'n10', x:2070, category:'catRemoval', scale:5, pinch:true,
+    title:'נתניהו לחרדים: לא קידמנו את החוק בגלל גלנט והלוי, עכשיו אפשר להתקדם', date:'5.6.2025',
+    desc:'בשיחה מוקלטת עם הרב משה הלל הירש, נתניהו מודה במניע להסרת ראשי המערכת: "היו לנו מכשולים עצומים שהסרנו… כששר הביטחון והרמטכ"ל נגדך אי אפשר להתקדם". זהו הרגע התיעודי שבו שני המסלולים — קידום החוק וסילוק ראשי מערכת הביטחון — מתגלים כפעולה אחת מתואמת, ולא כשני מהלכים נפרדים.',
+    tags:['הקלטה','נתניהו','מכשולים'], source:'דבר הראשון, 5.6.2025', sourceUrl:'https://www.davar1.co.il/605695/' },
+  { id:'n11', x:1900, category:'catRemoval', scale:5, swap:true,
+    title:'סיום תפקידו של רונן בר כראש השב"כ', date:'יוני 2025',
+    desc:'רונן בר מסיים את תפקידו כראש השב"כ, לאחר שספג 45 מתקפות פומביות משרים וחברי כנסת בליכוד — בהן 7 מנתניהו עצמו ו-8 מהח"כית טלי גוטליב.',
+    tags:['רונן בר','שב"כ'] },
+  { id:'n12', x:1730, category:'catRemoval', scale:3,
+    title:'אולטימטום אמסלם: לפטר את אדלשטיין', date:'15.7.2025',
+    desc:'השר דודי אמסלם דורש מנתניהו לפטר את אדלשטיין, בטענה שאם לא יעשה כן "כנראה שהוא לא רוצה באמת בחוק הגיוס".',
+    tags:['דודי אמסלם','אולטימטום'], source:'מעריב, 15.7.2025', sourceUrl:'https://www.maariv.co.il/news/politics/article-1215085' },
+  { id:'n13', x:1560, category:'catRemoval', scale:3,
+    title:'מירי רגב קוראת להחליף את אדלשטיין', date:'19.7.2025',
+    desc:'השרה מירי רגב תוקפת את אדלשטיין בטענה שהוא מטרפק את החוק מ"מניעים זרים" וקוראת להחלפתו.',
+    tags:['מירי רגב'], source:'סרוגים, 19.7.2025', sourceUrl:'https://www.srugim.co.il/1152988-%D7%A8%D7%92%D7%91-%D7%A7%D7%95%D7%A8%D7%90%D7%AA-%D7%9C%D7%94%D7%93%D7%99%D7%97-%D7%90%D7%AA-%D7%90%D7%93%D7%9C%D7%A9%D7%98%D7%99%D7%99%D7%9F-%D7%A9%D7%99%D7%A7%D7%95%D7%9C%D7%99%D7%9D-%D7%96' },
+  { id:'n14', x:1390, category:'catRemoval', scale:2,
+    title:'מיקי זוהר קורא להחליף את אדלשטיין', date:'21.7.2025',
+    desc:'השר מיקי זוהר קורא להחליף את אדלשטיין ומציין כי החרדים הם "השותפים הנאמנים ביותר".',
+    tags:['מיקי זוהר'], source:'אמת, 21.7.2025', sourceUrl:'https://www.emess.co.il/radio/1741423' },
+  { id:'n15', x:1220, category:'catRemoval', scale:5, swap:true,
+    title:'הדחת אדלשטיין ומינוי ביסמוט', date:'23.7.2025',
+    desc:'סיעת הליכוד מביאה להדחתו של יולי אדלשטיין מיו"ר ועדת החוץ והביטחון, ובוחרת בבועז ביסמוט להחליפו ברוב של 29 מול 4. במינוי תמכו בין היתר טלי גוטליב, משה סעדה וגילה גמליאל.',
+    tags:['יולי אדלשטיין','בועז ביסמוט','הדחה'], source:'Ynet, 23.7.2025', sourceUrl:'https://www.ynet.co.il/news/article/b1j1llaulx' },
+  { id:'n16', x:1050, category:'catRemoval', scale:3, swap:true,
+    title:'אישור סופי למינוי ביסמוט', date:'4.8.2025',
+    desc:'ועדת הכנסת מאשרת סופית את מינוי בועז ביסמוט ליו"ר ועדת החוץ והביטחון.',
+    tags:['בועז ביסמוט','ועדת הכנסת'], source:'Ynet, 4.8.2025', sourceUrl:'https://www.ynet.co.il/news/article/bkq0dzawle' },
+  { id:'n17', x:880, category:'catRemoval', scale:4, swap:true,
+    title:'דוד זיני נכנס לתפקיד ראש השב"כ', date:'5.10.2025',
+    desc:'דוד זיני נכנס לתפקידו כראש השב"כ במקום רונן בר, ומשלים את חילופי הגברי בשלוש המערכות הבכירות של מערכת הביטחון — משרד הביטחון, המטה הכללי והשב"כ.',
+    tags:['דוד זיני','שב"כ'], source:'Ynet, 5.10.2025', sourceUrl:'https://www.ynet.co.il/news/article/syuoysyael' },
+  { id:'n18', x:710, category:'catLaw', scale:4,
+    title:'פרסום מתווה ביסמוט לחוק הגיוס', date:'29.10.2025',
+    desc:'מפורסמת טיוטת חוק הגיוס המקלה שגיבש בועז ביסמוט, הכוללת יעדים נמוכים, סנקציות חלשות ואיכותיות נמוכות המאפשרות דחיית שירות.',
+    tags:['מתווה ביסמוט','טיוטת חוק'], source:'המכון הישראלי לדמוקרטיה, 29.10.2025', sourceUrl:'https://www.idi.org.il/articles/61986' },
+  { id:'n19', x:540, category:'catLaw', scale:3,
+    title:'נתניהו מציב דדליין להעברת החוק "תוך חודש"', date:'6.11.2025',
+    desc:'נתניהו מציב דדליין להשלמת חוק הגיוס "תוך חודש" במטרה לייצב את הקואליציה.',
+    tags:['דדליין','נתניהו'], source:'Mako, 6.11.2025', sourceUrl:'https://www.mako.co.il/news-politics/2025_q4/Article-d07683828455a91027.htm' },
+  { id:'n20', x:370, category:'catLaw', scale:4,
+    title:'הבטחת נתניהו ליהדות התורה: "החוק יעבור"', date:'11.12.2025',
+    desc:'בפגישה עם יהדות התורה מתחייב נתניהו: "אני שולט ברוב חברי הכנסת — החוק יעבור".',
+    tags:['יהדות התורה','הבטחה'], source:'Mako, 11.12.2025', sourceUrl:'https://www.mako.co.il/news-politics/2025_q4/Article-0905dae0e9e0b91026.htm' },
+];
+
+// שלוש תקופות רקע לצורך התמצאות בלבד (אותם גבולות כמו במפה הקודמת)
+const eras = [
+  { from:3175, to:3750, title:'שלב א׳ — הנחת התשתית', sub:'אוגוסט 2023 – אוקטובר 2024' },
+  { from:965,  to:3175, title:'שלב ב׳ — נקודת המפנה', sub:'נובמבר 2024 – אוגוסט 2025' },
+  { from:0,    to:965,  title:'שלב ג׳ — האצה חקיקתית', sub:'אוקטובר – דצמבר 2025' },
+];
+
+/* ==================== גיאומטריה: פונקציית ההיצרות ==================== */
+const W = 3750, H = 950;
+const SPINE_Y = 475;
+const MAX_OFFSET = 260;   // מרחק כל קו מהציר המרכזי בתחילת הסיפור (מימין, המוקדם ביותר)
+const MIN_OFFSET = 50;    // מרחק מינימלי — כמעט מיזוג — מנקודת ה"צוואר" ועד סוף הסיפור
+const PINCH_NODE = nodes.find(n => n.pinch);
+const PINCH_X = PINCH_NODE.x;
+const X_MAX = Math.max(...nodes.map(n => n.x));
+
+function smoothstep(t){ return t*t*(3-2*t); }
+function offsetForX(x){
+  if(x <= PINCH_X) return MIN_OFFSET;
+  const t = Math.min(1, (x - PINCH_X) / (X_MAX - PINCH_X));
+  return MIN_OFFSET + (MAX_OFFSET - MIN_OFFSET) * smoothstep(t);
+}
+function yForNode(n){
+  const off = offsetForX(n.x);
+  return n.category === 'catLaw' ? SPINE_Y - off : SPINE_Y + off;
+}
+function radiusFor(scale){ return 20 + scale*5; }
+
+const svg = document.getElementById('mainSvg');
+svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+svg.setAttribute('width', W);
+svg.setAttribute('height', H);
+function ns(tag){ return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+
+// defs: shadow + glow למרקם הצוואר
+const defs = ns('defs');
+defs.innerHTML = `
+  <radialGradient id="pinchGlow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#f5dfa0" stop-opacity="0.85"/>
+    <stop offset="100%" stop-color="#f5dfa0" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="funnelFill" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${CATEGORIES.catLaw.color}" stop-opacity="0.10"/>
+    <stop offset="100%" stop-color="${CATEGORIES.catRemoval.color}" stop-opacity="0.10"/>
+  </linearGradient>
+`;
+svg.appendChild(defs);
+
+// era bands (רקע בלבד, לצורך התמצאות בזמן)
+eras.forEach((era, i) => {
+  const rect = ns('rect');
+  rect.setAttribute('x', era.from); rect.setAttribute('y', 0);
+  rect.setAttribute('width', era.to - era.from); rect.setAttribute('height', H);
+  rect.setAttribute('fill', i % 2 === 0 ? 'var(--bg-band-a)' : 'var(--bg-band-b)');
+  svg.appendChild(rect);
+
+  const title = ns('text');
+  title.setAttribute('x', (era.from + era.to)/2); title.setAttribute('y', 40);
+  title.setAttribute('text-anchor','middle'); title.setAttribute('class','era-band-label');
+  title.textContent = era.title;
+  svg.appendChild(title);
+
+  const sub = ns('text');
+  sub.setAttribute('x', (era.from + era.to)/2); sub.setAttribute('y', 62);
+  sub.setAttribute('text-anchor','middle'); sub.setAttribute('class','era-band-sub');
+  sub.textContent = era.sub;
+  svg.appendChild(sub);
+
+  if (i > 0){
+    const divider = ns('line');
+    divider.setAttribute('x1', era.to); divider.setAttribute('x2', era.to);
+    divider.setAttribute('y1', 0); divider.setAttribute('y2', H);
+    divider.setAttribute('stroke', 'var(--line)'); divider.setAttribute('stroke-dasharray','3 6');
+    svg.appendChild(divider);
+  }
+});
+
+// דגימה רציפה של שני העקומות לאורך כל טווח ה-x (לא רק בנקודות האירועים) — זה מה שנותן קו חלק ומדויק
+function sampleCurve(sign){
+  const pts = [];
+  for(let x = 0; x <= W; x += 12){
+    const off = offsetForX(x);
+    pts.push({ x, y: SPINE_Y + sign*off });
+  }
+  return pts;
+}
+const lawCurvePts = sampleCurve(-1);
+const removalCurvePts = sampleCurve(1);
+function toPath(pts){ return 'M ' + pts.map(p => `${p.x} ${p.y}`).join(' L '); }
+
+// מילוי "המשפך" בין שני הקווים — עוצמה חזותית מיידית להתלכדות
+const funnelPath = ns('path');
+const fillD = toPath(lawCurvePts) + ' L ' + removalCurvePts.slice().reverse().map(p=>`${p.x} ${p.y}`).join(' L ') + ' Z';
+funnelPath.setAttribute('d', fillD);
+funnelPath.setAttribute('fill', 'url(#funnelFill)');
+svg.appendChild(funnelPath);
+
+// קו מקווקוו אנכי + תווית בנקודת ה"צוואר"
+const pinchGuide = ns('line');
+pinchGuide.setAttribute('x1', PINCH_X); pinchGuide.setAttribute('x2', PINCH_X);
+pinchGuide.setAttribute('y1', 90); pinchGuide.setAttribute('y2', H-30);
+pinchGuide.setAttribute('class','pinch-guide');
+svg.appendChild(pinchGuide);
+
+const glow = ns('circle');
+glow.setAttribute('cx', PINCH_X); glow.setAttribute('cy', SPINE_Y);
+glow.setAttribute('r', 130); glow.setAttribute('fill', 'url(#pinchGlow)');
+svg.appendChild(glow);
+
+const chipW = 300, chipH = 46;
+const chipBg = ns('rect');
+chipBg.setAttribute('x', PINCH_X - chipW/2); chipBg.setAttribute('y', 100);
+chipBg.setAttribute('width', chipW); chipBg.setAttribute('height', chipH);
+chipBg.setAttribute('rx', 12); chipBg.setAttribute('class','pinch-chip-bg');
+svg.appendChild(chipBg);
+
+const chipTitle = ns('text');
+chipTitle.setAttribute('x', PINCH_X); chipTitle.setAttribute('y', 122);
+chipTitle.setAttribute('text-anchor','middle'); chipTitle.setAttribute('class','pinch-tag');
+chipTitle.textContent = '5.6.2025 — נקודת ההצטלבות המתועדת';
+svg.appendChild(chipTitle);
+
+const chipSub = ns('text');
+chipSub.setAttribute('x', PINCH_X); chipSub.setAttribute('y', 139);
+chipSub.setAttribute('text-anchor','middle'); chipSub.setAttribute('class','pinch-tag-sub');
+chipSub.textContent = 'הקלטת נתניהו: "מכשולים עצומים שהסרנו"';
+svg.appendChild(chipSub);
+
+// שני קווי המסלול עצמם
+const lawLine = ns('path');
+lawLine.setAttribute('d', toPath(lawCurvePts));
+lawLine.setAttribute('fill','none'); lawLine.setAttribute('stroke', CATEGORIES.catLaw.color);
+lawLine.setAttribute('stroke-width','3.4'); lawLine.setAttribute('stroke-linecap','round');
+svg.appendChild(lawLine);
+
+const removalLine = ns('path');
+removalLine.setAttribute('d', toPath(removalCurvePts));
+removalLine.setAttribute('fill','none'); removalLine.setAttribute('stroke', CATEGORIES.catRemoval.color);
+removalLine.setAttribute('stroke-width','3.4'); removalLine.setAttribute('stroke-linecap','round');
+svg.appendChild(removalLine);
+
+// צמתים
+const nodeLayer = ns('g');
+svg.appendChild(nodeLayer);
+
+nodes.forEach(n => {
+  const cat = CATEGORIES[n.category];
+  const y = yForNode(n);
+  const r = radiusFor(n.scale) + (n.swap ? 8 : 0);
+  const above = n.category === 'catLaw'; // קידום חקיקתי -> תווית מעל; הדחות -> תווית מתחת
+  const fillColor = n.swap ? SWAP_COLOR : cat.color;
+  const softColor = n.swap ? SWAP_SOFT : cat.soft;
+
+  const g = ns('g');
+  g.setAttribute('class','node-group'); g.setAttribute('data-id', n.id); g.setAttribute('data-cat', n.category);
+
+  if(n.pinch){
+    const ring = ns('circle');
+    ring.setAttribute('cx', n.x); ring.setAttribute('cy', y);
+    ring.setAttribute('r', r+10); ring.setAttribute('fill','none');
+    ring.setAttribute('stroke','#c9a94a'); ring.setAttribute('stroke-width','2.5');
+    g.appendChild(ring);
+  }
+
+  const halo = ns('circle');
+  halo.setAttribute('cx', n.x); halo.setAttribute('cy', y);
+  halo.setAttribute('r', r+16); halo.setAttribute('fill', softColor);
+  halo.setAttribute('opacity', 0.55); halo.setAttribute('class','node-halo');
+  g.appendChild(halo);
+
+  const circle = ns('circle');
+  circle.setAttribute('cx', n.x); circle.setAttribute('cy', y);
+  circle.setAttribute('r', r); circle.setAttribute('fill', fillColor);
+  circle.setAttribute('class','node-circle');
+  g.appendChild(circle);
+
+  if(n.swap){
+    const iconSize = r * 0.95;
+    const iconG = ns('g');
+    iconG.setAttribute('transform', `translate(${n.x - iconSize/2}, ${y - iconSize/2})`);
+    iconG.innerHTML = `<svg width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">${SWAP_ICON_PATHS}</svg>`;
+    g.appendChild(iconG);
+  }
+
+  const title = ns('text');
+  title.setAttribute('x', n.x);
+  title.setAttribute('y', above ? y - r - 30 : y + r + 30);
+  title.setAttribute('text-anchor','middle'); title.setAttribute('class','node-title');
+  title.textContent = n.title;
+  g.appendChild(title);
+
+  const date = ns('text');
+  date.setAttribute('x', n.x);
+  date.setAttribute('y', above ? y - r - 50 : y + r + 50);
+  date.setAttribute('text-anchor','middle'); date.setAttribute('class','node-date');
+  date.textContent = n.date;
+  g.appendChild(date);
+
+  g.addEventListener('click', () => openPanel(n));
+  nodeLayer.appendChild(g);
+});
+
+/* ==================== תצוגת מובייל (אנכית, כרונולוגית, עם התכנסות שני הצדדים) ==================== */
+const mobileTimeline = document.getElementById('mobileTimeline');
+const CATEGORY_ICONS = {
+  catLaw: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"></path><path d="M15 3v4h4"></path><path d="M9 12h6M9 15.5h6M9 8.5h3"></path></svg>`,
+  catRemoval: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.6 6.6 7 .5-5.4 4.5 1.8 6.9L12 16.9 5.9 20.5l1.8-6.9-5.4-4.5 7-.5z"></path></svg>`,
+};
+const ERA_TINTS = ['#ffffff', '#ffffff', '#ffffff'];
+const chronological = [...nodes].sort((a,b) => b.x - a.x);
+function mobileDotSize(scale){ return 32 + scale*5; }
+
+// אותה פונקציית התכנסות בדיוק כמו בדסקטופ, ממופה לאחוזים של רוחב המסך —
+// כך שהקצוות במובייל מקבילים ל-MAX_OFFSET (רחוק מהמרכז) וסביבות ה-5.6.2025 ל-MIN_OFFSET (כמעט מוזג)
+const MOBILE_MIN_PCT = 6, MOBILE_MAX_PCT = 30;
+function mobileIndentPct(x){
+  const off = offsetForX(x);
+  const norm = (off - MIN_OFFSET) / (MAX_OFFSET - MIN_OFFSET);
+  return MOBILE_MIN_PCT + (MOBILE_MAX_PCT - MOBILE_MIN_PCT) * norm;
+}
+
+eras.forEach((era, eraIdx) => {
+  const eraNodes = chronological.filter(n => n.x >= era.from && n.x <= era.to);
+  if (eraNodes.length === 0) return;
+
+  const section = document.createElement('div');
+  section.className = 'mobile-era';
+  section.style.background = ERA_TINTS[eraIdx % ERA_TINTS.length];
+
+  const head = document.createElement('div');
+  head.className = 'mobile-era-head';
+  head.style.background = ERA_TINTS[eraIdx % ERA_TINTS.length];
+  head.innerHTML = `<p class="mobile-era-title">${era.title}</p><p class="mobile-era-sub">${era.sub}</p>`;
+  section.appendChild(head);
+
+  const track = document.createElement('div');
+  track.className = 'mobile-track';
+
+  eraNodes.forEach(n => {
+    const cat = CATEGORIES[n.category];
+    const size = mobileDotSize(n.scale) + (n.swap ? 10 : 0);
+    const dotColor = n.swap ? SWAP_COLOR : cat.color;
+    const dotIcon = n.swap ? SWAP_ICON : CATEGORY_ICONS[n.category];
+    const side = n.category === 'catLaw' ? 'side-right' : 'side-left'; // חקיקה תמיד מימין, הדחות תמיד משמאל
+    const indent = mobileIndentPct(n.x).toFixed(1);
+    const row = document.createElement('div');
+    row.className = `mobile-row node-group ${side}` + (n.pinch ? ' pinch-card' : '');
+    row.setAttribute('data-cat', n.category);
+    row.style.setProperty('--indent', indent + '%');
+
+    const dotHTML = `
+      <div class="mobile-dot" style="background:${dotColor};width:${size}px;height:${size}px">
+        ${dotIcon}
+      </div>`;
+    const textHTML = `
+      <div class="mobile-card-body">
+        <p class="mobile-card-date">${n.date}</p>
+        <p class="mobile-card-title">${n.title}</p>
+      </div>`;
+    // התאריך והכותרת צמודים לאייקון תמיד; הסדר הפנימי הפוך בין ימין לשמאל כדי שהטקסט יפנה תמיד למרכז
+    row.innerHTML = `<div class="mobile-group">${side === 'side-right' ? textHTML + dotHTML : dotHTML + textHTML}</div>`;
+    row.addEventListener('click', () => openPanel(n));
+    track.appendChild(row);
+  });
+
+  section.appendChild(track);
+  mobileTimeline.appendChild(section);
+});
+
+// קו מקשר גלי אחד ורציף שעובר על פני כל 20 האירועים, כולל בין חלק לחלק —
+// לא נבנה בנפרד לכל "תקופה", כדי שלא יהיה ניתוק חזותי בגבולות בין החלקים.
+requestAnimationFrame(() => {
+  const dots = mobileTimeline.querySelectorAll('.mobile-dot');
+  if (dots.length < 1) return;
+  const outerRect = mobileTimeline.getBoundingClientRect();
+  const outerWidth = mobileTimeline.clientWidth;
+  const outerHeight = mobileTimeline.scrollHeight;
+
+  const points = Array.from(dots).map(dot => {
+    const rect = dot.getBoundingClientRect();
+    return {
+      x: rect.left - outerRect.left + rect.width/2,
+      y: rect.top - outerRect.top + rect.height/2,
+    };
+  });
+
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    const midY = (points[i-1].y + points[i].y) / 2;
+    d += ` C ${points[i-1].x} ${midY}, ${points[i].x} ${midY}, ${points[i].x} ${points[i].y}`;
+  }
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const wave = document.createElementNS(svgNS, 'svg');
+  wave.setAttribute('class', 'mobile-wave-svg');
+  wave.setAttribute('viewBox', `0 0 ${outerWidth} ${outerHeight}`);
+  wave.setAttribute('preserveAspectRatio', 'none');
+  const path = document.createElementNS(svgNS, 'path');
+  path.setAttribute('d', d);
+  path.setAttribute('fill', 'none'); path.setAttribute('stroke', 'var(--line)');
+  path.setAttribute('stroke-width', '2.5'); path.setAttribute('stroke-linecap', 'round');
+  wave.appendChild(path);
+  mobileTimeline.insertBefore(wave, mobileTimeline.firstChild);
+});
+
+/* ==================== פילטרים ==================== */
+const filterControls = document.getElementById('filterControls');
+let activeFilter = 'all';
+
+function renderFilters(){
+  filterControls.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-btn' + (activeFilter==='all' ? ' active' : '');
+  allBtn.textContent = 'הצג הכל';
+  allBtn.onclick = () => { activeFilter='all'; applyFilter(); renderFilters(); };
+  filterControls.appendChild(allBtn);
+
+  Object.entries(CATEGORIES).forEach(([key, cat]) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (activeFilter===key ? ' active' : '');
+    btn.innerHTML = `<span class="filter-dot" style="background:${cat.color}"></span>${cat.label}`;
+    btn.onclick = () => { activeFilter = key; applyFilter(); renderFilters(); };
+    filterControls.appendChild(btn);
+  });
+}
+function applyFilter(){
+  document.querySelectorAll('.node-group').forEach(g => {
+    const cat = g.getAttribute('data-cat');
+    if(activeFilter === 'all' || cat === activeFilter){ g.classList.remove('fade'); }
+    else { g.classList.add('fade'); }
+  });
+}
+renderFilters();
+
+/* ==================== חלונית פרטים ==================== */
+const overlay = document.getElementById('overlay');
+const sidePanel = document.getElementById('sidePanel');
+const panelClose = document.getElementById('panelClose');
+
+function openPanel(n){
+  const cat = CATEGORIES[n.category];
+  document.getElementById('panelCatBadge').style.background = n.swap ? SWAP_COLOR : cat.color;
+  const badgeLabel = n.swap ? '🔁 חילופים בפועל · ' + cat.label : cat.label;
+  document.getElementById('panelCatBadge').textContent = n.pinch ? '🔗 נקודת ההצטלבות · ' + cat.label : badgeLabel;
+  document.getElementById('panelTitle').textContent = n.title;
+  document.getElementById('panelDate').textContent = n.date;
+  document.getElementById('panelDesc').textContent = n.desc;
+
+  const tagsWrap = document.getElementById('panelTags');
+  tagsWrap.innerHTML = '';
+  n.tags.forEach(t => {
+    const el = document.createElement('span');
+    el.className = 'panel-tag'; el.textContent = t;
+    tagsWrap.appendChild(el);
+  });
+
+  const sourceText = n.source || 'טרם הוגדר מקור לצומת זה.';
+  document.getElementById('panelSource').innerHTML = n.sourceUrl
+    ? `<b>מקור:</b> <a href="${n.sourceUrl}" target="_blank" rel="noopener">${sourceText}</a>`
+    : `<b>מקור:</b> ${sourceText}`;
+
+  overlay.classList.add('open');
+  sidePanel.classList.add('open');
+}
+function closePanel(){
+  overlay.classList.remove('open');
+  sidePanel.classList.remove('open');
+}
+overlay.addEventListener('click', closePanel);
+panelClose.addEventListener('click', closePanel);
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closePanel(); });
+
+const canvasWrap = document.getElementById('canvasWrap');
+canvasWrap.scrollLeft = canvasWrap.scrollWidth;
+</script>
+</body>
+</html>
