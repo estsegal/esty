@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מערוץ 20 לערוץ 14: הטיימליין הרגולטורי והחקיקתי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf7f1;
+    --bg-band-a:#f3ede1;
+    --bg-band-b:#faf7f1;
+    --ink:#2b2620;
+    --ink-soft:#6b6255;
+    --line:#c9c0af;
+    --panel-bg:#fffdf9;
+    --state:#c1440e;
+    --state-soft:#e9c3a8;
+    --network:#8b5e34;
+    --network-soft:#ddc7ab;
+    --unknown:#b5a642;
+    --unknown-soft:#e6dfad;
+    --shadow: 0 12px 34px rgba(43,38,32,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Assistant',sans-serif;}
+  body{min-height:100vh;}
+
+  .app-header{
+    padding:28px 32px 16px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fffdf9,var(--bg));
+    position:sticky;top:0;z-index:30;
+  }
+  .app-header h1{
+    margin:0 0 6px;
+    font-size:1.9rem;
+    font-weight:800;
+    letter-spacing:-0.3px;
+  }
+  .app-header p.sub{
+    margin:0 0 16px;
+    color:var(--ink-soft);
+    font-size:0.98rem;
+    font-weight:500;
+  }
+  .app-header p.hint{
+    margin:0 0 14px;
+    color:var(--ink-soft);
+    font-size:0.85rem;
+    font-weight:500;
+  }
+
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    align-items:center;
+  }
+  .filter-btn{
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    padding:8px 16px;
+    border-radius:999px;
+    font-family:'Assistant',sans-serif;
+    font-weight:600;
+    font-size:0.88rem;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .filter-btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,0.08);}
+  .filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .filter-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  .legend-note{
+    text-align:center;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-top:10px;
+  }
+
+  .canvas-wrap{
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:20px 0 40px;
+    scroll-behavior:smooth;
+  }
+  .canvas-wrap::-webkit-scrollbar{height:10px;}
+  .canvas-wrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px;}
+  .canvas-wrap::-webkit-scrollbar-track{background:transparent;}
+
+  svg{display:block;}
+
+  .era-band-label{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:20px;
+    fill:var(--ink);
+  }
+  .era-band-sub{
+    font-family:'Assistant',sans-serif;
+    font-weight:500;
+    font-size:12.5px;
+    fill:var(--ink-soft);
+  }
+  .row-label{
+    font-family:'Assistant',sans-serif;
+    font-weight:700;
+    font-size:14px;
+  }
+
+  .node-group{cursor:pointer;}
+  .node-halo{transition:opacity .25s ease, r .25s ease;}
+  .node-circle{
+    stroke:#fff;
+    stroke-width:3;
+    transition:transform .18s ease, filter .18s ease;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  .node-group:hover .node-circle{transform:scale(1.08);filter:drop-shadow(0 6px 14px rgba(0,0,0,0.25));}
+  .node-title{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:16.5px;
+    fill:var(--ink);
+  }
+  .node-date{
+    font-family:'Assistant',sans-serif;
+    font-weight:600;
+    font-size:12px;
+    fill:var(--ink-soft);
+  }
+  .node-scale-badge{
+    font-family:'Assistant',sans-serif;
+    font-weight:800;
+    font-size:12px;
+    fill:#fff;
+  }
+
+  .fade{opacity:0.15 !important;}
+
+  .edge-path{
+    fill:none;
+    stroke:var(--line);
+    stroke-width:2.4;
+    marker-end:url(#arrowGray);
+  }
+  .edge-path.dashed{
+    stroke-dasharray:6 6;
+    stroke-width:2;
+    opacity:0.75;
+  }
+
+  /* Side panel */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(30,26,20,0.45);
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease;
+    z-index:40;
+  }
+  .overlay.open{opacity:1;pointer-events:auto;}
+
+  .side-panel{
+    position:fixed;
+    top:0;right:0;
+    height:100%;
+    width:min(440px, 92vw);
+    background:var(--panel-bg);
+    box-shadow:var(--shadow);
+    transform:translateX(105%);
+    transition:transform .3s cubic-bezier(.22,.9,.32,1);
+    z-index:50;
+    display:flex;
+    flex-direction:column;
+    border-left:1px solid var(--line);
+  }
+  .side-panel.open{transform:translateX(0);}
+
+  .panel-head{
+    padding:22px 22px 16px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .panel-close{
+    position:absolute;
+    top:16px;left:16px;
+    width:32px;height:32px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:16px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft);
+  }
+  .panel-close:hover{background:#f2ede3;color:var(--ink);}
+
+  .panel-cat-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:0.78rem;font-weight:700;
+    padding:4px 10px;border-radius:999px;
+    color:#fff;
+    margin-bottom:10px;
+  }
+  .panel-title{
+    font-size:1.35rem;
+    font-weight:800;
+    margin:0 0 6px;
+    line-height:1.3;
+  }
+  .panel-date{
+    font-size:0.88rem;
+    color:var(--ink-soft);
+    font-weight:600;
+    margin:0;
+  }
+
+  .panel-body{
+    padding:20px 22px 30px;
+    overflow-y:auto;
+    flex:1;
+  }
+  .panel-section-title{
+    font-size:0.78rem;
+    font-weight:800;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin:0 0 8px;
+  }
+  .panel-desc{
+    font-size:1rem;
+    line-height:1.75;
+    margin:0 0 22px;
+    color:var(--ink);
+  }
+  .panel-tags{
+    display:flex;flex-wrap:wrap;gap:8px;
+    margin-bottom:22px;
+  }
+  .panel-tag{
+    font-size:0.78rem;
+    font-weight:600;
+    background:#f2ede3;
+    color:var(--ink-soft);
+    padding:5px 11px;
+    border-radius:8px;
+  }
+  .panel-source{
+    background:#f6f1e7;
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    line-height:1.6;
+    border:1px solid var(--line);
+  }
+  .panel-source b{color:var(--ink);}
+  .panel-source a{color:var(--state); font-weight:600; text-decoration:underline; text-underline-offset:2px;}
+  .panel-source a:hover{color:#8f3309;}
+
+  .scale-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:0.78rem;font-weight:700;
+    background:#2b2620;color:#fff;
+    padding:4px 10px;border-radius:8px;
+    margin-bottom:18px;
+  }
+
+  /* ==================== תצוגת מובייל: ציר אנכי ==================== */
+  .mobile-timeline{
+    display:none;
+    padding:8px 16px 60px;
+    max-width:640px;
+    margin:0 auto;
+  }
+  .mobile-era{
+    margin-bottom:18px;
+    border-radius:18px;
+    padding:2px 2px 12px;
+  }
+  .mobile-era-head{
+    position:sticky;
+    top:0;
+    padding:14px 12px 8px;
+    z-index:5;
+    backdrop-filter:blur(2px);
+    border-radius:18px 18px 0 0;
+  }
+  .mobile-era-title{
+    font-weight:800;
+    font-size:1.02rem;
+    margin:0 0 2px;
+  }
+  .mobile-era-sub{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    font-weight:500;
+    margin:0;
+  }
+  .mobile-track{
+    position:relative;
+    padding:2px 12px 2px 4px;
+    margin-top:2px;
+  }
+  .mobile-wave-svg{
+    position:absolute;
+    top:0; right:0;
+    width:56px; height:100%;
+    pointer-events:none;
+    z-index:0;
+    overflow:visible;
+  }
+  .mobile-card{
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:10px 0;
+    cursor:pointer;
+    text-align:right;
+  }
+  .mobile-dot-slot{
+    flex:0 0 56px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding-top:2px;
+  }
+  .mobile-dot{
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;
+    border:3px solid var(--bg);
+    box-shadow:0 0 0 2px var(--line), 0 3px 8px rgba(43,38,32,0.18);
+    position:relative;
+    transition:transform .15s ease;
+    flex-shrink:0;
+  }
+  .mobile-dot svg{ width:52%; height:52%; }
+  .mobile-scale-badge{
+    position:absolute;
+    bottom:-4px; left:-4px;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:var(--ink);
+    color:#fff;
+    font-size:10px;
+    font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    border:2px solid var(--bg);
+  }
+  .mobile-card:active .mobile-dot{transform:scale(0.92);}
+  .mobile-card-body{
+    flex:1;
+    background:#fffdf9;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 14px;
+    box-shadow:0 2px 6px rgba(43,38,32,0.06);
+    margin-top:2px;
+  }
+  .mobile-card-title{
+    font-weight:800;
+    font-size:0.98rem;
+    margin:0 0 3px;
+    line-height:1.35;
+  }
+  .mobile-card-date{
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    font-weight:600;
+    margin:0 0 6px;
+  }
+  .mobile-card-snippet{
+    font-size:0.85rem;
+    color:var(--ink);
+    line-height:1.55;
+    margin:0;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .mobile-card-cat{
+    display:inline-block;
+    font-size:0.7rem;
+    font-weight:700;
+    color:#fff;
+    padding:2px 8px;
+    border-radius:999px;
+    margin-top:7px;
+  }
+  .mobile-card.fade{opacity:0.25;}
+
+  .desktop-only{display:none;}
+
+  .canvas-wrap{display:none;}
+  .mobile-timeline{display:block;}
+  #mobileHint{display:block !important;}
+  .side-panel{width:100vw;}
+
+  @media (max-width:860px){
+    .app-header{padding:20px 16px 14px;}
+    .app-header h1{font-size:1.25rem;}
+    .app-header .sub{font-size:0.86rem;}
+    .app-header .hint{font-size:0.78rem;}
+    .controls{gap:8px;}
+    .filter-btn{padding:7px 12px;font-size:0.8rem;}
+  }
+
+  @media (max-width:640px){
+    .app-header h1{font-size:1.15rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>מערוץ מורשת לערוץ תעמולה</h1>
+  <p class="sub">2012–2026 הטבות רגולטוריות, תיקוני חקיקה והטבות כלכליות לערוץ 14</p>
+  <p class="hint" id="mobileHint">הקישו על כל אירוע כדי לפתוח פירוט מלא · גללו למטה לפי סדר כרונולוגי ↓</p>
+  <div class="controls" id="filterControls"></div>
+</div>
+
+<div class="canvas-wrap" id="canvasWrap" dir="ltr">
+  <svg id="mainSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="mobile-timeline" id="mobileTimeline"></div>
+
+<div class="overlay" id="overlay"></div>
+<div class="side-panel" id="sidePanel">
+  <div class="panel-head">
+    <button class="panel-close" id="panelClose">✕</button>
+    <div id="panelCatBadge" class="panel-cat-badge"></div>
+    <h2 class="panel-title" id="panelTitle"></h2>
+    <p class="panel-date" id="panelDate"></p>
+  </div>
+  <div class="panel-body">
+    <div id="panelScalePill"></div>
+    <div class="panel-section-title">מה קרה</div>
+    <p class="panel-desc" id="panelDesc"></p>
+    <div class="panel-tags" id="panelTags"></div>
+    <div class="panel-source" id="panelSource"></div>
+  </div>
+</div>
+
+<script>
+/* ==================== נתונים ====================
+   *** זהו קובץ-תבנית ***
+   כדי לבנות מפה על נושא חדש, ערכו רק את הבלוק הזה (ועד "גיאומטריה").
+   שאר הקוד (עיצוב, אינטראקציה, גרסת מובייל) גנרי ולא צריך לגעת בו.
+
+   שלבים:
+   1. הגדירו 2–4 קטגוריות ב-CATEGORIES (סוג הגורם/השחקן) + צבע ייחודי לכל אחת
+   2. הגדירו שורה (ROWS) לכל קטגוריה — מיקום Y קבוע על הציר
+   3. מלאו את nodes: כל אירוע/ישות עם x (ראו הערה למטה על כיוון), category, scale (1–5), date, desc, tags
+   4. מלאו את eras: חלוקה לתקופות/פרקים לרקע (אופציונלי — אפשר גם era אחד גדול)
+   5. crossLinks: קווים מקווקווים חוצי-שורה לקשרים תמטיים (לא כרונולוגיים) — אופציונלי
+*/
+const CATEGORIES = {
+  bg:   { label: "רקע", color: "#9a9186", soft:"#dedad2" },
+  reg:  { label: "הטבות רגולטוריות", color: "#c1440e", soft:"#e9c3a8" },
+  law:  { label: "חקיקה למען הערוץ", color: "#8b5e34", soft:"#ddc7ab" },
+  perk: { label: "הטבות ופעולות נוספות", color: "#b5a642", soft:"#e6dfad" },
+};
+
+const ROWS = {
+  bg:   { y: 180, label: "רקע" },
+  reg:  { y: 380, label: "הטבות רגולטוריות" },
+  law:  { y: 580, label: "חקיקה למען הערוץ" },
+  perk: { y: 780, label: "הטבות ופעולות נוספות" },
+};
+
+const nodes = [
+  {
+    id:"n2", x:2230, category:"bg", scale:2,
+    title:"זכייה במכרז ערוץ המורשת", date:"2013",
+    summary:"חברת \"ערוץ יהודי ישראלי בע\"מ\" זוכה במכרז ציבורי להפעלת ערוץ טלוויזיה ייעודי למורשת ישראל.",
+    desc:"חברת \"ערוץ יהודי ישראלי בע\"מ\" זוכה במכרז של המועצה לשידורי כבלים ולוויין להפעלת ערוץ טלוויזיה ייעודי לענייני מורשת ישראל (ערוץ 20). בהצעה למכרז נכלל תכנון עסקי שנשען, לטענת הערוץ מאוחר יותר, גם על הכנסות ממערך \"עידן פלוס\" — נקודה שהתבררה כשנויה במחלוקת משפטית שנים לאחר מכן.",
+    tags:["מכרז","מורשת ישראל"],
+    source:"<a href=\"https://www.the7eye.org.il/527096\" target=\"_blank\">the7eye.org.il/527096</a>",
+  },
+  {
+    id:"n3", x:2060, category:"bg", scale:2,
+    title:"תחילת שידורי \"ערוץ 20\"", date:"2014",
+    summary:"הערוץ עולה לשידור, בזיכיון שאסר עליו במפורש לשדר חדשות.",
+    desc:"הערוץ מתחיל לשדר. ברישיונו המקורי חל איסור מפורש על שידור חדשות — הוא הוגדר כערוץ תוכן ותרבות ייעודי לענייני מורשת ישראל בלבד.",
+    tags:["השקה","איסור חדשות"],
+    source:"ויקיפדיה, \"עכשיו 14\"",
+  },
+  {
+    id:"n4", x:1890, category:"reg", scale:3,
+    title:"היתר חדשות מוגבל", date:"דצמבר 2016",
+    summary:"מועצת הכבלים מתירה לערוץ לשדר חצי שעת חדשות ביום, בתנאי הצטרפות למועצת העיתונות.",
+    desc:"מועצת הכבלים והלוויין מעניקה לערוץ אישור מוגבל לשדר חדשות — כחצי שעה ביום בשעות הפריים-טיים, ועוד מספר חלונות מצומצמים. תנאי מהותי לאישור היה הצטרפות הערוץ למועצת העיתונות ואימוץ תקנון האתיקה שלה — תנאי שבוטל בפועל שנתיים לאחר מכן עם תיקון 44.",
+    tags:["היתר חלקי","מועצת העיתונות"],
+  },
+  {
+    id:"n5", x:1720, category:"law", scale:5,
+    title:"תיקון 44 לחוק הרשות השנייה", date:"25 בפברואר 2018",
+    summary:"תיקון חקיקה יוצר קטגוריית \"רישיון זעיר\" המעניקה לערוץ שורת פטורים רגולטוריים חסרי תקדים.",
+    desc:"נחקק ביוזמת שר התקשורת דאז איוב קרא. התיקון יוצר קטגוריה חדשה — \"בעל רישיון זעיר\" ו\"בעל רישיון זעיר ייעודי\" — עם הוראת מעבר המקנה לתקופה קצובה (במקור 5 שנים, הוארכה מאז פעמיים) שורת פטורים חסרי תקדים: פטור מאיסור בעלות יחיד, פטור מאיסור בעלות צולבת על גופי שידור נוספים, פטור מחובת הקמת חברת חדשות נפרדת ומחובת הצטרפות למועצת העיתונות, הפחתה בחובת השקעה בהפקות מקומיות, ופטור מדמי רישיון שנתיים. זהו האירוע המכונן שאפשר את הפיכת הערוץ לערוץ חדשות פוליטי מלא ללא הפיקוח החל על מתחריו המסחריים.",
+    tags:["תיקון 44","רישיון זעיר","איוב קרא"],
+    source:"<a href=\"https://tazkirim.gov.il/s/legislativeworkactivity/a133Y00000K4O9mQAF\" target=\"_blank\">אתר החקיקה הממשלתי (תזכירים)</a>; <a href=\"https://b.walla.co.il/item/3553445\" target=\"_blank\">b.walla.co.il/item/3553445</a>; <a href=\"https://www.the7eye.org.il/524816\" target=\"_blank\">the7eye.org.il/524816</a>",
+  },
+  {
+    id:"n6", x:1550, category:"reg", scale:4,
+    title:"רישיון חדשות ללא הגבלה", date:"מרץ 2018",
+    summary:"הרשות השנייה מעניקה לערוץ רישיון לשדר חדשות ללא הגבלה, תוך ויתור על סמכויות אכיפה מרכזיות.",
+    desc:"בעקבות תיקון 44, הרשות השנייה (שקיבלה את הפיקוח על הערוץ ממועצת הכבלים) מעניקה לערוץ רישיון חדש המאפשר שידורי חדשות ללא ההגבלות שחלו קודם, תחת מטריית \"הרישיון הזעיר\". במקביל מתועד ויתור של הרשות השנייה על מספר סמכויות אכיפה ופיקוח מהותיות (כגון נטילת זמני שידור כסנקציה, והגבלות על פרסומות בתוך מהדורות חדשות) שקיימות ברישיונות ערוצים 12 ו-13.",
+    tags:["רישיון זעיר","חדשות ללא הגבלה"],
+  },
+  {
+    id:"n7", x:1380, category:"reg", scale:2,
+    title:"מעבר לאפיק 14 ומיתוג \"עכשיו 14\"", date:"2021",
+    summary:"הערוץ עובר לאפיק 14 וממתג את עצמו מחדש כערוץ חדשות \"עכשיו 14\".",
+    desc:"הערוץ עובר לאפיק השידור 14 וממתג את עצמו מחדש כערוץ חדשות \"עכשיו 14\" (מאוחר יותר \"ערוץ 14\").",
+    tags:["מיתוג מחדש","אפיק 14"],
+  },
+  {
+    id:"n8", x:1210, category:"perk", scale:4,
+    title:"בלעדיות ראיונות לנתניהו", date:"2022 ואילך",
+    summary:"נתניהו מעניק לערוץ 14 בלעדיות ריאיונית כמעט מוחלטת, תוך החרמת שאר ערוצי החדשות.",
+    desc:"ראש הממשלה נתניהו מאמץ דפוס של החרמת ערוצי החדשות המתחרים ומתן בלעדיות לערוץ 14. מחקר אקדמי (פנייבסקי ואחרים) שבדק שבעה חודשים סביב בחירות 2022 מצא כי נתניהו העניק 196 דקות שידור ראיונות לערוץ 14 בלבד, לעומת כמעט אפס (כ-2 דקות) לערוצים 11, 12 ו-13 גם יחד. הדפוס נמשך ומעמיק לאחר מכן: לפי דיווחי \"העין השביעית\", לאחר 7.10.2023 נמנע נתניהו מראיונות בעברית לתקשורת הישראלית במשך יותר משנה, בעוד שהעניק במקביל כ-28 ראיונות לתקשורת זרה (כ-8 שעות שידור). ראיונותיו בערוץ 14 עצמו תרמו ישירות לעליית הרייטינג של הערוץ ולערכו המסחרי.",
+    tags:["חרם ראיונות","בלעדיות","פנייבסקי"],
+    source:"<a href=\"https://he.wikipedia.org/wiki/%D7%A2%D7%9B%D7%A9%D7%99%D7%95_14\" target=\"_blank\">ויקיפדיה, \"עכשיו 14\"</a> (מצטטת מחקר פנייבסקי ואחרים); <a href=\"https://www.the7eye.org.il/522417\" target=\"_blank\">the7eye.org.il/522417</a>; <a href=\"https://www.the7eye.org.il/536261\" target=\"_blank\">the7eye.org.il/536261</a>",
+  },
+  {
+    id:"n9", x:1040, category:"law", scale:3,
+    title:"תיקון 48 לחוק הרשות השנייה", date:"פברואר 2023",
+    summary:"הכנסת מאריכה את תקופת הפטורים הרגולטוריים לשש שנים וחצי.",
+    desc:"הכנסת מאריכה את תקופת המעבר של ההקלות הרגולטוריות מ-5 שנים לשש שנים וחצי — כלומר עד סוף אוגוסט 2024. הארכה זו מכונה בביקורת הציבורית \"הגנת ינוקא\" מוארכת.",
+    tags:["תיקון 48","הארכת פטורים"],
+    source:"<a href=\"https://tazkirim.gov.il/s/legislativeworkactivity/a133Y00000K4O9mQAF\" target=\"_blank\">tazkirim.gov.il</a>",
+  },
+  {
+    id:"n10", x:870, category:"perk", scale:4,
+    title:"תחילת הזינוק בתקציבי הפרסום הממשלתי", date:"2023",
+    summary:"תקציבי הפרסום הממשלתי לערוץ מזנקים ב-280% ביחס לשנה הקודמת.",
+    desc:"נתוני לפ\"מ (לשכת הפרסום הממשלתית) שנחשפו בתחקירי \"העין השביעית\" ו\"שקוף\" מראים עלייה של כ-280% בהיקף התקציבים הממשלתיים שהוזרמו לערוץ 14 בהשוואה ל-2022, זאת בעוד התקציבים לערוצים המתחרים דווקא ירדו. במקביל, טאלנטים של הערוץ קיבלו תשלומים על קמפיינים ממשלתיים.",
+    tags:["לפ\"מ","280%","תקציב פרסום"],
+    source:"<a href=\"https://www.ice.co.il/tv/news/article/1046792\" target=\"_blank\">ice.co.il/tv/news/article/1046792</a>; <a href=\"https://shakuf.co.il/54774\" target=\"_blank\">shakuf.co.il/54774</a>",
+  },
+  {
+    id:"n11", x:700, category:"law", scale:3,
+    title:"תזכיר תיקון 49 מתפרסם", date:"4 ביולי 2024",
+    summary:"מתפרסם תזכיר חוק להארכה נוספת של הפטורים הרגולטוריים לערוץ.",
+    desc:"מתפרסם להערות הציבור תזכיר חוק הרשות השנייה (תיקון מס' 49), שעניינו הארכה נוספת (בשנה) של תקופת המעבר וההקלות הרגולטוריות — מעבר לשש וחצי השנים שכבר נקבעו בתיקונים קודמים. מכון זולת מתנגד לתזכיר וטוען כי מדובר בהטבה שלטונית פרסונלית שנתפרה למידותיו של ערוץ 14.",
+    tags:["תיקון 49","זולת"],
+    source:"<a href=\"https://www.the7eye.org.il/524816\" target=\"_blank\">the7eye.org.il/524816</a>; <a href=\"https://zulat.org.il/2024/07/11/%D7%AA%D7%96%D7%9B%D7%99%D7%A8-%D7%97%D7%95%D7%A7-%D7%94%D7%A8%D7%A9%D7%95%D7%AA-%D7%94%D7%A9%D7%A0%D7%99%D7%99%D7%94-%D7%9E%D7%AA%D7%9F-%D7%94%D7%98%D7%91%D7%95%D7%AA-%D7%A8%D7%92%D7%95%D7%9C%D7%98/\" target=\"_blank\">zulat.org.il</a>",
+  },
+  {
+    id:"n12", x:530, category:"law", scale:4,
+    title:"פטור מדמי הפצה ב\"עידן פלוס\"", date:"אוגוסט 2024",
+    summary:"הכנסת מפטרת את הערוץ מתשלום דמי הפצה עתידיים, בעוד חוב העבר נותר במחלוקת משפטית.",
+    desc:"⚠️ תיקון עובדתי לעומת גרסאות קודמות שהסתובבו בנושא: החוק המפטיר את הערוצים הזעירים (כולל 14) מתשלום דמי הפצה בפלטפורמת \"עידן פלוס\" עבר בכנסת בקריאה שנייה ושלישית באוגוסט 2024 — לא בנובמבר 2023 — כשהמליאה מתכנסת במיוחד בתוך פגרת הקיץ, על רקע חשש ממתקפה איראנית. הפטור חל קדימה בלבד: החוב הקיים של הערוץ לרשות השנייה (כ-6.5 מיליון ₪, שנצבר בתקופה 2018–2023 בגין סירובו לשלם דמי הפצה) לא נמחק רטרואקטיבית ונותר במחלוקת משפטית — הערוץ אף הגיש תביעה נגדית בסך 5 מיליון ₪ נגד הרשות השנייה. עלות השידור ב\"עידן פלוס\" הוערכה בכ-2 מיליון ₪ בשנה.",
+    tags:["עידן פלוס","6.5 מיליון ₪","תיקון עובדתי"],
+    source:"<a href=\"https://www.calcalist.co.il/local_news/article/skt9f4y5r\" target=\"_blank\">calcalist.co.il/local_news/article/skt9f4y5r</a>; <a href=\"https://www.themarker.com/advertising/2024-08-25/ty-article/.premium/00000191-893a-d8c0-abff-9bfef1ec0000\" target=\"_blank\">themarker.com/advertising/2024-08-25</a>; <a href=\"https://www.kipa.co.il/%D7%AA%D7%A8%D7%91%D7%95%D7%AA/%D7%98%D7%9C%D7%95%D7%95%D7%99%D7%96%D7%99%D7%94/1182900-0/\" target=\"_blank\">kipa.co.il/1182900-0</a>",
+  },
+  {
+    id:"n13", x:360, category:"perk", scale:5,
+    title:"זינוק בתקציבי פרסום משרדי התחבורה, הבטחון, החינוך", date:"2024–2025",
+    summary:"משרדי התחבורה, הביטחון והחינוך בהובלת שרי ליכוד מזרימים לערוץ תקציבי פרסום שמזנקים באלפי אחוזים.",
+    desc:"תחקירים מעדכנים את התמונה עם נתונים חדים יותר: משרד התחבורה בראשות מירי רגב (לעומת קודמתה מרב מיכאלי, שהקצתה 41 אלף ₪ ב-2022) מזרים תקציבי פרסום שזינקו ב-1417% (עדכני יותר מנתון קודם של 480% שהתבסס על מדגם חלקי בלבד). משרד הביטחון (יואב גלנט ואחריו ישראל כץ) מזנק ב-2098%–2900% לעומת אותה שנת בסיס (בהתאם למועד המדידה — הנתון ממשיך לטפס). משרד החינוך בראשות יואב קיש מזנק ב-825% לעומת 2022, להוצאה של כ-1.14 מיליון ₪ ב-2025. תשעה משרדים בשליטת הליכוד אחראים יחד לרוב המכריע של תקציב הפרסום הכולל של הערוץ.",
+    tags:["מירי רגב","תחבורה","ביטחון","חינוך"],
+    source:"<a href=\"https://b.walla.co.il/item/3790204\" target=\"_blank\">b.walla.co.il/item/3790204</a>; <a href=\"https://www.the7eye.org.il/566367\" target=\"_blank\">the7eye.org.il/566367</a>; <a href=\"https://www.the7eye.org.il/591110\" target=\"_blank\">the7eye.org.il/591110</a>; <a href=\"https://shakuf.co.il/53563\" target=\"_blank\">shakuf.co.il/53563</a> (הנתון הישן, 480%)",
+  },
+  {
+    id:"n14", x:190, category:"reg", scale:4,
+    title:"עתירות לבג\"ץ", date:"2025",
+    summary:"מכון זולת והתנועה לרגולציה הוגנת עותרים לבג\"ץ נגד ההטבות הרגולטוריות והתקציביות לערוץ.",
+    desc:"מכון זולת והתנועה לרגולציה הוגנת מגישים עתירות לבג\"ץ נגד הרשות השנייה (בגין מחדלי אכיפה נטענים) ונגד הממשלה (בגין הסטת תקציבי פרסום). העותרים טוענים כי החלטת ראש הממשלה להתראיין אך ורק לערוץ 14 מהווה הטבה כלכלית אסורה לערוץ.",
+    tags:["בג\"ץ","זולת","רגולציה הוגנת"],
+    source:"<a href=\"https://www.the7eye.org.il/591110\" target=\"_blank\">the7eye.org.il/591110</a>",
+  },
+  {
+    id:"n14b", x:90, category:"law", scale:5,
+    title:"חוק השידורים עובר קריאה שנייה ושלישית", date:"16 ביולי 2026",
+    summary:"הכנסת מאשרת את רפורמת השידורים המקיפה של קרעי, המעניקה לערוץ 14 הטבות בשווי עשרות מיליוני שקלים.",
+    desc:"לאחר קמפיין חקיקה אגרסיבי וחריג בהליכיו — יועמ\"שית הכנסת התריעה על פגמים חמורים בהליך, בג\"ץ קיים דיון חריג בהצעת חוק עוד בטרם אושרה (תקדים), וההצעה פוצלה לשניים כדי להבטיח רוב — מאשרת מליאת הכנסת ב-16 ביולי 2026, ברוב של 53 מול 48 (2 נמנעים), את \"חוק השידורים\" המקיף של שר התקשורת שלמה קרעי. במסגרתו: סף ההכנסות המגדיר \"ערוץ זעיר\" (הזכאי לפטורים רגולטוריים) מועלה מ-80 מיליון ₪ לשני מיליארד ₪ — עלייה שמנתקת את ההגדרה כליל מרעיון ה\"ערוץ הקטן\" המקורי; ערוץ 14 (יחד עם i24NEWS) מוחרג מחובת הפצת תוכן בחינם לפלטפורמות, בעוד קשת 12 ורשת 13 יחויבו לספוג הפסדי עתק — תיקון שהוכנס יממה בלבד לאחר שקרעי זכה לראיון אוהד בערוץ 14; הבטחת הדגל להקמת אפליקציה ממשלתית חלופית לעידן פלוס נמחקה מהחוק כ-90 דקות לפני הדיון המסכם. החוק בא בהמשך לחוק נפרד למימון עידן פלוס שאושר כבר בסוף מרץ 2026 והעניק לערוץ הטבות נוספות. נתניהו נכח בדיון במליאה אך נעדר מההצבעה עצמה; קרעי הודה לו בנאום על \"הגיבוי הבלתי מתפשר\". גורמי מקצוע רבים — היועמ\"שית, רשות ההסדרה, הייעוץ המשפטי של הכנסת, הדרג המקצועי באוצר — התריעו מראש על פגמים חמורים בחוק ובהליך חקיקתו.",
+    tags:["חוק השידורים","קרעי","2 מיליארד ₪","16.7.2026"],
+    source:"<a href=\"https://www.themarker.com/news/themedia/2026-07-16/ty-article/.premium/0000019f-6b39-d161-a5df-effbe47f0000\" target=\"_blank\">themarker.com — האישור הסופי</a>; <a href=\"https://www.themarker.com/news/themedia/2026-07-16/ty-article-magazine/.highlight/0000019f-6a47-ddf1-abbf-6adf2aa10000\" target=\"_blank\">themarker.com — מי מרוויח ומי מפסיד</a>; <a href=\"https://www.mako.co.il/news-entertainment/2026_q3/Article-6600aa9fa275f91026.htm\" target=\"_blank\">mako.co.il — מחיקת היישומון</a>; <a href=\"https://www.calcalist.co.il/local_news/article/h1rqikkmgl\" target=\"_blank\">calcalist.co.il — אישור לקריאה שנייה/שלישית</a>; <a href=\"https://zulat.org.il/2026/08/09/%D7%9E%D7%9E%D7%A9%D7%9C%D7%AA-%D7%94%D7%94%D7%98%D7%91%D7%95%D7%AA-%D7%9C%D7%A2%D7%A8%D7%95%D7%A5-14%D6%BF-%D7%9B%D7%99%D7%A6%D7%93-%D7%97%D7%A7%D7%99%D7%A7%D7%94-%D7%90%D7%A1%D7%93%D7%A8%D7%94/\" target=\"_blank\">zulat.org.il — ניתוח מקיף</a>",
+  },
+  {
+    id:"n15", x:20, category:"perk", scale:5,
+    title:"שיא חדש בתקציבי הפרסום", date:"אוגוסט 2026",
+    summary:"תקציבי הפרסום הממשלתי לערוץ מגיעים לשיא של 7.1 מיליון ₪ — עלייה של 368% מ-2022.",
+    desc:"נתוני לפ\"מ המעודכנים ביותר: סך תקציבי הפרסום הממשלתי לערוץ 14 מגיע לשיא של 7.1 מיליון ₪ בשנת 2025 — עלייה של 368% לעומת 2022, ועלייה של 9% אף לעומת 2024 (שהייתה בעצמה שנת שיא). תשעה משרדי ליכוד אחראים ל-68% מהסכום.",
+    tags:["שיא","368%","7.1 מיליון ₪"],
+    source:"<a href=\"https://www.the7eye.org.il/591110\" target=\"_blank\">the7eye.org.il/591110</a>",
+  },
+];
+
+const eras = [
+  { from:1550, to:2300, title:"שלב א׳ — הקמה והכשרה רגולטורית", sub:"2013–2018: מרישיון ערוץ מורשת לרישיון ערוץ זעיר" },
+  { from:850,  to:1549, title:"שלב ב׳ — הופך לערוץ 14 עם הטבות ראשונות", sub:"2021–2023: נתניהו מתראיין רק ב-14, ופטורים רגולטוריים לעוד 6.5 שנים" },
+  { from:0,    to:850,  title:"שלב ג׳ — הרחבת ההטבות בצל המלחמה", sub:"2023–2026: הארכת פטורים נוספת, פטור מדמי הפצה, שיא בתקציבי הפרסום הממשלתיים" },
+];
+
+// קווי קישור ידניים בין שורות (קשר תמטי חוצה-קטגוריה, לא כרונולוגי) — אופציונלי, אפשר להשאיר ריק: []
+const crossLinks = [
+  // { from:'n1', to:'n3', dashed:true },
+];
+
+/* ==================== גיאומטריה ==================== */
+const W = 2450, H = 900;
+const svg = document.getElementById('mainSvg');
+svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+svg.setAttribute('width', W);
+svg.setAttribute('height', H);
+
+function ns(tag){ return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+function radiusFor(scale){ return 20 + scale*5; }
+
+// defs: markers + shadow
+const defs = ns('defs');
+defs.innerHTML = `
+  <marker id="arrowGray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#c9c0af"></path>
+  </marker>
+`;
+svg.appendChild(defs);
+
+// era bands
+eras.forEach((era, i) => {
+  const rect = ns('rect');
+  rect.setAttribute('x', era.from);
+  rect.setAttribute('y', 0);
+  rect.setAttribute('width', era.to - era.from);
+  rect.setAttribute('height', H);
+  rect.setAttribute('fill', i % 2 === 0 ? 'var(--bg-band-a)' : 'var(--bg-band-b)');
+  svg.appendChild(rect);
+
+  const title = ns('text');
+  title.setAttribute('x', (era.from + era.to)/2);
+  title.setAttribute('y', 50);
+  title.setAttribute('text-anchor','middle');
+  title.setAttribute('class','era-band-label');
+  title.textContent = era.title;
+  svg.appendChild(title);
+
+  const sub = ns('text');
+  sub.setAttribute('x', (era.from + era.to)/2);
+  sub.setAttribute('y', 74);
+  sub.setAttribute('text-anchor','middle');
+  sub.setAttribute('class','era-band-sub');
+  sub.textContent = era.sub;
+  svg.appendChild(sub);
+
+  if (i > 0){
+    const divider = ns('line');
+    divider.setAttribute('x1', era.to); divider.setAttribute('x2', era.to);
+    divider.setAttribute('y1', 0); divider.setAttribute('y2', H);
+    divider.setAttribute('stroke', 'var(--line)');
+    divider.setAttribute('stroke-dasharray','3 6');
+    svg.appendChild(divider);
+  }
+});
+
+// row labels (right edge, once)
+Object.entries(ROWS).forEach(([key, row]) => {
+  const bg = ns('rect');
+  bg.setAttribute('x', W-190); bg.setAttribute('y', row.y-16);
+  bg.setAttribute('width', 170); bg.setAttribute('height', 30);
+  bg.setAttribute('rx', 15);
+  bg.setAttribute('fill', CATEGORIES[key].soft);
+  svg.appendChild(bg);
+
+  const t = ns('text');
+  t.setAttribute('x', W-105); t.setAttribute('y', row.y+4);
+  t.setAttribute('text-anchor','middle');
+  t.setAttribute('class','row-label');
+  t.setAttribute('fill', '#3a3226');
+  t.textContent = row.label;
+  svg.appendChild(t);
+});
+
+// helper: get node by id
+function nodeById(id){ return nodes.find(n => n.id === id); }
+
+// build sequential edges per row (sorted by x desc = chronological)
+function buildRowEdges(){
+  const byRow = {};
+  nodes.forEach(n => {
+    if(!byRow[n.category]) byRow[n.category] = [];
+    byRow[n.category].push(n);
+  });
+  const edges = [];
+  Object.values(byRow).forEach(list => {
+    list.sort((a,b) => b.x - a.x);
+    for(let i=0;i<list.length-1;i++){
+      edges.push({ from:list[i].id, to:list[i+1].id, dashed:false });
+    }
+  });
+  return edges;
+}
+const rowEdges = buildRowEdges();
+
+function pathBetween(a, b, curveStrength){
+  const ay = ROWS[a.category].y, by = ROWS[b.category].y;
+  const midX = (a.x + b.x)/2;
+  const midY = (ay + by)/2 - curveStrength;
+  return `M ${a.x} ${ay} Q ${midX} ${midY} ${b.x} ${by}`;
+}
+
+// draw edges group (behind nodes)
+const edgeLayer = ns('g');
+svg.appendChild(edgeLayer);
+
+[...rowEdges, ...crossLinks].forEach(e => {
+  const a = nodeById(e.from), b = nodeById(e.to);
+  if(!a || !b) return;
+  const p = ns('path');
+  const sameRow = a.category === b.category;
+  p.setAttribute('d', pathBetween(a, b, sameRow ? -40 : (e.dashed ? 90 : 0)));
+  p.setAttribute('class', 'edge-path' + (e.dashed ? ' dashed' : ''));
+  edgeLayer.appendChild(p);
+});
+
+// draw nodes
+const nodeLayer = ns('g');
+svg.appendChild(nodeLayer);
+
+nodes.forEach(n => {
+  const row = ROWS[n.category];
+  const cat = CATEGORIES[n.category];
+  const r = radiusFor(n.scale);
+
+  const g = ns('g');
+  g.setAttribute('class','node-group');
+  g.setAttribute('data-id', n.id);
+  g.setAttribute('data-cat', n.category);
+
+  const halo = ns('circle');
+  halo.setAttribute('cx', n.x); halo.setAttribute('cy', row.y);
+  halo.setAttribute('r', r+16);
+  halo.setAttribute('fill', cat.soft);
+  halo.setAttribute('opacity', 0.55);
+  halo.setAttribute('class','node-halo');
+  g.appendChild(halo);
+
+  const circle = ns('circle');
+  circle.setAttribute('cx', n.x); circle.setAttribute('cy', row.y);
+  circle.setAttribute('r', r);
+  circle.setAttribute('fill', cat.color);
+  circle.setAttribute('class','node-circle');
+  g.appendChild(circle);
+
+  const badge = ns('text');
+  badge.setAttribute('x', n.x); badge.setAttribute('y', row.y+4);
+  badge.setAttribute('text-anchor','middle');
+  badge.setAttribute('class','node-scale-badge');
+  g.appendChild(badge);
+
+  const title = ns('text');
+  title.setAttribute('x', n.x); title.setAttribute('y', row.y + r + 30);
+  title.setAttribute('text-anchor','middle');
+  title.setAttribute('class','node-title');
+  title.textContent = n.title;
+  g.appendChild(title);
+
+  const date = ns('text');
+  date.setAttribute('x', n.x); date.setAttribute('y', row.y + r + 50);
+  date.setAttribute('text-anchor','middle');
+  date.setAttribute('class','node-date');
+  date.textContent = n.date;
+  g.appendChild(date);
+
+  g.addEventListener('click', () => openPanel(n));
+  nodeLayer.appendChild(g);
+});
+
+/* ==================== תצוגת מובייל (אנכית) ==================== */
+const mobileTimeline = document.getElementById('mobileTimeline');
+
+// אייקון SVG פשוט לכל קטגוריה — מזהה חזותי של סוג הגורם המפעיל
+const CATEGORY_ICONS = {
+  // רקע — עיגול פתוח נייטרלי
+  bg: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"></circle></svg>`,
+  // רגולציה — מגן/אישור
+  reg: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"></path></svg>`,
+  // חקיקה — פטיש/סעיף חוק
+  law: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l5-5 8 8-5 5-8-8z"></path><path d="M4 21l5-5"></path><path d="M13 4l-2 2"></path></svg>`,
+  // הטבות/כסף — מטבע
+  perk: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v9M9.3 15c0 1.4 1.2 2 2.7 2s2.7-.7 2.7-2c0-1.5-1.4-1.9-2.7-2.2C10.4 12.5 9 12.1 9 10.7c0-1.3 1.2-2 2.7-2s2.7.6 2.7 2"></path></svg>`,
+};
+
+// גוני רקע רכים לפי תקופה (מתאימים לרצועות שברקע הגרסה הרחבה)
+const ERA_TINTS = ['#f3ede1', '#faf7f1', '#f3ede1', '#faf7f1', '#f3ede1'];
+
+// סדר כרונולוגי: x גדול = מוקדם, אז ממיינים יורד לפי x כדי לקבל הקדום קודם מלמעלה למטה
+const chronological = [...nodes].sort((a,b) => b.x - a.x);
+
+function mobileDotSize(scale){ return 32 + scale*5; } // קטן יותר מהדסקטופ, אך יחסי לעוצמה
+
+eras.forEach((era, eraIdx) => {
+  const eraNodes = chronological.filter(n => n.x >= era.from && n.x <= era.to);
+  if (eraNodes.length === 0) return;
+
+  const section = document.createElement('div');
+  section.className = 'mobile-era';
+  section.style.background = ERA_TINTS[eraIdx % ERA_TINTS.length];
+
+  const head = document.createElement('div');
+  head.className = 'mobile-era-head';
+  head.style.background = ERA_TINTS[eraIdx % ERA_TINTS.length];
+  head.innerHTML = `<p class="mobile-era-title">${era.title}</p><p class="mobile-era-sub">${era.sub}</p>`;
+  section.appendChild(head);
+
+  const track = document.createElement('div');
+  track.className = 'mobile-track';
+
+  eraNodes.forEach(n => {
+    const cat = CATEGORIES[n.category];
+    const size = mobileDotSize(n.scale);
+    const card = document.createElement('div');
+    card.className = 'mobile-card node-group';
+    card.setAttribute('data-cat', n.category);
+    card.innerHTML = `
+      <div class="mobile-dot-slot">
+        <div class="mobile-dot" style="background:${cat.color};width:${size}px;height:${size}px">
+          ${CATEGORY_ICONS[n.category]}
+        </div>
+      </div>
+      <div class="mobile-card-body">
+        <p class="mobile-card-title">${n.title}</p>
+        <p class="mobile-card-date">${n.date}</p>
+        <p class="mobile-card-snippet">${n.summary || n.desc}</p>
+        <span class="mobile-card-cat" style="background:${cat.color}">${cat.label}</span>
+      </div>
+    `;
+    card.addEventListener('click', () => openPanel(n));
+    track.appendChild(card);
+  });
+
+  section.appendChild(track);
+  mobileTimeline.appendChild(section);
+
+  // בניית קו-חיבור גלי שעובר דרך מרכזי הנקודות בפועל (אחרי שהדפדפן חישב את הגובה בפועל)
+  requestAnimationFrame(() => {
+    const dots = track.querySelectorAll('.mobile-dot');
+    if (dots.length < 1) return;
+    const trackHeight = track.offsetHeight;
+    const baseX = 28; // מרכז עמודת הנקודות בתוך ה-slot (56px רוחב)
+    const amp = 9;     // עוצמת התנודה של הגל
+
+    const points = Array.from(dots).map((dot, i) => {
+      const rect = dot.getBoundingClientRect();
+      const trackRect = track.getBoundingClientRect();
+      const centerY = rect.top - trackRect.top + rect.height/2;
+      const x = baseX + (i % 2 === 0 ? -amp : amp) * (dots.length > 1 ? 1 : 0);
+      return { x, y: centerY };
+    });
+
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 1; i < points.length; i++) {
+      const midY = (points[i-1].y + points[i].y) / 2;
+      d += ` C ${points[i-1].x} ${midY}, ${points[i].x} ${midY}, ${points[i].x} ${points[i].y}`;
+    }
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('class', 'mobile-wave-svg');
+    svg.setAttribute('viewBox', `0 0 56 ${trackHeight}`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', 'var(--line)');
+    path.setAttribute('stroke-width', '2.5');
+    path.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(path);
+    track.insertBefore(svg, track.firstChild);
+  });
+});
+
+/* ==================== פילטרים ==================== */
+const filterControls = document.getElementById('filterControls');
+let activeFilter = 'all';
+
+function renderFilters(){
+  filterControls.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-btn' + (activeFilter==='all' ? ' active' : '');
+  allBtn.textContent = 'הצג הכל';
+  allBtn.onclick = () => { activeFilter='all'; applyFilter(); renderFilters(); };
+  filterControls.appendChild(allBtn);
+
+  Object.entries(CATEGORIES).forEach(([key, cat]) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (activeFilter===key ? ' active' : '');
+    btn.innerHTML = `<span class="filter-dot" style="background:${cat.color}"></span>${cat.label}`;
+    btn.onclick = () => { activeFilter = key; applyFilter(); renderFilters(); };
+    filterControls.appendChild(btn);
+  });
+}
+
+function applyFilter(){
+  document.querySelectorAll('.node-group').forEach(g => {
+    const cat = g.getAttribute('data-cat');
+    if(activeFilter === 'all' || cat === activeFilter){
+      g.classList.remove('fade');
+    } else {
+      g.classList.add('fade');
+    }
+  });
+}
+renderFilters();
+
+/* ==================== חלונית פרטים ==================== */
+const overlay = document.getElementById('overlay');
+const sidePanel = document.getElementById('sidePanel');
+const panelClose = document.getElementById('panelClose');
+
+function openPanel(n){
+  const cat = CATEGORIES[n.category];
+  document.getElementById('panelCatBadge').style.background = cat.color;
+  document.getElementById('panelCatBadge').textContent = cat.label;
+  document.getElementById('panelTitle').textContent = n.title;
+  document.getElementById('panelDate').textContent = n.date;
+  document.getElementById('panelDesc').textContent = n.desc;
+
+  const scaleWrap = document.getElementById('panelScalePill');
+  scaleWrap.innerHTML = '';
+  const pill = document.createElement('span');
+  pill.className = 'scale-pill';
+  pill.textContent = `רמת היקף/עוצמה משוערת: ${n.scale}/5`;
+  scaleWrap.appendChild(pill);
+
+  const tagsWrap = document.getElementById('panelTags');
+  tagsWrap.innerHTML = '';
+  n.tags.forEach(t => {
+    const el = document.createElement('span');
+    el.className = 'panel-tag';
+    el.textContent = t;
+    tagsWrap.appendChild(el);
+  });
+
+  document.getElementById('panelSource').innerHTML =
+    `<b>מקור:</b> ${n.source || 'טרם הוגדר מקור לצומת זה — הוסיפו שדה source לכל node ברשימת הנתונים.'}`;
+
+  overlay.classList.add('open');
+  sidePanel.classList.add('open');
+}
+
+function closePanel(){
+  overlay.classList.remove('open');
+  sidePanel.classList.remove('open');
+}
+overlay.addEventListener('click', closePanel);
+panelClose.addEventListener('click', closePanel);
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closePanel(); });
+
+/* גלילה התחלתית לצד ימין (האירועים המוקדמים) */
+const canvasWrap = document.getElementById('canvasWrap');
+canvasWrap.scrollLeft = canvasWrap.scrollWidth;
+</script>
+</body>
+</html>
