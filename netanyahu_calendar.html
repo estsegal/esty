@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>יומן המלחמה — אוקטובר 2023</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F6F2;
+    --paper: #FCFBF9;
+    --panel:#FFFFFF;
+    --panel-2:#F1EFE9;
+    --border: rgba(20,18,12,.12);
+    --border-soft: rgba(20,18,12,.07);
+    --text:#1E1D19;
+    --text-dim:#5B584F;
+    --text-faint:#928E80;
+    --medini:#1976D2;
+    --politi:#757575;
+    --bitchoni:#8A9A5B;
+    --tadmit:#9E9E9E;
+    --hatufim:#FFC857;
+    --medini-tx:#1976D2;
+    --politi-tx:#6b6b6b;
+    --bitchoni-tx:#63723F;
+    --tadmit-tx:#767676;
+    --hatufim-tx:#96700A;
+    --redact:#171613;
+    --font-head:'Heebo', sans-serif;
+    --font-sans:'Assistant', sans-serif;
+    --font-mono: ui-monospace, 'SFMono-Regular', 'Roboto Mono', Consolas, monospace;
+    --radius: 10px;
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 10% -10%, rgba(25,118,210,.05), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 100% 110%, rgba(138,154,91,.06), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-sans);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:1180px; margin:0 auto; padding:28px 20px 60px;}
+  @media(max-width:919px){
+    .subtitle{font-size:16px;}
+    .chip{font-size:15px; padding:9px 15px 9px 12px;}
+    .chip .n{font-size:13.5px;}
+    .legend-hint{font-size:13px;}
+    .panel-empty p{font-size:15px;}
+    .panel-head .pd-num{font-size:42px;}
+    .panel-head .pd-weekday{font-size:15px;}
+    .panel-head .pd-count{font-size:13.5px;}
+    .panel-sub{font-size:13.5px;}
+    .ev .t{font-size:14.5px;}
+    .ev .txt{font-size:15.5px;}
+    .ev .tag{font-size:12px;}
+    .note{font-size:13.5px;}
+  }
+  @media(max-width:480px){
+    .app{padding:20px 12px 48px;}
+    .calendar-wrap{padding:12px 10px 14px;}
+    .calendar, .weekdays{gap:5px;}
+    .day{padding:6px 5px 5px; border-radius:7px;}
+    .day .daynum{font-size:16px;}
+    .day .count{font-size:10px; padding:0 4px; top:4px; left:4px;}
+    .day .nodata{font-size:10.5px;}
+    .day .bar{height:5px;}
+    .weekdays span{font-size:12.5px;}
+    .masthead h1{font-size:27px;}
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead{display:flex; align-items:stretch; gap:16px; margin-bottom:22px;}
+  .redact-bar{width:8px; flex:none; background:var(--redact); border-radius:2px;
+    background-image: repeating-linear-gradient(180deg, var(--redact) 0 18px, #000 18px 20px, var(--redact) 20px 38px, #2a2822 38px 40px);
+  }
+  .masthead-text{padding:2px 0;}
+  .masthead h1{
+    font-family:var(--font-head); font-weight:800; font-size:clamp(28px,4vw,42px);
+    margin:0 0 6px; letter-spacing:.1px; line-height:1.05; color:var(--text);
+  }
+  .masthead .subtitle{margin:0; color:var(--text-dim); font-size:14.5px; font-weight:400; line-height:1.5;}
+  .masthead .subtitle b{color:var(--text); font-weight:600;}
+
+  /* ---------- Legend ---------- */
+  .legend{display:flex; flex-wrap:wrap; gap:9px; margin-bottom:22px;}
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--panel); border:1.5px solid var(--border);
+    padding:8px 14px 8px 11px; border-radius:999px; cursor:pointer;
+    font-family:var(--font-head);
+    font-size:13.5px; color:var(--text-dim); font-weight:600;
+    transition: border-color .15s, background .15s, color .15s, transform .12s, box-shadow .15s;
+    user-select:none;
+  }
+  .chip:hover{border-color:var(--c); transform:translateY(-1px); box-shadow:0 3px 10px rgba(20,18,12,.08);}
+  .chip:active{transform:translateY(0);}
+  .chip .dot{width:9px; height:9px; border-radius:50%; flex:none; transition:transform .15s;}
+  .chip .n{font-family:var(--font-mono); color:var(--text-faint); font-size:12px; font-weight:400;}
+  .chip[data-active="1"]{background:var(--c); border-color:var(--c); color:#fff;}
+  .chip[data-active="1"] .n{color:rgba(255,255,255,.85);}
+  .chip[data-active="1"] .dot{background:#fff !important; transform:scale(1.15);}
+  .chip[data-active="1"][data-light="1"]{color:#1E1D19;}
+  .chip[data-active="1"][data-light="1"] .n{color:rgba(30,29,25,.65);}
+  .chip[data-active="1"][data-light="1"] .dot{background:#1E1D19 !important;}
+  .legend-hint{align-self:center; color:var(--text-faint); font-size:12px; margin-inline-start:4px;}
+  .board.filtering .day:not(.match){opacity:.28;}
+  .day.highlight{
+    border-color:var(--hc); background:var(--hc-bg);
+    box-shadow:0 0 0 1.5px var(--hc) inset, 0 3px 10px var(--hc-bg);
+    transform:translateY(-1px);
+  }
+
+  /* ---------- Board layout ---------- */
+  .board{display:grid; grid-template-columns:1fr; gap:20px; align-items:start;}
+  @media(min-width:920px){ .board{grid-template-columns: 2.15fr 1fr;} }
+
+  .calendar-wrap{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px 16px 18px; box-shadow:0 1px 2px rgba(20,18,12,.04);}
+  .weekdays{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; margin-bottom:8px; padding:0 2px;}
+  .weekdays span{text-align:center; font-family:var(--font-head); font-size:12px; color:var(--text-faint); font-weight:700; letter-spacing:.4px;}
+  .calendar{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px;}
+
+  .day{
+    position:relative;
+    aspect-ratio:1/1;
+    min-width:0;
+    background:var(--panel-2);
+    border:1px solid var(--border-soft);
+    border-radius:9px;
+    padding:9px 8px 8px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    cursor:pointer; text-align:right;
+    font-family:var(--font-sans);
+    color:var(--text);
+    transition: transform .12s ease, border-color .15s, opacity .2s, background .15s, box-shadow .15s;
+    opacity:0; animation:cellin .5s ease forwards;
+    animation-delay: calc(var(--i) * 14ms);
+  }
+  @keyframes cellin{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+  .day:hover{border-color:rgba(20,18,12,.28); transform:translateY(-1px); box-shadow:0 3px 8px rgba(20,18,12,.07);}
+  .day:focus-visible{outline:2px solid var(--medini); outline-offset:2px;}
+  .day.selected{border-color:var(--medini); background:#EAF2FB; box-shadow:0 0 0 1px var(--medini) inset;}
+  .day.empty{visibility:hidden;}
+  .day.disabled{
+    cursor:default; opacity:.45; background:transparent; border-style:dashed;
+  }
+  .day.disabled:hover{transform:none; box-shadow:none; border-color:var(--border-soft);}
+  .day .daynum{font-family:var(--font-head); font-weight:700; font-size:17px; line-height:1;}
+  .day .count{
+    position:absolute; top:7px; left:7px;
+    font-family:var(--font-mono); font-size:10px; color:var(--text-faint);
+    background:rgba(20,18,12,.06); padding:1px 5px; border-radius:20px;
+  }
+  .day .bar{display:flex; width:100%; height:6px; border-radius:4px; overflow:hidden; background:rgba(20,18,12,.06);}
+  .day .bar .seg{height:100%;}
+  .day .nodata{font-size:10px; color:var(--text-faint); font-family:var(--font-mono);}
+
+  /* ---------- Panel ---------- */
+  .panel{
+    background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    padding:20px 18px; min-height:200px; box-shadow:0 1px 2px rgba(20,18,12,.04);
+  }
+  @media(min-width:920px){ .panel{position:sticky; top:20px; max-height:calc(100vh - 40px); overflow-y:auto;} }
+  .panel-empty{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:10px; color:var(--text-faint); padding:40px 10px;}
+  .panel-empty .glyph{font-family:var(--font-head); font-weight:700; font-size:30px; color:var(--text-dim);}
+  .panel-empty p{margin:0; font-size:13px; line-height:1.6; max-width:220px;}
+
+  .panel-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:4px;}
+  .panel-head .pd-num{font-family:var(--font-head); font-weight:800; font-size:38px; line-height:1;}
+  .panel-head .pd-meta{text-align:left;}
+  .panel-head .pd-weekday{font-family:var(--font-head); font-size:13px; color:var(--text-dim); font-weight:600;}
+  .panel-head .pd-count{font-family:var(--font-mono); font-size:12px; color:var(--text-faint); margin-top:2px;}
+  .panel-sub{font-size:12px; color:var(--text-faint); margin-bottom:16px; border-bottom:1px solid var(--border-soft); padding-bottom:14px;}
+
+  .evlist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;}
+  .ev{
+    display:grid; grid-template-columns:56px 1fr; gap:10px;
+    padding:10px 11px; background:var(--panel-2); border-radius:8px;
+    border-inline-start:3px solid var(--c);
+  }
+  .ev .t{font-family:var(--font-mono); font-size:12.5px; color:var(--text-dim); padding-top:1px;}
+  .ev .txt{font-size:13.5px; line-height:1.5;}
+  .ev .tag{
+    display:inline-block; font-family:var(--font-head); font-size:10.5px; font-weight:700; color:var(--ctext);
+    margin-top:5px; letter-spacing:.2px;
+  }
+  .close-btn{display:none;}
+
+  /* ---------- Footer note ---------- */
+  .note{margin-top:26px; font-size:12px; color:var(--text-faint); line-height:1.7; border-top:1px solid var(--border-soft); padding-top:16px;}
+  .note b{color:var(--text-dim);}
+
+  /* ---------- Mobile bottom-sheet ---------- */
+  @media(max-width:919px){
+    .panel{
+      position:fixed; inset:auto 0 0 0; z-index:50;
+      border-radius:18px 18px 0 0; max-height:78vh; overflow-y:auto;
+      transform:translateY(100%); transition:transform .28s cubic-bezier(.32,.72,0,1);
+      box-shadow:0 -10px 40px rgba(20,18,12,.25);
+    }
+    .panel.open{transform:translateY(0);}
+    .backdrop{
+      position:fixed; inset:0; background:rgba(20,18,12,.4); z-index:40;
+      opacity:0; pointer-events:none; transition:opacity .25s;
+    }
+    .backdrop.open{opacity:1; pointer-events:auto;}
+    .close-btn{
+      display:block; position:sticky; top:0; margin-inline-start:auto; margin-bottom:8px;
+      background:var(--panel-2); border:1px solid var(--border); color:var(--text-dim);
+      border-radius:20px; padding:5px 14px; font-size:12px; cursor:pointer; font-family:var(--font-sans);
+    }
+    .panel-placeholder-desktop-only{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="masthead">
+    <div class="redact-bar" aria-hidden="true"></div>
+    <div class="masthead-text">
+      <h1>יומן המלחמה</h1>
+      <p class="subtitle">פילוח פעילות ראש הממשלה נתניהו, <b>7–31 באוקטובר 2023</b> · מבוסס על יומן העבודה הרשמי שהתפרסם · לחצו על יום לפרטים</p>
+    </div>
+  </header>
+
+  <div class="legend" id="legend"></div>
+
+  <main class="board" id="board">
+    <section class="calendar-wrap">
+      <div class="weekdays">
+        <span>א</span><span>ב</span><span>ג</span><span>ד</span><span>ה</span><span>ו</span><span>ש</span>
+      </div>
+      <div class="calendar" id="calendar"></div>
+    </section>
+
+    <aside class="panel" id="panel">
+      <button class="close-btn" id="closeBtn">סגור ✕</button>
+      <div class="panel-empty" id="panelEmpty">
+        <div class="glyph">7.10</div>
+        <p>בחרו יום בלוח כדי לראות את פירוט האירועים והקטגוריה של כל אחד מהם.</p>
+      </div>
+      <div id="panelContent" hidden></div>
+    </aside>
+  </main>
+
+  <p class="note">
+    <b>הערת מתודולוגיה:</b> היומן המקורי מכיל חלקים נרחבים שהוחשכו; אירועים שלא ניתן היה לזהות את תוכנם הושמטו מהספירה ולא סווגו לאף קטגוריה. סביר שהחשכות אלו מטות את התמונה כלפי מטה במיוחד בקטגוריית "ביטחוני-צבאי". ימים 1–6 באוקטובר אינם כלולים בטווח היומן שנותח. סה"כ 139 אירועים מזוהים ב-25 הימים 7–31 באוקטובר 2023.
+  </p>
+
+</div>
+<div class="backdrop" id="backdrop"></div>
+
+<script>
+const CATS = {
+  medini:   { label:'מדיני',              color:'#1976D2', text:'#1976D2', light:false, count:0 },
+  politi:   { label:'פוליטי־קואליציוני',   color:'#757575', text:'#6b6b6b', light:false, count:0 },
+  bitchoni: { label:'ביטחוני־צבאי',        color:'#8A9A5B', text:'#63723F', light:false, count:0 },
+  tadmit:   { label:'תדמית',              color:'#9E9E9E', text:'#767676', light:true,  count:0 },
+  hatufim:  { label:'חטופים',             color:'#FFC857', text:'#96700A', light:true,  count:0 },
+};
+
+const DATA = {
+7:[
+  {t:'10:30',c:'medini',x:'שיחת טלפון עם ראש ממשלת הולנד'},
+  {t:'11:00',c:'tadmit',x:'צילום הצהרה לתקשורת — מדשאה מחוץ למשרד הביטחון'},
+  {t:'12:30',c:'bitchoni',x:'ישיבה עם שר האוצר, שר הביטחון, השר לביטחון לאומי, שר השיכון והשר לעניינים אסטרטגיים'},
+  {t:'15:15',c:'medini',x:'שיחת טלפון עם נשיא צרפת'},
+  {t:'16:15',c:'medini',x:'שיחת טלפון עם נשיא ארה"ב'},
+  {t:'17:00',c:'politi',x:'פגישה עם יו"ר האופוזיציה'},
+  {t:'18:00',c:'bitchoni',x:'ישיבת ממשלה'},
+  {t:'20:30',c:'tadmit',x:'הצהרה לתקשורת'},
+],
+8:[
+  {t:'14:10',c:'medini',x:'שיחת טלפון עם קנצלר גרמניה אולף שולץ'},
+  {t:'14:20',c:'tadmit',x:'פגישה עם טופז לוק, יונתן אוריך, מושיק ועופר'},
+  {t:'15:45',c:'medini',x:'שיחת טלפון עם ראש ממשלת איטליה'},
+  {t:'16:05',c:'medini',x:'שיחת טלפון עם נשיא אוקראינה'},
+  {t:'16:40',c:'politi',x:'פגישה עם רון דרמר וסמוטריץ׳'},
+  {t:'17:00',c:'bitchoni',x:'פגישה עם השר אבי דיכטר'},
+  {t:'17:45',c:'medini',x:'שיחת טלפון עם נשיא ארה"ב'},
+  {t:'18:00',c:'bitchoni',x:'פגישה עם שר הביטחון'},
+  {t:'19:00',c:'medini',x:'שיחת טלפון עם ראש ממשלת קנדה'},
+],
+9:[
+  {t:'13:00',c:'tadmit',x:'ביקור בחמ"ל ההסברה, קריה'},
+  {t:'13:45',c:'politi',x:'פגישה עם יריב לוין'},
+  {t:'14:00',c:'medini',x:'שיחת טלפון עם נשיא צרפת'},
+  {t:'15:00',c:'medini',x:'שיחת טלפון עם ראש ממשלת בריטניה'},
+  {t:'15:30',c:'politi',x:'שיחת טלפון עם נשיא המדינה'},
+  {t:'16:00',c:'politi',x:'פגישה עם היועצת המשפטית לממשלה'},
+  {t:'16:45',c:'tadmit',x:'תדריך לכתבים צבאיים, אולם אח"מ 3'},
+  {t:'20:30',c:'tadmit',x:'הצהרה לתקשורת'},
+],
+10:[
+  {t:'13:30',c:'medini',x:'לחיצת יד עם משלחת מחוקקים רפובליקנים בראשות הסנאטורית ג׳וני ארנסט'},
+  {t:'13:45',c:'politi',x:'פגישה עם יריב לוין ודודי אמסלם'},
+  {t:'14:30',c:'politi',x:'פגישה עם ח"כ יולי אדלשטיין'},
+  {t:'16:30',c:'bitchoni',x:'פגישה עם יעקב עמידרור, לשעבר ראש המל"ל'},
+  {t:'18:00',c:'tadmit',x:'הצהרה לתקשורת'},
+  {t:'19:30',c:'medini',x:'שיחת טלפון עם נשיא ארה"ב (נמשכה כ-5 שעות, עד 00:45)'},
+],
+11:[
+  {t:'11:15',c:'bitchoni',x:'פגישה עם השר בני גנץ, חבר קבינט המלחמה'},
+  {t:'12:00',c:'politi',x:'פגישה עם רון דרמר ויריב לוין'},
+  {t:'12:30',c:'politi',x:'פגישה עם אריה דרעי'},
+  {t:'22:45',c:'tadmit',x:'הצהרה משותפת לתקשורת עם שר הביטחון ובני גנץ'},
+],
+12:[
+  {t:'11:45',c:'medini',x:'פגישה מורחבת עם מזכיר המדינה האמריקאי אנתוני בלינקן'},
+  {t:'12:30',c:'medini',x:'פגישה עם מזכיר המדינה האמריקאי (4 עיניים)'},
+  {t:'13:40',c:'medini',x:'המשך פגישה עם מזכיר המדינה האמריקאי'},
+  {t:'16:45',c:'bitchoni',x:'ביקור באוגדה 98'},
+  {t:'17:45',c:'medini',x:'שיחת טלפון עם ראש ממשלת בריטניה'},
+  {t:'18:15',c:'bitchoni',x:'דיון בוועדת חוץ וביטחון בכנסת'},
+  {t:'19:00',c:'politi',x:'הצבעות במליאת הכנסת'},
+  {t:'22:00',c:'bitchoni',x:'המשך דיון בוועדת חוץ וביטחון'},
+  {t:'22:50',c:'politi',x:'פגישה עם סמוטריץ׳, כנסת'},
+],
+13:[
+  {t:'12:00',c:'hatufim',x:'פגישה עם גל הירש, ראש המטה למאמץ החטופים'},
+  {t:'12:45',c:'medini',x:'פגישה עם מזכיר ההגנה האמריקאי לויד אוסטין'},
+  {t:'16:00',c:'medini',x:'פגישה עם נשיאת הנציבות האירופית אורסולה פון דר ליין'},
+  {t:'16:50',c:'tadmit',x:'הצהרה משותפת לתקשורת עם נשיאת הנציבות האירופית'},
+  {t:'20:00',c:'medini',x:'שיחת טלפון עם נשיא קפריסין'},
+  {t:'20:30',c:'medini',x:'שיחת טלפון עם ראש ממשלת הולנד'},
+  {t:'21:00',c:'medini',x:'שיחת טלפון עם נשיא צרפת'},
+  {t:'21:30',c:'medini',x:'שיחת טלפון עם ראש ממשלת יוון'},
+],
+14:[
+  {t:'13:15',c:'bitchoni',x:'סיור בעוטף עזה — בארי ורעים'},
+  {t:'13:32',c:'medini',x:'שיחת טלפון עם ראש ממשלת יוון'},
+  {t:'13:54',c:'medini',x:'שיחת טלפון עם נשיא צרפת'},
+  {t:'16:04',c:'medini',x:'שיחת טלפון עם קנצלר גרמניה'},
+  {t:'18:30',c:'politi',x:'פגישה עם יריב לוין'},
+],
+15:[
+  {t:'11:00',c:'medini',x:'פגישה עם הסנאטור צ׳אק שומר'},
+  {t:'12:30',c:'bitchoni',x:'ישיבת ממשלה'},
+  {t:'14:30',c:'politi',x:'פגישה עם אפי איתם'},
+  {t:'14:40',c:'medini',x:'פגישה עם שרת החוץ של צרפת'},
+  {t:'16:15',c:'hatufim',x:'ביקור בחמ"ל שבויים ונעדרים'},
+  {t:'18:30',c:'medini',x:'שיחת טלפון עם נשיא קפריסין'},
+  {t:'19:10',c:'politi',x:'פגישה עם יפתח רון־תל'},
+],
+16:[
+  {t:'12:00',c:'tadmit',x:'הכנת נאומים עם יונתן אוריך'},
+  {t:'12:30',c:'bitchoni',x:'הכנה עם ראש המל"ל ואופיר'},
+  {t:'13:15',c:'medini',x:'פגישה מורחבת עם מזכיר המדינה האמריקאי בלינקן'},
+  {t:'14:15',c:'medini',x:'פגישה עם מזכיר המדינה האמריקאי (4 עיניים)'},
+  {t:'15:00',c:'politi',x:'פגישה עם איתמר בן גביר'},
+  {t:'15:30',c:'politi',x:'ישיבת סיעה'},
+  {t:'16:00',c:'politi',x:'ישיבת פתיחת מושב החורף ה-25, מליאת הכנסת'},
+  {t:'19:20',c:'medini',x:'המשך פגישה עם מזכיר המדינה האמריקאי (עד לפנות בוקר)'},
+],
+17:[
+  {t:'11:15',c:'politi',x:'שיחת טלפון עם השופט עוזי פוגלמן'},
+  {t:'12:00',c:'medini',x:'פגישה עם ראש ממשלת רומניה'},
+  {t:'16:00',c:'tadmit',x:'הכנה לפגישה עם מזכ"ל, ראש המל"ל ואוריך'},
+  {t:'16:45',c:'medini',x:'פגישה עם קנצלרית גרמניה'},
+  {t:'19:00',c:'tadmit',x:'"זמן תקשורת"'},
+  {t:'20:00',c:'tadmit',x:'"זמן תקשורת"'},
+],
+18:[
+  {t:'11:05',c:'medini',x:'קבלת פנים לנשיא ארה"ב בנתב"ג'},
+  {t:'12:00',c:'medini',x:'פגישה עם נשיא ארה"ב ג׳ו ביידן, מלון קמפינסקי ת"א'},
+  {t:'14:00',c:'medini',x:'פגישה מורחבת עם נשיא ארה"ב ופורום קבינט המלחמה'},
+  {t:'19:00',c:'tadmit',x:'הצהרה לתקשורת בעקבות ביקור ביידן'},
+],
+19:[
+  {t:'12:15',c:'medini',x:'פגישה עם ראש ממשלת בריטניה'},
+  {t:'13:50',c:'tadmit',x:'הצהרות משותפות עם ראש ממשלת בריטניה'},
+  {t:'14:00',c:'medini',x:'לחיצת יד עם משלחת סולידריות מטעם ועידת נשיאי הארגונים היהודיים'},
+  {t:'15:30',c:'bitchoni',x:'כינוס לוחמים באזור עוטף עזה'},
+  {t:'17:00',c:'medini',x:'שיחת טלפון עם ראש ממשלת נורווגיה'},
+  {t:'18:00',c:'politi',x:'פגישה עם שמחה רוטמן ועמיעד כהן'},
+  {t:'18:40',c:'tadmit',x:'"זמן תקשורת"'},
+  {t:'19:45',c:'politi',x:'פגישה עם מירי רגב'},
+],
+20:[
+  {t:'11:30',c:'medini',x:'שיחת טלפון עם נשיא צרפת'},
+  {t:'13:45',c:'medini',x:'פגישה עם מושל קליפורניה גאווין ניוסום'},
+  {t:'16:00',c:'politi',x:'המשך פגישה עם רוטמן וכהן'},
+  {t:'17:50',c:'medini',x:'שיחת טלפון עם נשיא ארה"ב'},
+  {t:'19:13',c:'medini',x:'שיחת טלפון עם ראש ממשלת הונגריה'},
+],
+21:[
+  {t:'20:30',c:'medini',x:'פגישה עם ראשת ממשלת איטליה (10 דקות ב-4 עיניים ולאחר מכן פגישה מורחבת)'},
+  {t:'22:00',c:'medini',x:'פגישה עם נשיא קפריסין'},
+],
+22:[
+  {t:'13:14',c:'medini',x:'שיחת טלפון עם נשיא צרפת'},
+  {t:'15:15',c:'medini',x:'פגישה עם משלחת סנאטורים בראשות לינדזי גרהאם'},
+  {t:'16:00',c:'politi',x:'פגישה עם יו"ר הכנסת'},
+  {t:'17:35',c:'politi',x:'פגישה נוספת עם יו"ר הכנסת'},
+  {t:'17:40',c:'politi',x:'פגישה עם שר האוצר ומנכ"ל משרד רה"מ'},
+  {t:'18:25',c:'politi',x:'פגישה עם ח"כ יולי אדלשטיין'},
+  {t:'20:20',c:'medini',x:'שיחת טלפון עם ראש ממשלת ספרד'},
+  {t:'20:47',c:'medini',x:'שיחת טלפון עם ראש ממשלת הולנד'},
+],
+23:[
+  {t:'11:00',c:'medini',x:'פגישה עם ראש ממשלת יוון'},
+  {t:'15:00',c:'medini',x:'פגישה עם ראש ממשלת הולנד'},
+  {t:'19:45',c:'politi',x:'פגישה עם השר גדעון סער'},
+],
+24:[
+  {t:'10:55',c:'medini',x:'פגישה עם נשיא צרפת (4 עיניים)'},
+  {t:'11:30',c:'medini',x:'פגישה מורחבת עם נשיא צרפת'},
+  {t:'12:50',c:'tadmit',x:'הצהרה לתקשורת עם נשיא צרפת'},
+  {t:'14:30',c:'bitchoni',x:'סיור בשטח (לא מפורט)'},
+  {t:'19:00',c:'politi',x:'פגישה עם דני דנון'},
+],
+25:[
+  {t:'11:45',c:'tadmit',x:'פגישה עם ראש המל"ל, יונתן אוריך ועופר'},
+  {t:'14:30',c:'medini',x:'פגישה עם ראש ממשלת צ׳כיה'},
+  {t:'16:00',c:'medini',x:'פגישה עם קנצלר אוסטריה'},
+  {t:'20:00',c:'tadmit',x:'הצהרה לתקשורת'},
+],
+26:[
+  {t:'12:30',c:'bitchoni',x:'ביקור במנהלת "תקומה" (שיקום יישובי העוטף)'},
+  {t:'16:40',c:'medini',x:'שיחת טלפון עם ראשת ממשלת דנמרק'},
+  {t:'16:45',c:'politi',x:'פגישה עם נציגי תנועת "הביטחוניסטים"'},
+  {t:'18:30',c:'politi',x:'פגישה עם היועמ"שית ויוסי פוקס'},
+  {t:'19:15',c:'politi',x:'פגישה עם גדעון סער'},
+],
+27:[
+  {t:'16:45',c:'politi',x:'פגישה עם יריב לוין'},
+  {t:'23:49',c:'medini',x:'שיחת טלפון עם ראשת ממשלת איטליה'},
+  {t:'01:15',c:'medini',x:'שיחת טלפון עם מייק ג׳ונסון, יו"ר בית הנבחרים האמריקאי (לפנות בוקר)'},
+],
+28:[
+  {t:'15:00',c:'medini',x:'שיחת טלפון עם ראש ממשלת יוון'},
+  {t:'17:20',c:'hatufim',x:'מפגש עם נציגי משפחות החטופים (עד 19:00)'},
+  {t:'20:40',c:'tadmit',x:'הצהרה משותפת לתקשורת עם שר הביטחון ובני גנץ'},
+],
+29:[
+  {t:'14:30',c:'medini',x:'שיחת טלפון עם ראש ממשלת הולנד'},
+  {t:'15:10',c:'hatufim',x:'פגישה עם יגאל סרוסי, אביו של אלמוג סרוסי (חטוף)'},
+],
+30:[
+  {t:'14:00',c:'politi',x:'פגישה עם שר האוצר'},
+  {t:'14:30',c:'bitchoni',x:'ישיבת ממשלה'},
+  {t:'17:15',c:'politi',x:'שיחת טלפון עם ח"כ גלעד קריב'},
+  {t:'17:30',c:'politi',x:'פגישה עם ח"כ משה גפני'},
+  {t:'19:00',c:'tadmit',x:'מסיבת עיתונאים לתקשורת הזרה'},
+  {t:'22:00',c:'tadmit',x:'שיחת טלפון עם אילון מאסק'},
+],
+31:[
+  {t:'12:00',c:'politi',x:'ישיבת הקבינט החברתי-כלכלי'},
+  {t:'18:00',c:'medini',x:'שיחת טלפון עם נשיא קפריסין'},
+  {t:'00:00',c:'medini',x:'שיחת טלפון עם ראש ממשלת אוסטרליה (לפנות בוקר)'},
+],
+};
+
+const WEEKDAY_NAMES = ['יום ראשון','יום שני','יום שלישי','יום רביעי','יום חמישי','יום שישי','שבת'];
+// Oct 1 2023 = Sunday
+function weekdayOf(day){ return (day - 1) % 7; }
+
+// tally totals
+for(const day in DATA){ DATA[day].forEach(ev=>{ CATS[ev.c].count++; }); }
+
+// ---------- render legend ----------
+const legendEl = document.getElementById('legend');
+const activeFilters = new Set();
+Object.entries(CATS).forEach(([key,cat])=>{
+  const chip = document.createElement('button');
+  chip.className='chip'; chip.dataset.cat=key; chip.dataset.active='0';
+  if(cat.light) chip.dataset.light='1';
+  chip.style.setProperty('--c', cat.color);
+  chip.innerHTML = `<span class="dot" style="background:${cat.color}"></span>${cat.label}<span class="n">${cat.count}</span>`;
+  chip.addEventListener('click', ()=>{
+    if(activeFilters.has(key)){ activeFilters.delete(key); chip.dataset.active='0'; }
+    else{ activeFilters.add(key); chip.dataset.active='1'; }
+    applyFilter();
+  });
+  legendEl.appendChild(chip);
+});
+const hint = document.createElement('span');
+hint.className='legend-hint'; hint.textContent='לחיצה על קטגוריה מסננת את הלוח';
+legendEl.appendChild(hint);
+
+function hexToRgba(hex, alpha){
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function applyFilter(){
+  const board = document.getElementById('board');
+  const filtering = activeFilters.size>0;
+  board.classList.toggle('filtering', filtering);
+
+  // single-category filter -> highlight in that category's own color
+  // multi-category filter -> neutral dark highlight (avoids implying one color)
+  let hc = '#1E1D19';
+  if(activeFilters.size===1){
+    const onlyKey = [...activeFilters][0];
+    hc = CATS[onlyKey].color;
+  }
+  const hcBg = hexToRgba(hc, .12);
+
+  document.querySelectorAll('.day[data-day]').forEach(cell=>{
+    const day = cell.dataset.day;
+    const evs = DATA[day] || [];
+    const match = !filtering || evs.some(e=>activeFilters.has(e.c));
+    cell.classList.toggle('match', match);
+    cell.classList.toggle('highlight', filtering && match);
+    if(filtering && match){
+      cell.style.setProperty('--hc', hc);
+      cell.style.setProperty('--hc-bg', hcBg);
+    } else {
+      cell.style.removeProperty('--hc');
+      cell.style.removeProperty('--hc-bg');
+    }
+  });
+}
+
+// ---------- render calendar ----------
+const calEl = document.getElementById('calendar');
+let cellIndex = 0;
+for(let day=1; day<=31; day++){
+  cellIndex++;
+  const cell = document.createElement(day<7 ? 'div' : 'button');
+  cell.style.setProperty('--i', cellIndex);
+  if(day < 7){
+    cell.className='day disabled';
+    cell.innerHTML = `<span class="daynum">${day}</span><span class="nodata">אין נתונים</span>`;
+  } else {
+    const evs = DATA[day] || [];
+    cell.className='day match';
+    cell.dataset.day = day;
+    cell.setAttribute('type','button');
+    const segs = evs.map(e=>`<span class="seg" style="flex:1 1 0; background:${CATS[e.c].color}"></span>`).join('');
+    cell.innerHTML = `
+      <span class="count">${evs.length}</span>
+      <span class="daynum">${day}</span>
+      <span class="bar">${segs || ''}</span>
+    `;
+    cell.addEventListener('click', ()=> selectDay(day, cell));
+  }
+  calEl.appendChild(cell);
+}
+// trailing filler cells to complete the grid (Oct 31 is a Tuesday -> 4 filler cells)
+const trailing = 6 - weekdayOf(31);
+for(let i=0;i<trailing;i++){
+  const filler = document.createElement('div');
+  filler.className='day empty';
+  calEl.appendChild(filler);
+}
+
+// ---------- panel ----------
+const panel = document.getElementById('panel');
+const panelEmpty = document.getElementById('panelEmpty');
+const panelContent = document.getElementById('panelContent');
+const backdrop = document.getElementById('backdrop');
+const closeBtn = document.getElementById('closeBtn');
+let selectedCell = null;
+
+function selectDay(day, cell){
+  if(selectedCell) selectedCell.classList.remove('selected');
+  cell.classList.add('selected');
+  selectedCell = cell;
+
+  const evs = (DATA[day] || []).slice().sort((a,b)=> a.t.localeCompare(b.t));
+  panelEmpty.hidden = true;
+  panelContent.hidden = false;
+
+  const rows = evs.map(e=>`
+    <li class="ev" style="--c:${CATS[e.c].color}; --ctext:${CATS[e.c].text}">
+      <span class="t">${e.t}</span>
+      <span>
+        <span class="txt">${e.x}</span>
+        <span class="tag">${CATS[e.c].label}</span>
+      </span>
+    </li>
+  `).join('');
+
+  panelContent.innerHTML = `
+    <div class="panel-head">
+      <span class="pd-num">${day}</span>
+      <span class="pd-meta">
+        <div class="pd-weekday">${WEEKDAY_NAMES[weekdayOf(day)]}</div>
+        <div class="pd-count">${evs.length} אירועים מתועדים</div>
+      </span>
+    </div>
+    <div class="panel-sub">אוקטובר 2023</div>
+    <ul class="evlist">${rows}</ul>
+  `;
+
+  if(window.innerWidth < 920){
+    panel.classList.add('open');
+    backdrop.classList.add('open');
+  }
+}
+
+function closePanel(){
+  panel.classList.remove('open');
+  backdrop.classList.remove('open');
+}
+closeBtn.addEventListener('click', closePanel);
+backdrop.addEventListener('click', closePanel);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closePanel(); });
+</script>
+</body>
+</html>
