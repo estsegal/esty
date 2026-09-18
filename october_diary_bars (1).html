@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>יומן אוקטובר 2023 — עם ובלי ההחשכות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F6F2;
+    --panel:#FFFFFF;
+    --track:#EFEBE1;
+    --border: rgba(20,18,12,.12);
+    --border-soft: rgba(20,18,12,.07);
+    --ink:#1E1D19;
+    --ink-dim:#5B584F;
+    --ink-faint:#928E80;
+    --redact:#171613;
+    --tab-inactive:#EAE7DE;
+    --medini:#1976D2;
+    --politi:#757575;
+    --tadmit:#9E9E9E;
+    --bitchoni:#8A9A5B;
+    --hatufim:#FFC857;
+    --prati:#4A4842;
+    --font-head:'Heebo', sans-serif;
+    --font-sans:'Assistant', sans-serif;
+    --font-mono: ui-monospace, 'SFMono-Regular', 'Roboto Mono', Consolas, monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  [hidden]{display:none !important;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 10% -10%, rgba(25,118,210,.05), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 100% 110%, rgba(23,22,19,.05), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--font-sans);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:680px; margin:0 auto; padding:28px 20px 50px;}
+
+  .masthead{display:flex; align-items:stretch; gap:14px; margin-bottom:20px;}
+  .redact-bar{width:7px; flex:none; border-radius:2px;
+    background-image: repeating-linear-gradient(180deg, var(--redact) 0 16px, #000 16px 18px, var(--redact) 18px 34px, #2a2822 34px 36px);
+  }
+  .masthead h1{font-family:var(--font-head); font-weight:800; font-size:clamp(21px,3.3vw,27px); margin:0 0 7px; line-height:1.2;}
+  .masthead .sub{margin:0; color:var(--ink-dim); font-size:16px; line-height:1.6;}
+
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:16px;
+    padding:8px 8px 20px; box-shadow:0 1px 2px rgba(20,18,12,.04);
+  }
+
+  .tabs{display:flex; border-radius:10px; overflow:hidden; margin-bottom:6px;}
+  .tab{
+    flex:1; text-align:center; padding:15px 10px; cursor:pointer; border:none;
+    background:var(--tab-inactive); color:var(--ink-faint);
+    font-family:var(--font-head); font-weight:600; font-size:17px;
+    transition:background .18s, color .18s;
+  }
+  .tab.active{background:var(--panel); color:var(--ink);}
+  .tab:not(.active):hover{background:#E0DCD0;}
+
+  .total-line{
+    text-align:center; font-family:var(--font-sans); font-size:16px; color:var(--ink-dim);
+    margin:16px 0 22px;
+  }
+  .total-line b{font-family:var(--font-head); font-weight:800; color:var(--ink); font-size:22px;}
+
+  .bars{display:flex; flex-direction:column; gap:16px; padding:0 20px;}
+  .bar-row{
+    cursor:pointer; border:none; background:none; padding:0; text-align:right;
+    display:block; width:100%; font-family:inherit; color:inherit;
+    border-radius:10px; transition:background .15s;
+  }
+  .bar-row:hover{background:rgba(20,18,12,.035);}
+  .bar-row:hover .bar-row-inner{padding:4px 6px;}
+  .bar-row-inner{padding:4px 0; transition:padding .15s;}
+  .bar-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px;}
+  .bar-label{font-family:var(--font-head); font-weight:700; font-size:18px; display:flex; align-items:center; gap:8px;}
+  .bar-label .arrow{font-size:13px; color:var(--ink-faint); transition:transform .15s;}
+  .bar-row:hover .bar-label .arrow{transform:translateX(-3px);}
+  .bar-stat{font-family:var(--font-mono); font-size:16px; color:var(--ink-dim); white-space:nowrap;}
+  .bar-stat b{font-family:var(--font-head); font-weight:700; color:var(--ink); font-size:17px;}
+  .bar-track{height:26px; background:var(--track); border-radius:7px; overflow:hidden; position:relative;}
+  .bar-fill{height:100%; border-radius:7px 0 0 7px; min-width:2px;}
+  .bar-fill.full-round{border-radius:7px;}
+
+  .note{margin:22px 16px 0; font-size:14.5px; color:var(--ink-faint); line-height:1.7; border-top:1px solid var(--border-soft); padding-top:15px;}
+  .note b{color:var(--ink-dim);}
+
+  /* ---------- Modal ---------- */
+  .backdrop{
+    position:fixed; inset:0; background:rgba(20,18,12,.45); z-index:40;
+    opacity:0; pointer-events:none; transition:opacity .2s;
+  }
+  .backdrop.open{opacity:1; pointer-events:auto;}
+  .modal{
+    position:fixed; z-index:50; background:var(--panel);
+    inset:auto 0 0 0; border-radius:18px 18px 0 0; max-height:82vh;
+    transform:translateY(100%); transition:transform .28s cubic-bezier(.32,.72,0,1);
+    display:flex; flex-direction:column; pointer-events:none;
+    box-shadow:0 -10px 40px rgba(20,18,12,.2);
+  }
+  .modal.open{transform:translateY(0); pointer-events:auto;}
+  @media(min-width:720px){
+    .modal{
+      inset:50% auto auto 50%; transform:translate(-50%,-46%) scale(.97); opacity:0;
+      width:min(640px, 92vw); max-height:80vh; border-radius:16px; transition:transform .22s, opacity .22s;
+    }
+    .modal.open{transform:translate(-50%,-50%) scale(1); opacity:1; pointer-events:auto;}
+  }
+  .modal-head{padding:20px 20px 14px; border-bottom:1px solid var(--border-soft); flex:none;}
+  .modal-head-row{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .modal-title{font-family:var(--font-head); font-weight:800; font-size:19px; line-height:1.35;}
+  .modal-title .n{color:var(--ink-faint); font-weight:600;}
+  .modal-sub{font-family:var(--font-sans); font-size:14px; color:var(--ink-dim); margin-top:5px;}
+  .modal-close{
+    flex:none; width:32px; height:32px; border-radius:50%; border:1px solid var(--border);
+    background:var(--panel); color:var(--ink-dim); font-size:15px; cursor:pointer; line-height:1;
+  }
+  .modal-body{overflow-y:auto; padding:6px 0 14px;}
+  table{width:100%; border-collapse:collapse;}
+  thead th{
+    position:sticky; top:0; background:var(--panel);
+    font-family:var(--font-head); font-weight:700; font-size:13px; color:var(--ink-faint);
+    text-align:right; padding:10px 20px 8px; border-bottom:1px solid var(--border-soft);
+  }
+  thead th.col-date, thead th.col-time{text-align:center; width:78px;}
+  tbody td{padding:11px 20px; font-size:14.5px; border-bottom:1px solid var(--border-soft); vertical-align:top;}
+  tbody td.col-date, tbody td.col-time{text-align:center; font-family:var(--font-mono); font-size:13px; color:var(--ink-dim); white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  .modal-footnote{
+    margin:14px 20px 0; padding:12px 14px; background:var(--track); border-radius:10px;
+    font-size:13.5px; color:var(--ink-dim); line-height:1.6;
+  }
+  .redacted-only{padding:30px 20px; text-align:center; color:var(--ink-dim); font-size:14.5px; line-height:1.7;}
+
+  @media(max-width:480px){
+    .app{padding:20px 12px 40px;}
+    .masthead h1{font-size:19px;}
+    .bars{padding:0 10px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="masthead">
+    <div class="redact-bar" aria-hidden="true"></div>
+    <div>
+      <h1>חלוקת זמן ראש הממשלה — אוקטובר 23</h1>
+      <p class="sub">פילוח לפי יומן העבודה הרשמי של נתניהו. לפירוט וללו״ז האירועים לחצו על השורה</p>
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" id="tabA" type="button">אירועים גלויים</button>
+      <button class="tab" id="tabB" type="button">אירועים גלויים + החשכות</button>
+    </div>
+    <div class="total-line"><b id="totalNum">139</b> <span id="totalSub">אירועים מזוהים (ללא החשכות)</span></div>
+    <div class="bars" id="bars"></div>
+  </div>
+
+
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="modal" id="modal">
+  <div class="modal-head">
+    <div class="modal-head-row">
+      <div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" id="modalClose" type="button">✕</button>
+    </div>
+  </div>
+  <div class="modal-body" id="modalBody"></div>
+</div>
+
+<script>
+// ---------- event data (parsed from the validated per-day diary breakdown) ----------
+const EVENTS = {
+  medini: [
+    { day:7, t:'10:30', x:'שיחת טלפון עם ראש ממשלת הולנד' },
+    { day:7, t:'15:15', x:'שיחת טלפון עם נשיא צרפת' },
+    { day:7, t:'16:15', x:'שיחת טלפון עם נשיא ארה"ב' },
+    { day:8, t:'14:10', x:'שיחת טלפון עם קנצלר גרמניה אולף שולץ' },
+    { day:8, t:'15:45', x:'שיחת טלפון עם ראש ממשלת איטליה' },
+    { day:8, t:'16:05', x:'שיחת טלפון עם נשיא אוקראינה' },
+    { day:8, t:'17:45', x:'שיחת טלפון עם נשיא ארה"ב' },
+    { day:8, t:'19:00', x:'שיחת טלפון עם ראש ממשלת קנדה' },
+    { day:9, t:'14:00', x:'שיחת טלפון עם נשיא צרפת' },
+    { day:9, t:'15:00', x:'שיחת טלפון עם ראש ממשלת בריטניה' },
+    { day:10, t:'13:30', x:'לחיצת יד עם משלחת מחוקקים רפובליקנים בראשות הסנאטורית ג׳וני ארנסט' },
+    { day:10, t:'19:30', x:'שיחת טלפון עם נשיא ארה"ב (נמשכה כ-5 שעות, עד 00:45)' },
+    { day:12, t:'11:45', x:'פגישה מורחבת עם מזכיר המדינה האמריקאי אנתוני בלינקן' },
+    { day:12, t:'12:30', x:'פגישה עם מזכיר המדינה האמריקאי (4 עיניים)' },
+    { day:12, t:'13:40', x:'המשך פגישה עם מזכיר המדינה האמריקאי' },
+    { day:12, t:'17:45', x:'שיחת טלפון עם ראש ממשלת בריטניה' },
+    { day:13, t:'12:45', x:'פגישה עם מזכיר ההגנה האמריקאי לויד אוסטין' },
+    { day:13, t:'16:00', x:'פגישה עם נשיאת הנציבות האירופית אורסולה פון דר ליין' },
+    { day:13, t:'20:00', x:'שיחת טלפון עם נשיא קפריסין' },
+    { day:13, t:'20:30', x:'שיחת טלפון עם ראש ממשלת הולנד' },
+    { day:13, t:'21:00', x:'שיחת טלפון עם נשיא צרפת' },
+    { day:13, t:'21:30', x:'שיחת טלפון עם ראש ממשלת יוון' },
+    { day:14, t:'13:32', x:'שיחת טלפון עם ראש ממשלת יוון' },
+    { day:14, t:'13:54', x:'שיחת טלפון עם נשיא צרפת' },
+    { day:14, t:'16:04', x:'שיחת טלפון עם קנצלר גרמניה' },
+    { day:15, t:'11:00', x:'פגישה עם הסנאטור צ׳אק שומר' },
+    { day:15, t:'14:40', x:'פגישה עם שרת החוץ של צרפת' },
+    { day:15, t:'18:30', x:'שיחת טלפון עם נשיא קפריסין' },
+    { day:16, t:'13:15', x:'פגישה מורחבת עם מזכיר המדינה האמריקאי בלינקן' },
+    { day:16, t:'14:15', x:'פגישה עם מזכיר המדינה האמריקאי (4 עיניים)' },
+    { day:16, t:'19:20', x:'המשך פגישה עם מזכיר המדינה האמריקאי (עד לפנות בוקר)' },
+    { day:17, t:'12:00', x:'פגישה עם ראש ממשלת רומניה' },
+    { day:17, t:'16:45', x:'פגישה עם קנצלרית גרמניה' },
+    { day:18, t:'11:05', x:'קבלת פנים לנשיא ארה"ב בנתב"ג' },
+    { day:18, t:'12:00', x:'פגישה עם נשיא ארה"ב ג׳ו ביידן, מלון קמפינסקי ת"א' },
+    { day:18, t:'14:00', x:'פגישה מורחבת עם נשיא ארה"ב ופורום קבינט המלחמה' },
+    { day:19, t:'12:15', x:'פגישה עם ראש ממשלת בריטניה' },
+    { day:19, t:'14:00', x:'לחיצת יד עם משלחת סולידריות מטעם ועידת נשיאי הארגונים היהודיים' },
+    { day:19, t:'17:00', x:'שיחת טלפון עם ראש ממשלת נורווגיה' },
+    { day:20, t:'11:30', x:'שיחת טלפון עם נשיא צרפת' },
+    { day:20, t:'13:45', x:'פגישה עם מושל קליפורניה גאווין ניוסום' },
+    { day:20, t:'17:50', x:'שיחת טלפון עם נשיא ארה"ב' },
+    { day:20, t:'19:13', x:'שיחת טלפון עם ראש ממשלת הונגריה' },
+    { day:21, t:'20:30', x:'פגישה עם ראשת ממשלת איטליה (10 דקות ב-4 עיניים ולאחר מכן פגישה מורחבת)' },
+    { day:21, t:'22:00', x:'פגישה עם נשיא קפריסין' },
+    { day:22, t:'13:14', x:'שיחת טלפון עם נשיא צרפת' },
+    { day:22, t:'15:15', x:'פגישה עם משלחת סנאטורים בראשות לינדזי גרהאם' },
+    { day:22, t:'20:20', x:'שיחת טלפון עם ראש ממשלת ספרד' },
+    { day:22, t:'20:47', x:'שיחת טלפון עם ראש ממשלת הולנד' },
+    { day:23, t:'11:00', x:'פגישה עם ראש ממשלת יוון' },
+    { day:23, t:'15:00', x:'פגישה עם ראש ממשלת הולנד' },
+    { day:24, t:'10:55', x:'פגישה עם נשיא צרפת (4 עיניים)' },
+    { day:24, t:'11:30', x:'פגישה מורחבת עם נשיא צרפת' },
+    { day:25, t:'14:30', x:'פגישה עם ראש ממשלת צ׳כיה' },
+    { day:25, t:'16:00', x:'פגישה עם קנצלר אוסטריה' },
+    { day:26, t:'16:40', x:'שיחת טלפון עם ראשת ממשלת דנמרק' },
+    { day:27, t:'01:15', x:'שיחת טלפון עם מייק ג׳ונסון, יו"ר בית הנבחרים האמריקאי (לפנות בוקר)' },
+    { day:27, t:'23:49', x:'שיחת טלפון עם ראשת ממשלת איטליה' },
+    { day:28, t:'15:00', x:'שיחת טלפון עם ראש ממשלת יוון' },
+    { day:29, t:'14:30', x:'שיחת טלפון עם ראש ממשלת הולנד' },
+    { day:31, t:'00:00', x:'שיחת טלפון עם ראש ממשלת אוסטרליה (לפנות בוקר)' },
+    { day:31, t:'18:00', x:'שיחת טלפון עם נשיא קפריסין' },
+  ],
+  politi: [
+    { day:7, t:'17:00', x:'פגישה עם יו"ר האופוזיציה' },
+    { day:8, t:'16:40', x:'פגישה עם רון דרמר וסמוטריץ׳' },
+    { day:9, t:'13:45', x:'פגישה עם יריב לוין' },
+    { day:9, t:'15:30', x:'שיחת טלפון עם נשיא המדינה' },
+    { day:9, t:'16:00', x:'פגישה עם היועצת המשפטית לממשלה' },
+    { day:10, t:'13:45', x:'פגישה עם יריב לוין ודודי אמסלם' },
+    { day:10, t:'14:30', x:'פגישה עם ח"כ יולי אדלשטיין' },
+    { day:11, t:'12:00', x:'פגישה עם רון דרמר ויריב לוין' },
+    { day:11, t:'12:30', x:'פגישה עם אריה דרעי' },
+    { day:12, t:'19:00', x:'הצבעות במליאת הכנסת' },
+    { day:12, t:'22:50', x:'פגישה עם סמוטריץ׳, כנסת' },
+    { day:14, t:'18:30', x:'פגישה עם יריב לוין' },
+    { day:15, t:'14:30', x:'פגישה עם אפי איתם' },
+    { day:15, t:'19:10', x:'פגישה עם יפתח רון־תל' },
+    { day:16, t:'15:00', x:'פגישה עם איתמר בן גביר' },
+    { day:16, t:'15:30', x:'ישיבת סיעה' },
+    { day:16, t:'16:00', x:'ישיבת פתיחת מושב החורף ה-25, מליאת הכנסת' },
+    { day:17, t:'11:15', x:'שיחת טלפון עם השופט עוזי פוגלמן' },
+    { day:19, t:'18:00', x:'פגישה עם שמחה רוטמן ועמיעד כהן' },
+    { day:19, t:'19:45', x:'פגישה עם מירי רגב' },
+    { day:20, t:'16:00', x:'המשך פגישה עם רוטמן וכהן' },
+    { day:22, t:'16:00', x:'פגישה עם יו"ר הכנסת' },
+    { day:22, t:'17:35', x:'פגישה נוספת עם יו"ר הכנסת' },
+    { day:22, t:'17:40', x:'פגישה עם שר האוצר ומנכ"ל משרד רה"מ' },
+    { day:22, t:'18:25', x:'פגישה עם ח"כ יולי אדלשטיין' },
+    { day:23, t:'19:45', x:'פגישה עם השר גדעון סער' },
+    { day:24, t:'19:00', x:'פגישה עם דני דנון' },
+    { day:26, t:'16:45', x:'פגישה עם נציגי תנועת "הביטחוניסטים"' },
+    { day:26, t:'18:30', x:'פגישה עם היועמ"שית ויוסי פוקס' },
+    { day:26, t:'19:15', x:'פגישה עם גדעון סער' },
+    { day:27, t:'16:45', x:'פגישה עם יריב לוין' },
+    { day:30, t:'14:00', x:'פגישה עם שר האוצר' },
+    { day:30, t:'17:15', x:'שיחת טלפון עם ח"כ גלעד קריב' },
+    { day:30, t:'17:30', x:'פגישה עם ח"כ משה גפני' },
+    { day:31, t:'12:00', x:'ישיבת הקבינט החברתי-כלכלי' },
+  ],
+  tadmit: [
+    { day:7, t:'11:00', x:'צילום הצהרה לתקשורת — מדשאה מחוץ למשרד הביטחון' },
+    { day:7, t:'20:30', x:'הצהרה לתקשורת' },
+    { day:8, t:'14:20', x:'פגישה עם טופז לוק, יונתן אוריך, מושיק ועופר' },
+    { day:9, t:'13:00', x:'ביקור בחמ"ל ההסברה, קריה' },
+    { day:9, t:'16:45', x:'תדריך לכתבים צבאיים, אולם אח"מ 3' },
+    { day:9, t:'20:30', x:'הצהרה לתקשורת' },
+    { day:10, t:'18:00', x:'הצהרה לתקשורת' },
+    { day:11, t:'22:45', x:'הצהרה משותפת לתקשורת עם שר הביטחון ובני גנץ' },
+    { day:13, t:'16:50', x:'הצהרה משותפת לתקשורת עם נשיאת הנציבות האירופית' },
+    { day:16, t:'12:00', x:'הכנת נאומים עם יונתן אוריך' },
+    { day:17, t:'16:00', x:'הכנה לפגישה עם מזכ"ל, ראש המל"ל ואוריך' },
+    { day:17, t:'19:00', x:'"זמן תקשורת"' },
+    { day:17, t:'20:00', x:'"זמן תקשורת"' },
+    { day:18, t:'19:00', x:'הצהרה לתקשורת בעקבות ביקור ביידן' },
+    { day:19, t:'13:50', x:'הצהרות משותפות עם ראש ממשלת בריטניה' },
+    { day:19, t:'18:40', x:'"זמן תקשורת"' },
+    { day:24, t:'12:50', x:'הצהרה לתקשורת עם נשיא צרפת' },
+    { day:25, t:'11:45', x:'פגישה עם ראש המל"ל, יונתן אוריך ועופר' },
+    { day:25, t:'20:00', x:'הצהרה לתקשורת' },
+    { day:28, t:'20:40', x:'הצהרה משותפת לתקשורת עם שר הביטחון ובני גנץ' },
+    { day:30, t:'19:00', x:'מסיבת עיתונאים לתקשורת הזרה' },
+    { day:30, t:'22:00', x:'שיחת טלפון עם אילון מאסק' },
+  ],
+  bitchoni: [
+    { day:7, t:'12:30', x:'ישיבה עם שר האוצר, שר הביטחון, השר לביטחון לאומי, שר השיכון והשר לעניינים אסטרטגיים' },
+    { day:7, t:'18:00', x:'ישיבת ממשלה' },
+    { day:8, t:'17:00', x:'פגישה עם השר אבי דיכטר' },
+    { day:8, t:'18:00', x:'פגישה עם שר הביטחון' },
+    { day:10, t:'16:30', x:'פגישה עם יעקב עמידרור, לשעבר ראש המל"ל' },
+    { day:11, t:'11:15', x:'פגישה עם השר בני גנץ, חבר קבינט המלחמה' },
+    { day:12, t:'16:45', x:'ביקור באוגדה 98' },
+    { day:12, t:'18:15', x:'דיון בוועדת חוץ וביטחון בכנסת' },
+    { day:12, t:'22:00', x:'המשך דיון בוועדת חוץ וביטחון' },
+    { day:14, t:'13:15', x:'סיור בעוטף עזה — בארי ורעים' },
+    { day:15, t:'12:30', x:'ישיבת ממשלה' },
+    { day:16, t:'12:30', x:'הכנה עם ראש המל"ל ואופיר' },
+    { day:19, t:'15:30', x:'כינוס לוחמים באזור עוטף עזה' },
+    { day:24, t:'14:30', x:'סיור בשטח (לא מפורט)' },
+    { day:26, t:'12:30', x:'ביקור במנהלת "תקומה" (שיקום יישובי העוטף)' },
+    { day:30, t:'14:30', x:'ישיבת ממשלה' },
+  ],
+  hatufim: [
+    { day:13, t:'12:00', x:'פגישה עם גל הירש, ראש המטה למאמץ החטופים' },
+    { day:15, t:'16:15', x:'ביקור בחמ"ל שבויים ונעדרים' },
+    { day:28, t:'17:20', x:'מפגש עם נציגי משפחות החטופים (עד 19:00)' },
+    { day:29, t:'15:10', x:'פגישה עם יגאל סרוסי, אביו של אלמוג סרוסי (חטוף)' },
+  ],
+};
+
+const META = {
+  medini:   { label:'מדיני',              desc:'שיחות ופגישות עם מנהיגי חוץ',                    color:'#1976D2' },
+  politi:   { label:'פוליטי-קואליציוני',   desc:'שרים, ח"כים, כנסת',                              color:'#757575' },
+  tadmit:   { label:'תדמית',              desc:'הופעות תקשורת, יועצים, הצהרות',                  color:'#9E9E9E' },
+  bitchoni: { label:'ביטחוני-צבאי',        desc:'ישיבות, פגישות, סיורי שטח',                      color:'#8A9A5B' },
+  hatufim:  { label:'חטופים',             desc:'מאמץ חטופים, משפחות, שבויים ונעדרים',            color:'#FFC857' },
+  prati:    { label:'"פרטי" (מוחשך)',     desc:'רשומות שהוחשכו וסומנו "פרטי"',                   color:'#4A4842' },
+};
+const ORDER = ['medini','politi','tadmit','bitchoni','hatufim','prati'];
+
+const STATE_A = { medini:62, politi:35, tadmit:22, bitchoni:16, hatufim:4, prati:0 };   // 139 — ללא החשכות
+const STATE_B = { medini:62, politi:35, tadmit:22, bitchoni:29, hatufim:4, prati:21 };  // 173 — עם החשכות
+
+const WEEKDAY = ['יום א׳','יום ב׳','יום ג׳','יום ד׳','יום ה׳','יום ו׳','שבת'];
+function dateLabel(day){ return `${day}.10`; }
+
+// ---------- build bar rows ----------
+const barsEl = document.getElementById('bars');
+const rowEls = {}, fillEls = {}, statEls = {};
+
+ORDER.forEach(k=>{
+  const row = document.createElement('button');
+  row.type = 'button';
+  row.className = 'bar-row';
+  row.innerHTML = `
+    <div class="bar-row-inner">
+      <div class="bar-head">
+        <span class="bar-label"><span class="arrow">◂</span>${META[k].label}</span>
+        <span class="bar-stat" id="stat-${k}"></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="fill-${k}" style="background:${META[k].color}"></div></div>
+    </div>
+  `;
+  row.addEventListener('click', ()=> openModal(k));
+  barsEl.appendChild(row);
+  rowEls[k] = row;
+  fillEls[k] = row.querySelector(`#fill-${k}`);
+  statEls[k] = row.querySelector(`#stat-${k}`);
+});
+
+let current = { ...STATE_A };
+
+function renderBars(target, animate){
+  const from = { ...current };
+  const toTotal = ORDER.reduce((s,k)=>s+target[k],0);
+  const fromTotal = ORDER.reduce((s,k)=>s+from[k],0);
+  const duration = animate ? 600 : 0;
+  const t0 = performance.now();
+
+  function frame(now){
+    const t = duration ? Math.min(1, (now-t0)/duration) : 1;
+    const ease = 1 - Math.pow(1-t, 3);
+    const totalNow = fromTotal + (toTotal-fromTotal)*ease;
+    ORDER.forEach(k=>{
+      const v = from[k] + (target[k]-from[k])*ease;
+      const pct = totalNow>0 ? (v/totalNow*100) : 0;
+      fillEls[k].style.width = pct + '%';
+      fillEls[k].classList.toggle('full-round', pct < 3);
+      rowEls[k].style.display = (target[k] === 0 && v < 0.5) ? 'none' : '';
+      const showVal = Math.round(v);
+      statEls[k].innerHTML = `<b>${showVal}</b> · ${pct.toFixed(1)}%`;
+    });
+    document.getElementById('totalNum').textContent = Math.round(totalNow);
+    if (t < 1) requestAnimationFrame(frame);
+    else current = { ...target };
+  }
+  requestAnimationFrame(frame);
+}
+
+document.getElementById('tabA').addEventListener('click', ()=>{
+  setTab('tabA');
+  document.getElementById('totalSub').textContent = 'אירועים מזוהים (ללא החשכות)';
+  renderBars(STATE_A, true);
+});
+document.getElementById('tabB').addEventListener('click', ()=>{
+  setTab('tabB');
+  document.getElementById('totalSub').textContent = 'אירועים, כולל 34 החשכות (13 ב.מ + 21 פרטי)';
+  renderBars(STATE_B, true);
+});
+function setTab(id){
+  document.getElementById('tabA').classList.toggle('active', id==='tabA');
+  document.getElementById('tabB').classList.toggle('active', id==='tabB');
+}
+renderBars(STATE_A, false);
+
+// ---------- modal ----------
+const backdrop = document.getElementById('backdrop');
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const modalSub = document.getElementById('modalSub');
+const modalBody = document.getElementById('modalBody');
+const modalClose = document.getElementById('modalClose');
+
+function openModal(key){
+  const meta = META[key];
+  const isTabB = document.getElementById('tabB').classList.contains('active');
+
+  if (key === 'prati'){
+    modalTitle.innerHTML = `${meta.label} <span class="n">— 21 רשומות</span>`;
+    modalSub.textContent = 'רשומות שהוחשכו ביומן וסומנו "פרטי"';
+    modalBody.innerHTML = `<div class="redacted-only">
+      תוכן 21 הרשומות המסומנות "פרטי" הוחשך במלואו ביומן המקורי — אין נתון זמין על מהותן.
+      הסימון "פרטי" (בשונה מ"ב.מ") סביר שמציין עניינים אישיים שגרתיים, ולא בהכרח תוכן רגיש.
+    </div>`;
+    show();
+    return;
+  }
+
+  const events = EVENTS[key];
+  const n = events.length;
+  modalTitle.innerHTML = `${meta.label} <span class="n">— ${n} אירועים</span>`;
+  modalSub.textContent = meta.desc;
+
+  let rows = events.map(e => `
+    <tr>
+      <td class="col-date">${dateLabel(e.day)}</td>
+      <td class="col-time">${e.t}</td>
+      <td>${e.x}</td>
+    </tr>
+  `).join('');
+
+  let footnote = '';
+  if (key === 'bitchoni' && isTabB){
+    footnote = `<div class="modal-footnote"><b>בנוסף:</b> 13 רשומות נוספות מוחשכות בסימון "ב.מ" (ביטחון מידע) — ככל הנראה תוכן ביטחוני-מבצעי נוסף שאין עליו פרטים זמינים.</div>`;
+  }
+
+  modalBody.innerHTML = `
+    <table>
+      <thead><tr>
+        <th class="col-date">תאריך</th>
+        <th class="col-time">שעה</th>
+        <th>פירוט</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${footnote}
+  `;
+  show();
+}
+
+function show(){
+  backdrop.classList.add('open');
+  modal.classList.add('open');
+}
+function closeModal(){
+  backdrop.classList.remove('open');
+  modal.classList.remove('open');
+}
+backdrop.addEventListener('click', closeModal);
+modalClose.addEventListener('click', closeModal);
+document.addEventListener('keydown', e=>{ if (e.key==='Escape') closeModal(); });
+</script>
+</body>
+</html>
