@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>השיח על רונן בר ברשת – לפי שעה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EDEFF2;--panel:#FFFFFF;--ink:#14171C;--muted:#5B6470;--line:#D3D8DE;--soft:#F5F6F8;--bar:#BAC0C8;
+--eco:#F0560C;--likud:#1D5BD8;--pmo:#6B2FA3;--radio:#B98B00;--target:#D7263D;--c14:#F0560C;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0F1216;--panel:#171B21;--ink:#E8EBEF;--muted:#98A2AE;--line:#2A3038;--soft:#1E232A;--bar:#4A525D}}
+:root[data-theme="dark"]{--bg:#0F1216;--panel:#171B21;--ink:#E8EBEF;--muted:#98A2AE;--line:#2A3038;--soft:#1E232A;--bar:#4A525D}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Assistant','Arial Hebrew','Segoe UI',Arial,sans-serif;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 20px 30px}
+h1{margin:0;font-weight:800;font-size:clamp(22px,2.6vw,32px);line-height:1.1}
+.dek{margin:6px 0 14px;color:var(--muted);max-width:78ch}
+.dek b{color:var(--eco)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 16px 12px}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:6px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:5px 14px;cursor:pointer;font:inherit;font-weight:600;color:inherit}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.tg{display:inline-flex;gap:6px;align-items:center;color:var(--muted);font-size:14px;cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13.5px;color:var(--muted);margin-inline-start:auto}
+.sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-inline-end:5px;vertical-align:-1px}
+.stage{position:relative}
+svg{display:block;width:100%;overflow:visible}
+svg text{font-family:inherit}
+.ax text{fill:var(--muted);font-size:12px}
+.ax line{stroke:var(--line)}
+.bar{cursor:pointer}
+.bar:hover rect,.bar:focus rect{filter:brightness(1.08)}
+.bar:focus{outline:none}.bar:focus-visible rect.rest{stroke:var(--ink);stroke-width:2}
+.co{position:absolute;background:var(--panel);border:1px solid var(--line);border-inline-end:3px solid var(--c);border-radius:6px;padding:6px 9px;font-size:13px;line-height:1.35;box-shadow:0 2px 10px rgba(0,0,0,.06);pointer-events:none}
+.co b{display:block;font-size:13.5px}
+.co .t{font-weight:800;color:var(--c)}
+.co .n{color:var(--muted);font-size:12.5px}
+.badge{font-size:12px;font-weight:800;fill:#fff}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--panel);border-radius:6px;padding:7px 10px;font-size:13px;line-height:1.35;max-width:260px;opacity:0;transition:opacity .12s;z-index:5}
+.tip b{font-weight:800}
+.list{margin:10px 0 0;padding:0;list-style:none;display:none}
+.list li{display:flex;gap:9px;padding:7px 0;border-top:1px solid var(--line);font-size:14.5px}
+.list .num{flex:none;width:22px;height:22px;border-radius:50%;color:#fff;font-weight:800;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.list .when{font-weight:800}
+.notes{margin:16px 0 0;font-size:14px;color:var(--muted)}
+.notes p{margin:4px 0}
+.notes b{color:var(--ink)}
+.src{font-size:12.5px;color:var(--muted);margin-top:10px}
+@media (max-width:860px){.legend{margin-inline-start:0}}
+@media (max-width:560px){.wrap{padding:16px 12px 24px}.card{padding:12px 10px 10px}.dek{font-size:15px}}
+.list.show{display:block}
+.more{display:none;gap:8px;margin-top:12px}
+.mbtn{flex:1;font:inherit;font-weight:700;font-size:15px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px 8px;cursor:pointer}
+.mbtn[aria-expanded="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.mbtn .ar{display:inline-block;transition:transform .2s}.mbtn[aria-expanded="true"] .ar{transform:rotate(180deg)}
+@media (max-width:860px){.more{display:flex}.list.show{display:none}.list.show.open{display:block}.notes{display:none;margin-top:10px}.notes.open{display:block}}
+@media (prefers-reduced-motion: reduce){.mbtn .ar{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>השיח על רונן בר ברשת – לפי שעה</h1>
+<p class="dek">28.9.2026, 07:00 – 29.9.2026, 07:39. סך הכול 1,029 פוסטים. <b>בכתום: ערוץ 14 ואנשיו, נתניהו והלשכה, הליכוד, תקשורת תומכת נתניהו.</b> 23 פוסטים, 2.2% מהכלל.</p>
+<div class="card">
+ <div class="ctrl">
+    <label class="tg"><input type="checkbox" id="eco" checked> הדגשה בכתום</label>
+  <div class="legend" id="lg"><span><span class="sw" style="background:var(--eco)"></span>ערוץ 14 ואנשיו, נתניהו והלשכה, הליכוד, תקשורת תומכת נתניהו</span><span><span class="sw" style="background:var(--bar)"></span>שאר השיח</span><span><span class="sw" style="background:var(--c14);border-radius:50%"></span>ערוץ 14 בשידור</span><span><span class="sw" style="background:transparent;border:2px solid var(--c14);border-radius:50%"></span>הקראת הפוסט של נתניהו בשידור</span></div>
+ </div>
+ <div class="stage" id="stage"><svg id="svg" role="img" aria-label="גרף עמודות: אינטראקציות לפי שעה, עם הערות"></svg><div class="tip" id="tip"></div></div>
+ <div class="more">
+  <button type="button" class="mbtn" id="bList" aria-expanded="false" aria-controls="list">פירוט האירועים <span class="ar">▾</span></button>
+  <button type="button" class="mbtn" id="bHow" aria-expanded="false" aria-controls="how">איך לקרוא את הגרף <span class="ar">▾</span></button>
+ </div>
+ <ol class="list" id="list"></ol>
+ <div class="notes" id="how">
+ <p><b>איך לקרוא:</b> כל עמודה היא שעה עגולה. העמודה "15:00" כוללת את כל מה שפורסם בין 15:00 ל-15:59, ולכן הפוסט של נתניהו (15:46) נספר בה.</p>
+ <p><b>העמודה האחרונה חלקית:</b> "07:00" של 29.9 מכסה רק עד 07:39, שם נגמר איסוף הנתונים.</p>
+ <p><b>מי בכתום (15 חשבונות):</b> ערוץ 14 ואנשיו: אראל סגל, נועם אמיר, ארז תדמור, שמעון ריקלין, תמיר מורג, גלעד צוויק, דוד פטר, החשבון הרשמי של חדשות 14. נתניהו והלשכה: בנימין נתניהו, טופז לוק (יועץ ראש הממשלה). הליכוד: גיא לוי (דובר הליכוד), השר עמיחי שיקלי, ח"כ טלי גוטליב. תקשורת תומכת נתניהו: גלי ישראל, אלדד בק.</p>
+ <p><b>הרצועה התחתונה</b> מציגה רגעים בשידורי ערוץ 14 ב-28.9, בשעה המדויקת. התשתית עצמה, סימון בר כמטרה ובניית כתב האישום, נבנתה בשידור ב-26–27.9, לפני תחילת הגרף.</p>
+</div>
+</div>
+
+<p class="src">מקור: 1,029 פוסטים ב-X שנאספו בחיפוש "רונן בר" (28.9 07:45 – 29.9 07:39); תמלולי שידורי ערוץ 14.</p>
+</div>
+<script>
+const H=[{"h": "07:00", "d": "28.9", "p": 4, "e": 33, "ep": 0, "ee": 0}, {"h": "08:00", "d": "28.9", "p": 12, "e": 81, "ep": 0, "ee": 0}, {"h": "09:00", "d": "28.9", "p": 10, "e": 999, "ep": 1, "ee": 836}, {"h": "10:00", "d": "28.9", "p": 15, "e": 84, "ep": 0, "ee": 0}, {"h": "11:00", "d": "28.9", "p": 12, "e": 186, "ep": 0, "ee": 0}, {"h": "12:00", "d": "28.9", "p": 14, "e": 1225, "ep": 1, "ee": 392}, {"h": "13:00", "d": "28.9", "p": 13, "e": 1242, "ep": 1, "ee": 1166}, {"h": "14:00", "d": "28.9", "p": 14, "e": 1380, "ep": 0, "ee": 0}, {"h": "15:00", "d": "28.9", "p": 29, "e": 5930, "ep": 1, "ee": 5204}, {"h": "16:00", "d": "28.9", "p": 64, "e": 4181, "ep": 1, "ee": 1822}, {"h": "17:00", "d": "28.9", "p": 45, "e": 2941, "ep": 1, "ee": 144}, {"h": "18:00", "d": "28.9", "p": 41, "e": 1077, "ep": 0, "ee": 0}, {"h": "19:00", "d": "28.9", "p": 163, "e": 22089, "ep": 4, "ee": 3746}, {"h": "20:00", "d": "28.9", "p": 167, "e": 9505, "ep": 3, "ee": 2218}, {"h": "21:00", "d": "28.9", "p": 141, "e": 4728, "ep": 2, "ee": 469}, {"h": "22:00", "d": "28.9", "p": 100, "e": 3114, "ep": 2, "ee": 446}, {"h": "23:00", "d": "28.9", "p": 66, "e": 4049, "ep": 4, "ee": 2695}, {"h": "00:00", "d": "29.9", "p": 40, "e": 401, "ep": 0, "ee": 0}, {"h": "01:00", "d": "29.9", "p": 14, "e": 366, "ep": 0, "ee": 0}, {"h": "02:00", "d": "29.9", "p": 6, "e": 20, "ep": 0, "ee": 0}, {"h": "03:00", "d": "29.9", "p": 8, "e": 256, "ep": 1, "ee": 242}, {"h": "04:00", "d": "29.9", "p": 3, "e": 3, "ep": 0, "ee": 0}, {"h": "05:00", "d": "29.9", "p": 11, "e": 27, "ep": 0, "ee": 0}, {"h": "06:00", "d": "29.9", "p": 17, "e": 64, "ep": 0, "ee": 0}, {"h": "07:00", "d": "29.9", "p": 20, "e": 338, "ep": 1, "ee": 47}];
+const ANN=[{"i": 2, "m": 7, "c": "--likud", "t": "09:07", "h": "דובר הליכוד מפרסם את הרשימה", "n": "הבוקר שקט: 107 פוסטים בשמונה שעות, כ-13 בשעה. הפוסט של הדובר הוא אחד מ-10 בשעה זו."}, {"i": 8, "m": 46, "c": "--pmo", "t": "15:46", "h": "נתניהו מפרסם", "n": "ב-14 הדקות שאחרי הפוסט: 16 פוסטים, יותר מבכל שעה שלמה לפניו."}, {"i": 9, "m": 30, "c": "--pmo", "t": "16:00", "h": "השעה שאחרי נתניהו", "n": "64 פוסטים, כמעט פי חמישה מהממוצע בבוקר (כ-13 בשעה). ביניהם דוד פטר מערוץ 14."}, {"i": 12, "m": 9, "c": "--target", "t": "19:09", "h": "בר מודיע על תביעת דיבה", "n": "163 פוסטים, פי 4 מהשעה שלפני (41). ב-9 הדקות שלפני ההודעה: 7 פוסטים. ב-51 הדקות שאחריה: 156."}, {"i": 13, "m": 30, "c": "--c14", "t": "20:00", "h": "שיא הפוסטים: 167", "n": "בין המגיבים: אראל סגל וארז תדמור מערוץ 14."}, {"i": 16, "m": 25, "c": "--c14", "t": "22:58–23:43", "h": "הגל השני", "n": "הנפח כבר יורד (66 פוסטים), אבל ארבעה פוסטים של אנשי ערוץ 14 והליכוד מייצרים שני שלישים מהמעורבות בשעה זו."}];
+const HL=[{"i": 9, "c": "--pmo", "lab": "השעה שאחרי הודעת נתניהו"}, {"i": 12, "c": "--target", "lab": "שעת הודעת בר"}];
+const C14=[
+ {i:0,m:36,t:'07:36',l:'פליישמן',d:'איתמר פליישמן בשידור: "למה לא פיזרת את הנובה... למה לא העירות את ראש הממשלה". 91 דקות לפני דובר הליכוד.',k:1,row:0},
+ {i:9,m:41,t:'16:41',l:'גוטליב',d:'טלי גוטליב בשידור: "רונן בר, החתרן והמסוכן". בחצות אותו ניסוח ב-X.',k:0},
+ {i:10,m:5,t:'17:05',l:'',d:'הקראה ראשונה של הפוסט של נתניהו בשידור (מתוך שש, עד 21:12).',r:1},
+ {i:10,m:21,t:'17:21',l:'בן עמי',d:'ויקטור בן עמי ב"#חמש": "רונן בר בגד באמון העם". בחשבון ערוץ 14 ב-X אחרי 30 דקות.',k:1,row:1},
+ {i:11,m:10,t:'18:10',l:'',d:'הקראת הפוסט של נתניהו (ליטל שמש).',r:1},
+ {i:12,m:8,t:'19:08',l:'',d:'הקראת הפוסט של נתניהו (יהודה שלזינגר).',r:1},
+ {i:12,m:32,t:'19:32',l:'אמיר',d:'נועם אמיר בשידור: "זה חתיכת שרלטן". ב-X אחרי 10 דקות: "על מי אתה בא לעבוד?"',k:1,row:0},
+ {i:13,m:12,t:'20:12',l:'',d:'הקראת הפוסט של נתניהו (אברהם חסון, המהדורה המרכזית).',r:1},
+ {i:14,m:12,t:'21:12',l:'',d:'הקראת הפוסט של נתניהו (ינון מגל, "הפטריוטים").',r:1},
+ {i:14,m:21,t:'21:21',l:'',d:'אראל סגל ב"הפטריוטים": "מי הרגיע את רונן בר באותו לילה?" (אותה שאלה כמו בפוסטים שלו ב-X ב-19:39 וב-23:03).'},
+ {i:14,m:28,t:'21:28',l:'זמרי',d:'יותם זמרי ב"הפטריוטים": "הכי הרבה דם על הידיים... זה רונן בר". בחשבון ערוץ 14 אחרי 11 דקות.',k:1,row:1}
+];
+const mode='p';let showEco=true,listOpen=false;
+const svg=document.getElementById('svg'),stage=document.getElementById('stage'),tip=document.getElementById('tip'),list=document.getElementById('list');
+const NS='http://www.w3.org/2000/svg';
+const el=(n,a,p)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e};
+const fmt=n=>n.toLocaleString('en-US');
+const cv=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v)));for(const s of [1,2,2.5,5,10])if(s*p>=v)return s*p}
+function render(){
+ svg.innerHTML='';stage.querySelectorAll('.co').forEach(x=>x.remove());
+ const W=stage.clientWidth,mob=W<860,small=W<560,cards=!mob;
+ const ml=small?34:50,mr=8,ph=small?230:(mob?280:320),trackH=small?36:90,n=H.length,step=(W-ml-mr)/n,bw=step*.74;
+ const xm=(i,m)=>ml+i*step+step*(m/60);
+ // cards band
+ let band=0,placed=[];
+ if(cards){const gap=8,cw=Math.min(205,(W-ml-mr-gap*(ANN.length-1))/ANN.length);
+  let pos=ANN.map(a=>xm(a.i,a.m)-cw/2);
+  for(let k=0;k<pos.length;k++){pos[k]=Math.max(ml,pos[k]);if(k>0)pos[k]=Math.max(pos[k],pos[k-1]+cw+gap)}
+  pos[pos.length-1]=Math.min(pos[pos.length-1],W-mr-cw);
+  for(let k=pos.length-2;k>=0;k--)pos[k]=Math.min(pos[k],pos[k+1]-cw-gap);
+  ANN.forEach((a,k)=>{const d=document.createElement('div');d.className='co';d.style.setProperty('--c',`var(${a.c})`);d.style.left=pos[k]+'px';d.style.top='0px';d.style.width=cw+'px';
+   d.innerHTML=`<span class="t">${a.t}</span><b>${a.h}</b><span class="n">${a.n}</span>`;stage.appendChild(d);placed.push({d,x:pos[k]+cw/2})});
+  band=Math.max(...placed.map(p=>p.d.offsetHeight))+30;}
+ const top=cards?band:40;
+ const Ht=top+ph+26+trackH;
+ svg.setAttribute('viewBox',`0 0 ${W} ${Ht}`);svg.setAttribute('height',Ht);
+ const vals=H.map(d=>mode==='e'?d.e:d.p),evals=H.map(d=>mode==='e'?d.ee:d.ep);
+ const max=niceMax(Math.max(...vals)*1.02),y=v=>top+ph-v/max*ph,x=i=>ml+i*step+(step-bw)/2;
+ const ax=el('g',{class:'ax'});
+ const stp=niceMax(max/5);for(let v=0;v<=max+1e-9;v+=stp){const yy=y(v);el('line',{x1:ml,x2:W-mr,y1:yy,y2:yy},ax);const t=el('text',{x:ml-6,y:yy+4,'text-anchor':'end',direction:'ltr'},ax);t.textContent=v>=1000?(Math.round(v/100)/10)+'K':Math.round(v)}
+ H.forEach((d,i)=>{if(i%(small?4:3)===0){const t=el('text',{x:x(i)+bw/2,y:top+ph+17,'text-anchor':'middle',direction:'ltr'},ax);t.textContent=d.h}});
+ const di=H.findIndex(d=>d.h==='00:00');if(di>0){const xx=ml+di*step;el('line',{x1:xx,x2:xx,y1:top-4,y2:top+ph+trackH+10,stroke:'var(--line)','stroke-dasharray':'3 3'});
+  const a=el('text',{x:xx-6,y:top+ph*.3,'text-anchor':'end',direction:'ltr',fill:'var(--muted)','font-size':12});a.textContent='28.9';
+  const b=el('text',{x:xx+6,y:top+ph*.3,'text-anchor':'start',direction:'ltr',fill:'var(--muted)','font-size':12});b.textContent='29.9'}
+ H.forEach((d,i)=>{const g=el('g',{class:'bar',tabindex:0,role:'img','aria-label':`${d.d} ${d.h}: ${d.p} פוסטים, ${fmt(d.e)} אינטראקציות`});
+  const v=vals[i],ev=showEco?evals[i]:0;
+  const hl=HL.find(q=>q.i===i);
+  el('rect',{class:'rest',x:x(i),y:y(v),width:bw,height:Math.max(0,top+ph-y(v)),rx:2,fill:hl?`var(${hl.c})`:'var(--bar)'},g);
+  if(hl&&!small&&top+ph-y(v)>28){const t=el('text',{x:x(i)+bw/2,y:y(v)+(small?13:17),'text-anchor':'middle',direction:'ltr',fill:'#fff','font-weight':800,'font-size':small?10.5:14},g);t.textContent=v;}
+  if(ev>0)el('rect',{x:x(i),y:y(ev),width:bw,height:top+ph-y(ev),rx:2,fill:'var(--eco)'},g);
+  el('rect',{x:ml+i*step,y:top,width:step,height:ph,fill:'transparent'},g);
+  const show=()=>{const e2=H[i];const a=ANN.find(q=>q.i===i);
+   tip.innerHTML=`<b>${e2.d}, ${e2.h}${i===n-1?' (עד 07:39)':''}</b><br>${e2.p} פוסטים · ${fmt(e2.e)} אינטראקציות${e2.ee?`<br>בכתום: ${fmt(e2.ee)} (${Math.round(e2.ee/e2.e*100)}%)`:''}${a?`<br>${a.t}: ${a.h}`:''}`;
+   tip.style.opacity=1;let lx=x(i)+bw/2-130;lx=Math.max(0,Math.min(W-265,lx));tip.style.left=lx+'px';tip.style.top=Math.max(0,y(v)-90)+'px'};
+  g.addEventListener('mouseenter',show);g.addEventListener('focus',show);g.addEventListener('click',show);
+  g.addEventListener('mouseleave',()=>tip.style.opacity=0);g.addEventListener('blur',()=>tip.style.opacity=0);});
+ const cbMax=cards?Math.max(...placed.map(p=>p.d.offsetHeight)):0;let prev=null;
+ ANN.forEach((a,k)=>{const bx=xm(a.i,a.m),by=y(vals[a.i]);
+  if(cards){const p=placed[k],cb=p.d.offsetHeight,dir=bx<p.x?-1:1,yb=cbMax+6+(dir<0?k*5:(ANN.length-k)*5);
+   el('polyline',{points:`${p.x},${cb} ${p.x},${yb} ${bx},${yb} ${bx},${by-4}`,fill:'none',stroke:`var(${a.c})`,'stroke-width':1.4});
+   el('circle',{cx:bx,cy:by-4,r:3.5,fill:`var(${a.c})`});
+  }else{let cy=Math.max(top-4,by-16);if(prev&&Math.abs(bx-prev.x)<22&&Math.abs(cy-prev.y)<22)cy=prev.y-22;cy=Math.max(10,cy);prev={x:bx,y:cy};el('line',{x1:bx,x2:bx,y1:cy+9,y2:by-2,stroke:`var(${a.c})`,'stroke-width':1.2});el('circle',{cx:bx,cy:cy,r:9,fill:`var(${a.c})`});const t=el('text',{x:bx,y:cy+4,'text-anchor':'middle',class:'badge'});t.textContent=k+1;}
+ });
+ // ch14 track
+ const ty=top+ph+(small?46:52);
+ const lab=el('text',{x:W-mr,y:ty-9,'text-anchor':'start','font-size':12,'font-weight':700,fill:'var(--c14)'});lab.textContent='ערוץ 14 בשידור, 28.9';
+ el('line',{x1:ml,x2:W-mr,y1:ty,y2:ty,stroke:'var(--line)'});
+ C14.forEach(c=>{const cx=xm(c.i,c.m);const g=el('g',{tabindex:0,style:'cursor:pointer'});
+  el('circle',{cx,cy:ty,r:c.r?4:6,fill:c.r?'var(--panel)':'var(--c14)',stroke:'var(--c14)','stroke-width':c.r?1.8:0},g);
+  el('circle',{cx,cy:ty,r:11,fill:'transparent'},g);
+  if(c.k&&!small){const t=el('text',{x:cx,y:ty+(c.row?32:19),'text-anchor':'middle','font-size':12,fill:'var(--ink)','font-weight':600},g);t.textContent=`${c.t} ${c.l}`;if(c.row)el('line',{x1:cx,x2:cx,y1:ty+6,y2:ty+21,stroke:'var(--c14)','stroke-width':1},g)}
+  const show=()=>{tip.innerHTML=`<b>${c.t}, ערוץ 14</b><br>${c.d}`;tip.style.opacity=1;let lx=cx-130;lx=Math.max(0,Math.min(W-265,lx));tip.style.left=lx+'px';tip.style.top=(ty-96)+'px'};
+  g.addEventListener('mouseenter',show);g.addEventListener('focus',show);g.addEventListener('click',show);g.addEventListener('mouseleave',()=>tip.style.opacity=0);g.addEventListener('blur',()=>tip.style.opacity=0);});
+
+ // list
+ list.innerHTML=ANN.map((a,k)=>`<li><span class="num" style="background:var(${a.c})">${k+1}</span><span><span class="when">${a.t}</span> · <b>${a.h}</b><br>${a.n}</span></li>`).join('');
+ if(small)list.innerHTML+=`<li style="border-top:2px solid var(--c14);margin-top:6px"><span><b style="color:var(--c14)">ערוץ 14 בשידור, 28.9</b></span></li>`+C14.filter(c=>c.k).map(c=>`<li><span class="num" style="background:var(--c14)">●</span><span><span class="when">${c.t}</span> · ${c.d}</span></li>`).join('');
+ list.className='list'+(cards?'':' show')+(listOpen?' open':'');
+}
+document.getElementById('eco').onchange=e=>{showEco=e.target.checked;render()};
+const lg=document.getElementById('lg');HL.slice().reverse().forEach(h=>{const sp=document.createElement('span');sp.innerHTML=`<span class="sw" style="background:var(${h.c})"></span>${h.lab}`;lg.insertBefore(sp,lg.children[2])});
+new ResizeObserver(()=>render()).observe(stage);
+const bL=document.getElementById('bList'),bH=document.getElementById('bHow'),how=document.getElementById('how');
+bL.onclick=()=>{listOpen=!listOpen;bL.setAttribute('aria-expanded',listOpen);list.classList.toggle('open',listOpen)};
+bH.onclick=()=>{const o=!how.classList.contains('open');how.classList.toggle('open',o);bH.setAttribute('aria-expanded',o)};
+document.addEventListener('click',e=>{if(!e.target.closest('svg'))tip.style.opacity=0});
+render();
+</script>
+</body>
+</html>
