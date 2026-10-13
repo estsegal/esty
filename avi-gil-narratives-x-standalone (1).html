@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מי מוביל את המתקפה על אבי גיל</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: embeddable chart card. Six narratives ranked right-to-left in a Channel 14 orange ramp (darkest = largest);
+   curved arrows fan out to each narrative's leading X voices, circles sized by their posts; dashed arcs tie a voice that recurs. Stacked rows on narrow screens. */
+:root{
+  --bg:#FFFFFF; --card:#FFFFFF; --fg:#1D1A18; --muted:#6A625D; --rule:#E2DDD9;
+  --arrow:#1F6F78; --link:#B5400C; --chip:#F4EEEA;
+  --x1:#1F6F78; --x2:#4B3F8F; --x3:#2F7A3E; --x4:#B0306A;
+  --o1:#6A2103; --o2:#8E2F07; --o3:#B9420C; --o4:#DE5A1A; --o5:#F2884D; --o6:#F9BA94;
+  --t1:#FFFFFF; --t2:#FFFFFF; --t3:#FFFFFF; --t4:#FFFFFF; --t5:#2A130A; --t6:#2A130A;
+  --body:"Assistant", "Arial Hebrew", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color-scheme:light}
+body{color:var(--fg);font-family:var(--body);direction:rtl}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:8px 16px}
+.card{background:var(--card);padding:8px 0 12px}
+h1{font-weight:800;font-size:clamp(26px,6vw,38px);line-height:1.2;letter-spacing:-.01em;margin:0 0 6px;color:var(--o3);text-wrap:balance}
+.subtitle{font-size:clamp(18px,3.6vw,23px);font-weight:700;line-height:1.35;margin:0 0 10px;color:var(--fg);text-wrap:balance}
+.dek{font-size:16.5px;color:var(--muted);margin:0 0 16px;max-width:70ch;line-height:1.55}
+.controls{display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;margin-bottom:4px}
+.ctl-label{font-size:13.5px;color:var(--muted);font-weight:600;margin-left:8px}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;padding:3px;background:var(--chip)}
+.seg button,.chip{font:inherit;cursor:pointer;border:0;background:none;color:var(--fg)}
+.seg button{font-size:14px;font-weight:600;padding:5px 14px;border-radius:999px;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--o3);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font-size:14px;font-weight:600;padding:5px 12px 5px 10px;border-radius:999px;border:1px solid var(--rule);background:var(--card);display:inline-flex;align-items:center;gap:6px}
+.chip i{width:18px;height:0;border-top:2.5px dashed currentColor;display:inline-block}
+.chip .n{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{box-shadow:inset 0 0 0 2px currentColor}
+button:focus-visible,.ng:focus-visible{outline:2px solid var(--arrow);outline-offset:2px}
+#chart{display:block;width:100%;height:auto;margin-top:4px;touch-action:manipulation}
+#chart text{font-family:var(--body);fill:var(--fg)}
+.lab{font-size:16px;font-weight:700}.sub{font-size:13.5px;fill:var(--muted)!important}
+.val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.pname{font-weight:700;pointer-events:none}
+.axis{stroke:var(--fg);stroke-width:1.2}
+.arrow{stroke:var(--arrow);stroke-width:2;fill:none;stroke-linecap:round}
+.xlink{fill:none;stroke-width:2.6;stroke-dasharray:4 6;stroke-linecap:round;transition:opacity .25s}
+.xlink.dim{opacity:.12}.xlink.on{stroke-width:3.4}
+.ng{cursor:pointer;transition:opacity .25s;outline:none}
+.ng.dim{opacity:.28}
+.ng.sel .bar{stroke:var(--fg);stroke-width:2.5}
+.pc{cursor:pointer;transition:opacity .25s}
+.pc.dim{opacity:.22}
+.pc.cur circle.body{stroke:var(--fg);stroke-width:3}
+.ring{fill:none;stroke-width:3.5}
+.panel{border-top:1px solid var(--rule);margin-top:10px;padding-top:16px}
+.qtag{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:10px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.qtag b{color:var(--fg)}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+blockquote{margin:0;padding:6px 20px 6px 0;border-right:4px solid var(--o1);font-size:clamp(20px,2.6vw,26px);font-weight:700;line-height:1.45;max-width:48ch;text-wrap:pretty}
+.qmeta{font-size:15px;color:var(--muted);margin-top:12px}
+.qmeta a{color:var(--link);font-weight:700}
+.notes{border-top:1px solid var(--rule);margin-top:16px;padding-top:10px;font-size:13.5px;color:var(--muted);line-height:1.6}
+.notes p{margin:0 0 3px}
+@media (max-width:420px){.seg button{font-size:13.5px;padding:5px 11px}.dek{font-size:15.5px}}
+@media (prefers-reduced-motion:reduce){.ng,.pc,.xlink{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <h1>5 נרטיבים של התקפה</h1>
+  <p class="subtitle">איך מסיטים את האחריות אל אבי גיל ואל מערכת הביטחון<br>ואיך פוסלים את העד</p>
+  <p class="dek">ניטור השיח ברשתות לפי היקף ולפי הדוברים שהטקסטים שלהם הופצו הכי הרבה בכל אחד מהם. לחצו על דובר כדי לקרוא את הציטוט שלו.</p>
+  <div class="controls">
+    <div><span class="ctl-label">מדד:</span>
+      <div class="seg" role="group" aria-label="בחירת מדד">
+        <button type="button" id="m-items" data-m="items" aria-pressed="true">פוסטים</button>
+        <button type="button" id="m-acc" data-m="acc" aria-pressed="false">חשבונות</button>
+      </div></div>
+    <div class="chips" id="chips" role="group" aria-label="דוברים שמובילים כמה נרטיבים"><span class="ctl-label">מובילים כמה נרטיבים:</span></div>
+  </div>
+  <svg id="chart" role="img" aria-label="תרשים עמודות אינטראקטיבי של חמישה נרטיבים והדוברים המובילים בכל אחד"></svg>
+  <section class="panel" id="panel" aria-live="polite"></section>
+  <div class="notes">
+    <p>גודל העיגול מייצג את מספר הפוסטים של הדובר בנרטיב. הקווים המקווקווים מחברים דובר שמוביל יותר מנרטיב אחד.</p>
+    <p>הנתונים: 5,446 פוסטים של 1,199 חשבונות במחנה התוקף ב-X, 2–9 באוקטובר 2026 (עד 06:50). המחנה זוהה לפי רשת הריטוויטים.</p>
+    <p>הסיווג לנרטיבים לפי מילות מפתח. פוסט יכול להשתייך לכמה נרטיבים. ספירת הדובר כוללת את הפוסטים שלו ואת הריטוויטים שקיבל.</p>
+  </div>
+</div></div>
+
+<script>
+const RAW={
+ "N1": {
+  "name": "לא העיר את נתניהו",
+  "items": 1649,
+  "acc": 674,
+  "who": [
+   {
+    "h": "tadmorerez48",
+    "name": "ארז תדמור",
+    "n": 145,
+    "rank": 1,
+    "q": "אם המידע המודיעיני דרמטי מספיק כדי להקפיץ את צמרת השב\"כ למטה הארגון, ודרמטי מספיק כדי שצמרת המטכ\"ל תקיים דיונים כל הלילה, הוא דרמטי מספיק כדי לעדכן את ראש הממשלה באמצעות המזכיר הצבאי. נקודה.",
+    "partial": true,
+    "when": "08.10.2026, 12:39",
+    "url": "https://x.com/tadmorerez48/status/2108130267869167635"
+   },
+   {
+    "h": "filbers",
+    "name": "שלמה פילבר",
+    "n": 107,
+    "rank": 4,
+    "q": "תסבירו איך אבי גיל מסביר את המשפט הזה שאמר לרה\"מ עשר דקות אחרי תחילת המתקפה? *אבי גיל לנתניהו בשעה 06:40* \"אין לנו שום דבר (במודיעין).",
+    "partial": true,
+    "when": "08.10.2026, 20:08",
+    "url": "https://x.com/filbers/status/2108243209499369609"
+   },
+   {
+    "h": "c14_news",
+    "name": "ערוץ 14",
+    "n": 93,
+    "rank": 5,
+    "q": "ארז תדמור על אבי גיל: \"הוא לא יודע מה התפקיד שלו? חייב לוודא שראש הממשלה מעודכן - האיש הזה מופקר!\"",
+    "partial": true,
+    "when": "08.10.2026, 22:42",
+    "url": "https://x.com/C14_news/status/2108281998687056336"
+   },
+   {
+    "h": "habibistit_",
+    "name": "רונית הביביסטית",
+    "n": 70,
+    "rank": 6,
+    "q": "וזה גם אחרי שקיבל התרעה ב6:19 והעיר את ראש הממשלה רק אחרי 10 דקות בתחילת המתקפה. עכשיו מתראיין כאילו היו התרעות.",
+    "partial": true,
+    "when": "08.10.2026, 09:41",
+    "url": "https://x.com/habibistit_/status/2108085425004818569"
+   },
+   {
+    "h": "erelsegal",
+    "name": "אראל סג״ל",
+    "n": 56,
+    "rank": 7,
+    "q": "שלא העירו את ראש הממשלה ש\"לא במתכוון\" אבל כן שלחו במתכוון צוות טקילה וישבו במטה משעה 02:00 ומה עשה גיל באותו זמן ישן על אף? אחלה מזכיר צבאי.",
+    "partial": true,
+    "when": "08.10.2026, 14:04",
+    "url": "https://x.com/ErelSegal/status/2108151591098290347"
+   }
+  ]
+ },
+ "N2": {
+  "name": "מינוי בנט",
+  "items": 604,
+  "acc": 355,
+  "who": [
+   {
+    "h": "yossibaum",
+    "name": "יוסי באום",
+    "n": 209,
+    "rank": 1,
+    "q": "רה\"מ יכול לקבל בירושה מזכיר צבאי שמינה יריבו הפוליטי (בנט) והוא אנוס לראות בו \"איש אמונו\". נתניהו דרש אמנם להחליפו, אבל הרצי הלוי לא אישר לו.",
+    "partial": true,
+    "when": "08.10.2026, 03:51",
+    "url": "https://x.com/YOSSIBAUM/status/2107997298722590928"
+   },
+   {
+    "h": "tamir114",
+    "name": "תמיר מורג",
+    "n": 29,
+    "rank": 5,
+    "q": "לפיד מאיר כאן נקודה חשובה: אבי גיל מונה על ידי בנט ולמעשה הונחת על נתניהו כמזכיר צבאי מתקופת \"ממשלת השינוי\". עכשיו הכל יותר ברור.",
+    "partial": true,
+    "when": "08.10.2026, 13:37",
+    "url": "https://x.com/Tamir114/status/2108144827149730048"
+   },
+   {
+    "h": "yamityanai1",
+    "name": "ימית מלול ינאי",
+    "n": 26,
+    "rank": 6,
+    "q": "אבי גיל מונה על ידי בנט ולמעשה הונחת על נתניהו כמזכיר צבאי מתקופת \"ממשלת השינוי\". עכשיו הכל יותר ברור.",
+    "partial": false,
+    "when": "08.10.2026, 13:49",
+    "url": "https://x.com/YAMITYANAI1/status/2108147869613948959"
+   },
+   {
+    "h": "yakiadamker",
+    "name": "יקי אדמקר",
+    "n": 18,
+    "rank": 8,
+    "q": "אבי גיל, המזכיר הצבאי לשעבר בלשכת ראש הממשלה, היה מינוי של נפתלי בנט. כשנתניהו חזר ללשכה, הוא ביקש מהרמטכ״ל דאז, הרצי הלוי, להחליפו. הלוי סירב.",
+    "partial": true,
+    "when": "09.10.2026, 00:14",
+    "url": "https://x.com/YakiAdamker/status/2108304950254076037"
+   }
+  ]
+ },
+ "N3": {
+  "name": "למה עכשיו / בחירות",
+  "items": 903,
+  "acc": 471,
+  "who": [
+   {
+    "h": "ybenshemesh",
+    "name": "יעקב בן שמש",
+    "n": 112,
+    "rank": 1,
+    "q": "מזכיר צבאי לשעבר שמתראיין שבועיים לפני הבחירות ומספר \"את כל האמת\". כזאת עוד לא ראינו.",
+    "partial": true,
+    "when": "08.10.2026, 09:02",
+    "url": "https://x.com/YBenshemesh/status/2108075623746826605"
+   },
+   {
+    "h": "noam_fathi",
+    "name": "נעם פתחי",
+    "n": 49,
+    "rank": 4,
+    "q": "מסכן אבי גיל, שלוש שנים הוא סבל מכאבי בטן, ורק עכשיו כשהרופאים בבית החולים קפלן נתנו לו זריקת \"שבועיים לבחירותיזון\" וזה השתחרר לו..",
+    "partial": false,
+    "when": "08.10.2026, 20:41",
+    "url": "https://x.com/noam_fathi/status/2108251365059506380"
+   },
+   {
+    "h": "bismuthboaz",
+    "name": "בועז ביסמוט",
+    "n": 46,
+    "rank": 5,
+    "q": "במקום להרכין ראש ולקחת אחריות על מחדל הדיווח בזמן אמת, אתם מנהלים קמפיין שקרים נגד ראש הממשלה במטרה להפיל את שלטון הימין.",
+    "partial": true,
+    "when": "08.10.2026, 23:27",
+    "url": "https://x.com/BismuthBoaz/status/2108293275090137545"
+   },
+   {
+    "h": "yoavkisch",
+    "name": "יואב קיש",
+    "n": 35,
+    "rank": 7,
+    "q": "השמאל ממשיך בקמפיין הפייק שלו לקראת הבחירות והפעם עם אבי גיל.",
+    "partial": true,
+    "when": "08.10.2026, 20:29",
+    "url": "https://x.com/YoavKisch/status/2108248332489343295"
+   }
+  ]
+ },
+ "N4": {
+  "name": "מעילה באמון / התלונה נסגרה",
+  "items": 609,
+  "acc": 373,
+  "who": [
+   {
+    "h": "filbers",
+    "name": "שלמה פילבר",
+    "n": 102,
+    "rank": 3,
+    "q": "או שהאיש מסתכן בגילוי סודות מדינה, במקרה כזה כדאי שירים טלפון לנגד רוזנפלד מה קורה במקרה כזה.",
+    "partial": true,
+    "when": "07.10.2026, 13:02",
+    "url": "https://x.com/filbers/status/2107773501771809096"
+   },
+   {
+    "h": "yoavkisch",
+    "name": "יואב קיש",
+    "n": 35,
+    "rank": 4,
+    "q": "הטענות השקריות של אבי גיל כבר נבדקו על ידי גורמי אכיפת החוק והסתיימו בלא כלום - ולא בכדי.",
+    "partial": true,
+    "when": "08.10.2026, 20:29",
+    "url": "https://x.com/YoavKisch/status/2108248332489343295"
+   },
+   {
+    "h": "thenthinkagain",
+    "name": "Think4yourself",
+    "n": 27,
+    "rank": 5,
+    "q": "ברקע ששוברים את החיסיון והאמון, נפגע הקשר שבין הדרג הנבחר לצבא.",
+    "partial": true,
+    "when": "08.10.2026, 09:02",
+    "url": "https://x.com/thenthinkagain/status/2108075595007504408"
+   },
+   {
+    "h": "lyyt31400170",
+    "name": "לייט",
+    "n": 22,
+    "rank": 7,
+    "q": "אבי גיל לפני שנתיים טען שיש זיוף של פרוטוקולים המשטרה חקרה וגילתה שאבי חרטטן ויש המלצה לסגור את התיק",
+    "partial": true,
+    "when": "09.10.2026, 03:18",
+    "url": "https://x.com/lyyt31400170/status/2108351253927412041"
+   }
+  ]
+ },
+ "N5": {
+  "name": "לא בגידה אלא מרד",
+  "items": 670,
+  "acc": 394,
+  "who": [
+   {
+    "h": "erelsegal",
+    "name": "אראל סג״ל",
+    "n": 133,
+    "rank": 2,
+    "q": "לא הייתה בגידה היה מרד בראש הממשלה הכרעה אסטרטגית נלקחה על ידי ממסד בטחוני מטומטם ועלוב.",
+    "partial": true,
+    "when": "08.10.2026, 13:43",
+    "url": "https://x.com/ErelSegal/status/2108146380929699918"
+   },
+   {
+    "h": "netanelgla",
+    "name": "נתנאל גלסנר",
+    "n": 52,
+    "rank": 3,
+    "q": "אם עד היום חשבתם שלא היתה בגידה בא אבי גיל וסגר לכם את הפינה.",
+    "partial": false,
+    "when": "08.10.2026, 18:05",
+    "url": "https://x.com/netanelgla/status/2108212283335971128"
+   },
+   {
+    "h": "eranhatzor",
+    "name": "ערן חצור",
+    "n": 35,
+    "rank": 4,
+    "q": "האין מידור דרג נבחר ומושל ממידע מהווה בגידה ביסודות המשטר⁉️",
+    "partial": true,
+    "when": "08.10.2026, 21:53",
+    "url": "https://x.com/EranHatzor/status/2108269635787489287"
+   },
+   {
+    "h": "bloombergyuval",
+    "name": "יובל בלומברג",
+    "n": 20,
+    "rank": 6,
+    "q": "אפילו המזכיר הצבאי, מישרת אמון מהדרגה הראשונה, אחד האנשים הכי חשובים בסביבתו של רוה״מ, הגשר שלו לצבא ולהבנת המצב בצורה המעודכנת ביותר, מתגלה כעת כעוד ״סוכן מגוייס״ של אותה קליקה צבאית.",
+    "partial": true,
+    "when": "08.10.2026, 17:59",
+    "url": "https://x.com/BloombergYuval/status/2108210661314474124"
+   }
+  ]
+ }
+};
+const ORDER=Object.keys(RAW).sort((a,b)=>RAW[b].items-RAW[a].items);
+const D=ORDER.map((k,i)=>({...RAW[k],key:k,c:`var(--o${i+1})`,tc:`var(--t${i+1})`}));
+const cnt={};D.forEach(d=>d.who.forEach(w=>cnt[w.h]=(cnt[w.h]||0)+1));
+const multi=Object.keys(cnt).filter(h=>cnt[h]>1).sort((a,b)=>cnt[b]-cnt[a]);
+const XC={};multi.forEach((h,i)=>XC[h]=`var(--x${i+1})`);
+const NAME={};D.forEach(d=>d.who.forEach(w=>NAME[w.h]=w.name));
+const NMAX=Math.max(...D.flatMap(d=>d.who.map(w=>w.n)));
+const S={metric:"items",sel:0,pk:D[0].who[0].h,person:null,vals:D.map(()=>0),appear:0,mobile:false};
+const NS="http://www.w3.org/2000/svg",svg=document.getElementById("chart");
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e};
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const rad=n=>(S.mobile?0.82:1)*(24+12*Math.sqrt(n/NMAX));
+function curve(sx,sy,ex,ey,bend){const mx=(sx+ex)/2,my=(sy+ey)/2,dx=ex-sx,dy=ey-sy;return `M${sx},${sy} Q${mx-dy*bend},${my+dx*bend} ${ex},${ey}`}
+function trim(sx,sy,px,py,r){const dx=px-sx,dy=py-sy,L=Math.hypot(dx,dy)||1;return [sx+dx*(L-r-4)/L,sy+dy*(L-r-4)/L]}
+function marker(defs,id,col){const m=el("marker",{id,viewBox:"0 0 10 10",refX:"7",refY:"5",markerWidth:"6",markerHeight:"6",orient:"auto-start-reverse"},defs);el("path",{d:"M0,0 L10,5 L0,10 z",style:`fill:${col}`},m)}
+function lines(name){const w=name.split(" ");if(w.length===1&&name.length>8){const m=Math.ceil(name.length/2);return [name.slice(0,m),name.slice(m)]}if(w.length<=2)return w;return [w[0],w.slice(1).join(" ")]}
+function halves(name){const w=name.replace(" / "," ").split(" ");if(w.length<2)return w;let best=1,bd=1e9;for(let i=1;i<w.length;i++){const d=Math.abs(w.slice(0,i).join(" ").length-w.slice(i).join(" ").length);if(d<bd){bd=d;best=i}}return [w.slice(0,best).join(" "),w.slice(best).join(" ")]}
+function render(){
+  svg.textContent="";
+  const mob=S.mobile,maxV=Math.max(...D.map(d=>d[S.metric]));
+  const defs=el("defs",{});marker(defs,"ah","var(--arrow)");multi.forEach(h=>marker(defs,"ax-"+h,XC[h]));
+  const layer=el("g",{});const spots={};let W,H;
+  if(!mob){
+    W=1320;H=760;const base=650,maxH=300,bw=124,step=256,x0=W-150;
+    const LAY={4:[[72,-58],[36,-138],[-36,-138],[-72,-58]],5:[[90,-46],[60,-130],[0,-176],[-60,-130],[-90,-46]]};
+    el("line",{x1:16,x2:W-16,y1:base,y2:base,class:"axis"},layer);
+    D.forEach((d,i)=>{
+      const cx=x0-i*step,h=Math.max(2,S.vals[i]/maxV*maxH),top=base-h,g=group(d,i,layer);
+      el("rect",{x:cx-bw/2,y:top,width:bw,height:h,rx:3,class:"bar",style:`fill:${d.c}`},g);
+      const inside=h>27;
+      el("text",{x:cx,y:inside?base-Math.min(14,(h-20)/2):top-10,"text-anchor":"middle",class:"val",style:`fill:${inside?d.tc:"var(--fg)"}`},g).textContent=Math.round(S.vals[i]).toLocaleString("he-IL");
+      halves(d.name).forEach((ln,j)=>el("text",{x:cx,y:base+28+j*21,"text-anchor":"middle",class:"lab"},g).textContent=ln);
+      el("text",{x:cx,y:base+74,"text-anchor":"middle",class:"sub"},g).textContent=`${d.acc.toLocaleString("he-IL")} חשבונות`;
+      const lay=LAY[d.who.length];people(g,d,i,cx,top-3,(k)=>[cx+lay[k][0],top-18+lay[k][1]],spots,cx);
+    });
+  }else{
+    W=420;const rowH=200;H=D.length*rowH+10;const right=W-8,maxL=W-120;
+    D.forEach((d,i)=>{
+      const y0=i*rowH+8,L=Math.max(2,S.vals[i]/maxV*maxL),by=y0+30,g=group(d,i,layer);
+      el("text",{x:right,y:y0+18,"text-anchor":"start",class:"lab"},g).textContent=d.name;
+      el("rect",{x:right-L,y:by,width:L,height:30,rx:3,class:"bar",style:`fill:${d.c}`},g);
+      el("text",{x:right-L-8,y:by+22,"text-anchor":"end",class:"val",style:"direction:ltr"},g).textContent=Math.round(S.vals[i]).toLocaleString("he-IL");
+      const startX=right-34,gap=d.who.length>4?70:78;
+      people(g,d,i,right-Math.min(L,60)/2,by+33,(k)=>[startX-k*gap,by+118],spots,null);
+    });
+  }
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const links=el("g",{});
+  multi.forEach((h,li)=>{
+    const pts=(spots[h]||[]).slice().sort((a,b)=>mob?a.y-b.y:b.x-a.x);if(pts.length<2)return;
+    const cls="xlink"+(S.person&&S.person!==h?" dim":"")+(S.person===h?" on":"");
+    for(let j=0;j<pts.length-1;j++){const a=pts[j],b=pts[j+1];let p;
+      if(mob){const lane=8+li*11,R=8,y1=a.y+a.r+10+li*5,yt=b.y-b.r-12-li*4;
+        p=`M${a.x},${a.y+a.r+2} L${a.x},${y1-R} Q${a.x},${y1} ${a.x-R},${y1} L${lane+R},${y1} Q${lane},${y1} ${lane},${y1+R} L${lane},${yt-R} Q${lane},${yt} ${lane+R},${yt} L${b.x-R},${yt} Q${b.x},${yt} ${b.x},${yt+R} L${b.x},${b.y-b.r-5}`}
+      else{const cy=Math.max(14,Math.min(a.y-a.r,b.y-b.r)-90-li*16);p=`M${a.x},${a.y-a.r-2} C${a.x},${cy} ${b.x},${cy} ${b.x},${b.y-b.r-5}`}
+      el("path",{d:p,class:cls,"marker-end":`url(#ax-${h})`,style:`stroke:${XC[h]};opacity:${S.appear<1?S.appear:""}`},links);}
+  });
+  const top=el("g",{});svg.querySelectorAll(".pc").forEach(n=>top.appendChild(n));
+}
+function group(d,i,layer){return el("g",{class:"ng"+(S.sel===i?" sel":"")+(S.person&&!d.who.some(w=>w.h===S.person)?" dim":""),tabindex:"0",role:"button","aria-label":`${d.name}: ${d.items} פוסטים, ${d.acc} חשבונות`,"data-i":i},layer)}
+function people(g,d,i,sx,sy,place,spots,cx){
+  let list=d.who.map((w,k)=>({...w,k}));
+  if(S.mobile){const rank=o=>XC[o.h]?1+multi.indexOf(o.h)*0:0;list=list.slice().sort((a,b)=>(XC[a.h]?1:0)-(XC[b.h]?1:0)||a.k-b.k)}
+  list.forEach((p,k)=>{
+    const [px,py]=place(k),r=rad(p.n);
+    const bend=S.mobile?0.16:(px<cx-1?-0.22:px>cx+1?0.22:0.12);
+    const [ex,ey]=trim(sx,sy,px,py,r);
+    el("path",{d:curve(sx,sy,ex,ey,bend),class:"arrow","marker-end":"url(#ah)",pathLength:"1",style:`stroke-dasharray:1;stroke-dashoffset:${1-S.appear}`},g);
+    const dim=S.person&&p.h!==S.person,cur=S.sel===i&&S.pk===p.h;
+    const pg=el("g",{class:"pc"+(dim?" dim":"")+(cur?" cur":""),"data-p":p.h,"data-i":i,tabindex:"0",role:"button","aria-label":`${p.name}, ${p.n} פוסטים בנרטיב`,style:`opacity:${dim?"":Math.min(1,S.appear*1.4)}`},g);
+    (spots[p.h]=spots[p.h]||[]).push({x:px,y:py,r});
+    el("title",{},pg).textContent=`${p.name}: ${p.n} פוסטים בנרטיב (מקום ${p.rank})`;
+    el("circle",{cx:px,cy:py,r,class:"body",style:`fill:${d.c}`},pg);
+    if(XC[p.h])el("circle",{cx:px,cy:py,r:r+4,class:"ring",style:`stroke:${XC[p.h]}`},pg);
+    const ls=lines(p.name),fs=Math.max(11.5,Math.min(15,r*0.42)),lh=fs*1.1;
+    ls.forEach((ln,j)=>el("text",{x:px,y:py+fs*0.35-(ls.length-1)*lh/2+j*lh,"text-anchor":"middle",class:"pname",style:`fill:${d.tc};font-size:${fs}px`},pg).textContent=ln);
+  });
+}
+function panel(){
+  const d=D[S.sel],w=d.who.find(x=>x.h===S.pk)||d.who[0];
+  document.getElementById("panel").innerHTML=`<div class="qtag"><span class="sw" style="background:${d.c}"></span><b>${esc(w.name)}</b> בנרטיב ״${esc(d.name)}״ · ${w.n} פוסטים, מקום ${w.rank} בנרטיב</div>
+   <blockquote>״${esc(w.q)}${w.partial?"…":""}״</blockquote>
+   <div class="qmeta">${esc(w.name)} · X · ${esc(w.when)} · <a href="${w.url}" target="_blank" rel="noopener">למקור ברשת</a></div>`;
+}
+function tween(to,dur){const from=S.vals.slice(),a0=S.appear,t0=performance.now();
+  if(reduce){S.vals=to.slice();S.appear=1;render();return}
+  (function f(now){const t=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-t,3);S.vals=from.map((v,i)=>v+(to[i]-v)*e);S.appear=Math.max(a0,Math.min(1,(t-0.35)/0.65));render();if(t<1)requestAnimationFrame(f)})(t0)}
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{S.metric=b.dataset.m;document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b));tween(D.map(d=>d[S.metric]),650)}));
+const chips=document.getElementById("chips");
+multi.forEach(h=>{const b=document.createElement("button");b.type="button";b.className="chip";b.id="p-"+h;b.dataset.p=h;b.setAttribute("aria-pressed","false");b.style.color=XC[h];
+  b.innerHTML=`<i></i><span style="color:var(--fg)">${esc(NAME[h])}</span><span class="n">${cnt[h]} נרטיבים</span>`;chips.appendChild(b);
+  b.addEventListener("click",()=>{S.person=S.person===h?null:h;if(S.person){S.pk=h;if(!D[S.sel].who.some(w=>w.h===h))S.sel=D.findIndex(d=>d.who.some(w=>w.h===h))}sync()})});
+function sync(){chips.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.p===S.person));panel();render()}
+function pick(e){const pc=e.target.closest(".pc");
+  if(pc){S.sel=+pc.dataset.i;S.pk=pc.dataset.p;if(S.person&&S.person!==S.pk)S.person=null;sync();return true}
+  const g=e.target.closest(".ng");if(g){S.sel=+g.dataset.i;S.pk=D[S.sel].who[0].h;S.person=null;sync();return true}return false}
+svg.addEventListener("click",pick);
+svg.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){if(pick(e))e.preventDefault()}});
+function fit(){const m=svg.parentElement.clientWidth<600;if(m!==S.mobile){S.mobile=m;render()}}
+new ResizeObserver(fit).observe(document.querySelector(".card"));
+S.mobile=svg.parentElement.clientWidth<600;panel();render();
+setTimeout(()=>tween(D.map(d=>d.items),1300),150);
+</script>
+
+</body>
+</html>
