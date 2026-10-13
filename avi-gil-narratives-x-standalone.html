@@ -10,23 +10,20 @@
 /* Layout: embeddable chart card. Six narratives ranked right-to-left in a Channel 14 orange ramp (darkest = largest);
    curved arrows fan out to each narrative's leading X voices, circles sized by their posts; dashed arcs tie a voice that recurs. Stacked rows on narrow screens. */
 :root{
-  --bg:#F3F2F1; --card:#FFFFFF; --fg:#1D1A18; --muted:#6A625D; --rule:#E2DDD9;
+  --bg:#FFFFFF; --card:#FFFFFF; --fg:#1D1A18; --muted:#6A625D; --rule:#E2DDD9;
   --arrow:#1F6F78; --link:#B5400C; --chip:#F4EEEA;
   --x1:#1F6F78; --x2:#4B3F8F; --x3:#2F7A3E; --x4:#B0306A;
   --o1:#6A2103; --o2:#8E2F07; --o3:#B9420C; --o4:#DE5A1A; --o5:#F2884D; --o6:#F9BA94;
   --t1:#FFFFFF; --t2:#FFFFFF; --t3:#FFFFFF; --t4:#FFFFFF; --t5:#2A130A; --t6:#2A130A;
   --body:"Assistant", "Arial Hebrew", Arial, sans-serif;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#171514; --card:#211E1C; --fg:#F2EEEB; --muted:#ABA19A; --rule:#3A3431; --arrow:#5FC2CB; --link:#FF9A62; --chip:#2C2724;
-  --x1:#5FC2CB; --x2:#A99BF0; --x3:#7DD38C; --x4:#F07AB0; color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#171514; --card:#211E1C; --fg:#F2EEEB; --muted:#ABA19A; --rule:#3A3431; --arrow:#5FC2CB; --link:#FF9A62; --chip:#2C2724;
-  --x1:#5FC2CB; --x2:#A99BF0; --x3:#7DD38C; --x4:#F07AB0; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);direction:rtl}
-.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:24px 36px}
-.card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:22px clamp(14px,3vw,28px) 18px}
-h1{font-weight:800;font-size:clamp(22px,5.6vw,34px);line-height:1.25;letter-spacing:-.01em;margin:0 0 8px;text-wrap:balance}
+html,body{background:var(--bg);color-scheme:light}
+body{color:var(--fg);font-family:var(--body);direction:rtl}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:8px 16px}
+.card{background:var(--card);padding:8px 0 12px}
+h1{font-weight:800;font-size:clamp(26px,6vw,38px);line-height:1.2;letter-spacing:-.01em;margin:0 0 6px;color:var(--o3);text-wrap:balance}
+.subtitle{font-size:clamp(18px,3.6vw,23px);font-weight:700;line-height:1.35;margin:0 0 10px;color:var(--fg);text-wrap:balance}
 .dek{font-size:16.5px;color:var(--muted);margin:0 0 16px;max-width:70ch;line-height:1.55}
 .controls{display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;margin-bottom:4px}
 .ctl-label{font-size:13.5px;color:var(--muted);font-weight:600;margin-left:8px}
@@ -72,8 +69,9 @@ blockquote{margin:0;padding:6px 20px 6px 0;border-right:4px solid var(--o1);font
 </head>
 <body>
 <div class="wrap"><div class="card">
-  <h1>איך מסיטים את האחריות אל אבי גיל ואל מערכת הביטחון<br>ואיך פוסלים את העד</h1>
-  <p class="dek">5 נרטיבים של התקפה, לפי היקף ולפי הדוברים שהטקסטים שלהם הופצו הכי הרבה בכל אחד מהם. גודל העיגול מייצג את מספר הפוסטים של הדובר בנרטיב. הקווים המקווקווים מחברים דובר שמוביל יותר מנרטיב אחד. לחצו על דובר כדי לקרוא את הציטוט שלו.</p>
+  <h1>5 נרטיבים של התקפה</h1>
+  <p class="subtitle">איך מסיטים את האחריות אל אבי גיל ואל מערכת הביטחון<br>ואיך פוסלים את העד</p>
+  <p class="dek">ניטור השיח ברשתות לפי היקף ולפי הדוברים שהטקסטים שלהם הופצו הכי הרבה בכל אחד מהם. לחצו על דובר כדי לקרוא את הציטוט שלו.</p>
   <div class="controls">
     <div><span class="ctl-label">מדד:</span>
       <div class="seg" role="group" aria-label="בחירת מדד">
@@ -85,6 +83,7 @@ blockquote{margin:0;padding:6px 20px 6px 0;border-right:4px solid var(--o1);font
   <svg id="chart" role="img" aria-label="תרשים עמודות אינטראקטיבי של חמישה נרטיבים והדוברים המובילים בכל אחד"></svg>
   <section class="panel" id="panel" aria-live="polite"></section>
   <div class="notes">
+    <p>גודל העיגול מייצג את מספר הפוסטים של הדובר בנרטיב. הקווים המקווקווים מחברים דובר שמוביל יותר מנרטיב אחד.</p>
     <p>הנתונים: 5,446 פוסטים של 1,199 חשבונות במחנה התוקף ב-X, 2–9 באוקטובר 2026 (עד 06:50). המחנה זוהה לפי רשת הריטוויטים.</p>
     <p>הסיווג לנרטיבים לפי מילות מפתח. פוסט יכול להשתייך לכמה נרטיבים. ספירת הדובר כוללת את הפוסטים שלו ואת הריטוויטים שקיבל.</p>
   </div>
